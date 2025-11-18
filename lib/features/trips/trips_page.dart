@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:keikichi_logistics_web/core/models/currency.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 
 class TripsPage extends StatelessWidget {
@@ -40,7 +39,7 @@ class TripsPage extends StatelessWidget {
       text: existing?.basePricePerSpace.toString() ?? '40',
     );
     final labelPriceController = TextEditingController(
-      text: existing?.labelPrintPricePerLabel.toString() ?? '0.5',
+      text: existing?.labelPricePerUnit.toString() ?? '0.5',
     );
     final bondPriceController = TextEditingController(
       text: existing?.bondPrice.toString() ?? '25',
@@ -48,10 +47,6 @@ class TripsPage extends StatelessWidget {
     final pickupPriceController = TextEditingController(
       text: existing?.pickupPrice.toString() ?? '20',
     );
-    final exchangeRateController = TextEditingController(
-      text: existing?.exchangeRateToMxn.toString() ?? '18.5',
-    );
-
     DateTime? selectedDate =
         existing?.departureDateTime ?? DateTime.now();
     TimeOfDay? selectedTime;
@@ -63,7 +58,7 @@ class TripsPage extends StatelessWidget {
     }
 
     bool isInternational = existing?.isInternational ?? true;
-    Currency currencyBase = existing?.currencyBase ?? Currency.usd;
+    TripCurrency currency = existing?.currency ?? TripCurrency.usd;
 
     final result = await showDialog<bool>(
       context: context,
@@ -171,27 +166,18 @@ class TripsPage extends StatelessWidget {
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('USD'),
-                        selected: currencyBase == Currency.usd,
+                        selected: currency == TripCurrency.usd,
                         onSelected: (_) =>
-                            setLocal(() => currencyBase = Currency.usd),
+                            setLocal(() => currency = TripCurrency.usd),
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
                         label: const Text('MXN'),
-                        selected: currencyBase == Currency.mxn,
+                        selected: currency == TripCurrency.mxn,
                         onSelected: (_) =>
-                            setLocal(() => currencyBase = Currency.mxn),
+                            setLocal(() => currency = TripCurrency.mxn),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: exchangeRateController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Tipo de cambio (1 USD = X MXN)',
-                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
@@ -258,8 +244,6 @@ class TripsPage extends StatelessWidget {
                       double.tryParse(bondPriceController.text.trim());
                   final pickupPrice =
                       double.tryParse(pickupPriceController.text.trim());
-                  final exchangeRate = double.tryParse(
-                      exchangeRateController.text.trim());
 
                   if (origin.isEmpty ||
                       destination.isEmpty ||
@@ -269,9 +253,7 @@ class TripsPage extends StatelessWidget {
                       basePrice == null ||
                       labelPrice == null ||
                       bondPrice == null ||
-                      pickupPrice == null ||
-                      exchangeRate == null ||
-                      exchangeRate <= 0) {
+                      pickupPrice == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
@@ -298,13 +280,13 @@ class TripsPage extends StatelessWidget {
                       status: existing.status,
                       capacitySpaces: existing.capacitySpaces,
                       isInternational: isInternational,
-                      currencyBase: currencyBase,
-                      exchangeRateToMxn: exchangeRate,
+                      currency: currency,
                       basePricePerSpace: basePrice,
-                      labelPrintPricePerLabel: labelPrice,
+                      labelPricePerUnit: labelPrice,
                       bondPrice: bondPrice,
                       pickupPrice: pickupPrice,
                       spaces: existing.spaces,
+                      reservations: existing.reservations,
                     );
                     Navigator.pop(context, true);
                     onUpdateTrip(updated);
@@ -317,10 +299,9 @@ class TripsPage extends StatelessWidget {
                       destination: destination,
                       capacitySpaces: capacity ?? 0,
                       isInternational: isInternational,
-                      currencyBase: currencyBase,
-                      exchangeRateToMxn: exchangeRate,
+                      currency: currency,
                       basePricePerSpace: basePrice,
-                      labelPrintPricePerLabel: labelPrice,
+                      labelPricePerUnit: labelPrice,
                       bondPrice: bondPrice,
                       pickupPrice: pickupPrice,
                       spaces: List.generate(
@@ -415,7 +396,7 @@ class TripsPage extends StatelessWidget {
                                   'Capacidad: ${trip.capacitySpaces} espacios',
                                 ),
                                 Text(
-                                  'Moneda base: ${trip.currencyBase.code}',
+                                  'Moneda base: ${trip.currency.code}',
                                 ),
                                 const SizedBox(height: 12),
                                 Row(

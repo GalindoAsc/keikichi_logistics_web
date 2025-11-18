@@ -1,6 +1,5 @@
 // lib/core/models/trip.dart
 
-import 'package:keikichi_logistics_web/core/models/currency.dart';
 import 'package:keikichi_logistics_web/core/models/reservation.dart';
 
 /// Estado de viaje
@@ -31,8 +30,6 @@ enum SpaceStatus {
   free,
   reserved,
   occupied,
-  blocked,
-  cancelled,
 }
 
 extension SpaceStatusLabel on SpaceStatus {
@@ -44,12 +41,20 @@ extension SpaceStatusLabel on SpaceStatus {
         return 'Reservado';
       case SpaceStatus.occupied:
         return 'Ocupado';
-      case SpaceStatus.blocked:
-        return 'Bloqueado';
-      case SpaceStatus.cancelled:
-        return 'Cancelado';
     }
   }
+}
+
+/// Monedas soportadas para los viajes.
+enum TripCurrency {
+  mxn,
+  usd,
+}
+
+extension TripCurrencyLabel on TripCurrency {
+  String get code => this == TripCurrency.mxn ? 'MXN' : 'USD';
+
+  String get name => this == TripCurrency.mxn ? 'Pesos' : 'Dólares';
 }
 
 /// Espacio individual dentro de la caja
@@ -80,17 +85,15 @@ class Trip {
 
   final int capacitySpaces;
 
-  // Configuración económica por viaje
-  final bool isInternational; // true = viaje internacional → fianza disponible
-  final Currency currencyBase; // moneda base (USD o MXN)
-  final double exchangeRateToMxn; // 1 USD = X MXN
-
+  final TripCurrency currency;
   final double basePricePerSpace;
-  final double labelPrintPricePerLabel;
-  final double bondPrice; // costo de usar la fianza de Keikichi (en moneda base)
-  final double pickupPrice; // costo de recolección (en moneda base)
+  final double labelPricePerUnit;
+  final double bondPrice;
+  final double pickupPrice;
+  final bool isInternational;
 
   final List<TripSpace> spaces;
+  List<ReservationDetails> reservations;
 
   Trip({
     required this.id,
@@ -99,15 +102,15 @@ class Trip {
     required this.destination,
     this.status = TripStatus.planned,
     required this.capacitySpaces,
-    required this.isInternational,
-    required this.currencyBase,
-    required this.exchangeRateToMxn,
-    required this.basePricePerSpace,
-    required this.labelPrintPricePerLabel,
-    required this.bondPrice,
-    required this.pickupPrice,
+    this.currency = TripCurrency.mxn,
+    this.basePricePerSpace = 100,
+    this.labelPricePerUnit = 5,
+    this.bondPrice = 0,
+    this.pickupPrice = 0,
+    this.isInternational = false,
     required this.spaces,
-  });
+    List<ReservationDetails>? reservations,
+  }) : reservations = reservations ?? [];
 
   String get dateLabel {
     final d = departureDateTime.toLocal();

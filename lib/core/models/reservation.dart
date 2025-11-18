@@ -1,103 +1,98 @@
 // lib/core/models/reservation.dart
 
-/// Estado del pago de la reservación
-enum PaymentStatus {
+/// Estado actual de la reservación / pago.
+enum ReservationStatus {
   pending,
   paid,
   cancelled,
 }
 
-extension PaymentStatusLabel on PaymentStatus {
-  String get label {
-    switch (this) {
-      case PaymentStatus.pending:
-        return 'Pendiente de pago';
-      case PaymentStatus.paid:
-        return 'Pagado';
-      case PaymentStatus.cancelled:
-        return 'Cancelado';
-    }
-  }
-}
-
-/// Línea de producto dentro de una reservación (tarima)
+/// Línea de producto dentro de una reservación.
 class ProductLine {
-  String productName;
-  int quantity;
-  String unit; // cajas, bolsas, cubetas, etc.
-  double? unitWeightLbs;
+  final String id;
+  final String name;
+  final int quantity;
+  final String unit;
+  final double? weightPerUnit;
 
-  ProductLine({
-    required this.productName,
+  const ProductLine({
+    required this.id,
+    required this.name,
     required this.quantity,
     required this.unit,
-    this.unitWeightLbs,
-  });
-
-  double get totalWeightLbs => (unitWeightLbs ?? 0) * quantity;
-}
-
-/// Asignación de etiquetas por producto
-class ProductLabelAssignment {
-  String productName;
-  String labelFileName;
-  int labelsCount;
-
-  ProductLabelAssignment({
-    required this.productName,
-    required this.labelFileName,
-    required this.labelsCount,
+    this.weightPerUnit,
   });
 }
 
-/// Detalles de la reservación de una tarima asociada a uno o varios espacios
+/// Configuración de impresión de etiquetas asociadas a un producto.
+class LabelAssignment {
+  final String id;
+  final String productLineId;
+  final String labelName;
+  final String? fileName;
+  final int quantityToPrint;
+
+  const LabelAssignment({
+    required this.id,
+    required this.productLineId,
+    required this.labelName,
+    this.fileName,
+    required this.quantityToPrint,
+  });
+}
+
+/// Detalle completo de la reservación de espacios.
 class ReservationDetails {
-  String customerName; // Emisor / dueño de la cuenta
+  final String id;
+  final String customerName;
 
-  // Destino detallado
-  String destinationName; // Nombre de destino (bodega/rancho)
-  String? destinationContactName; // Persona/empresa receptora
-  String? destinationAddress; // Dirección
-  String? destinationReference; // Referencias de dirección
+  final String? contactName;
+  final String? contactPhone;
+  final String destinationAddress;
+  final String? destinationNotes;
+  final bool saveDestinationForLater;
 
-  List<ProductLine> products;
+  final bool customerDeliversToWarehouse;
 
-  // Etiquetas
-  bool clientProvidesLabels; // true = ya llega etiquetado
-  List<String> labelFileNames; // archivos de etiquetas disponibles en esta reserva
-  List<ProductLabelAssignment>
-      productLabels; // etiqueta y cantidad por producto
+  final bool usesCustomerBond;
+  final bool usesKeikichiBond;
 
-  // Fianza
-  bool usesClientBond;
-  String? clientBondFileName;
-  bool usesKeikichiBond;
+  final List<ProductLine> products;
+  final List<LabelAssignment> labels;
 
-  // Logística
-  bool pickupByKeikichi; // true = se recoge en origen, false = cliente lleva a bodega
+  final ReservationStatus status;
+  final String? paymentMethod;
+  final String? paymentReceiptFileName;
 
-  // Pago
-  PaymentStatus paymentStatus;
-  double totalPrice; // precio total calculado en la moneda base del viaje
+  final List<int> spaceIndexes;
 
-  String? notes;
+  final double spacesSubtotal;
+  final double labelsSubtotal;
+  final double bondSubtotal;
+  final double logisticsSubtotal;
+  final double totalAmount;
 
-  ReservationDetails({
+  const ReservationDetails({
+    required this.id,
     required this.customerName,
-    required this.destinationName,
-    this.destinationContactName,
-    this.destinationAddress,
-    this.destinationReference,
-    required this.products,
-    required this.clientProvidesLabels,
-    required this.labelFileNames,
-    required this.productLabels,
-    required this.usesClientBond,
-    this.clientBondFileName,
+    required this.contactName,
+    required this.contactPhone,
+    required this.destinationAddress,
+    required this.destinationNotes,
+    required this.saveDestinationForLater,
+    required this.customerDeliversToWarehouse,
+    required this.usesCustomerBond,
     required this.usesKeikichiBond,
-    required this.pickupByKeikichi,
-    required this.paymentStatus,
-    required this.totalPrice,
-    this.notes,
+    required this.products,
+    required this.labels,
+    required this.status,
+    required this.paymentMethod,
+    required this.paymentReceiptFileName,
+    required this.spaceIndexes,
+    required this.spacesSubtotal,
+    required this.labelsSubtotal,
+    required this.bondSubtotal,
+    required this.logisticsSubtotal,
+    required this.totalAmount,
   });
 }
