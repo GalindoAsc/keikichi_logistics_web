@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:keikichi_logistics_web/core/models/currency.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 import 'package:keikichi_logistics_web/features/settings/settings_page.dart';
 import 'package:keikichi_logistics_web/features/spaces/spaces_page.dart';
@@ -53,10 +52,9 @@ class _MainShellState extends State<MainShell> {
         destination: 'Los Ángeles, CA',
         capacitySpaces: 28,
         isInternational: true,
-        currencyBase: Currency.usd,
-        exchangeRateToMxn: 18.50,
+        currency: TripCurrency.usd,
         basePricePerSpace: 40,
-        labelPrintPricePerLabel: 0.5,
+        labelPricePerUnit: 0.5,
         bondPrice: 25,
         pickupPrice: 20,
         spaces: List.generate(
@@ -78,10 +76,9 @@ class _MainShellState extends State<MainShell> {
         destination: 'CDMX',
         capacitySpaces: 30,
         isInternational: false,
-        currencyBase: Currency.mxn,
-        exchangeRateToMxn: 18.50,
+        currency: TripCurrency.mxn,
         basePricePerSpace: 700,
-        labelPrintPricePerLabel: 5,
+        labelPricePerUnit: 5,
         bondPrice: 0,
         pickupPrice: 350,
         spaces: List.generate(
