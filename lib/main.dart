@@ -290,6 +290,7 @@ class _MainShellState extends State<MainShell> {
     switch (activeSection) {
       case AppSection.trips:
         content = TripsPage(
+          currentUser: widget.currentUser,
           trips: _trips,
           onAddTrip: _addTrip,
           onUpdateTrip: _updateTrip,
