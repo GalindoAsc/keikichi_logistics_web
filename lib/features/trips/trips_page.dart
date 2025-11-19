@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
+import 'package:keikichi_logistics_web/core/models/app_user.dart';
+import 'package:keikichi_logistics_web/core/models/user_role.dart';
 
 class TripsPage extends StatefulWidget {
+  final AppUser currentUser;
   final List<Trip> trips;
   final void Function(Trip) onAddTrip;
   final void Function(Trip) onUpdateTrip;
@@ -9,6 +12,7 @@ class TripsPage extends StatefulWidget {
 
   const TripsPage({
     super.key,
+    required this.currentUser,
     required this.trips,
     required this.onAddTrip,
     required this.onUpdateTrip,
@@ -22,6 +26,10 @@ class TripsPage extends StatefulWidget {
 class _TripsPageState extends State<TripsPage> {
   final Set<String> _recentOrigins = {'Irapuato, Gto'};
   final Set<String> _recentDestinations = {'Los Ángeles, CA', 'CDMX'};
+
+  bool get _isManagerOrAdmin =>
+      widget.currentUser.role == UserRole.manager ||
+      widget.currentUser.role == UserRole.superAdmin;
 
   Future<void> _openNewTripDialog(BuildContext context) async {
     await _openTripDialog(context);
@@ -442,11 +450,12 @@ class _TripsPageState extends State<TripsPage> {
                   'Viajes',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                FilledButton.icon(
-                  onPressed: () => _openNewTripDialog(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nuevo viaje'),
-                ),
+                if (_isManagerOrAdmin)
+                  FilledButton.icon(
+                    onPressed: () => _openNewTripDialog(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nuevo viaje'),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -509,15 +518,16 @@ class _TripsPageState extends State<TripsPage> {
                                     Wrap(
                                       spacing: 8,
                                       children: [
-                                        OutlinedButton.icon(
-                                          onPressed: () =>
-                                              _openTripDialog(
-                                            context,
-                                            existing: trip,
+                                        if (_isManagerOrAdmin)
+                                          OutlinedButton.icon(
+                                            onPressed: () =>
+                                                _openTripDialog(
+                                              context,
+                                              existing: trip,
+                                            ),
+                                            icon: const Icon(Icons.edit_outlined),
+                                            label: const Text('Editar'),
                                           ),
-                                          icon: const Icon(Icons.edit_outlined),
-                                          label: const Text('Editar'),
-                                        ),
                                         FilledButton.icon(
                                           onPressed: () =>
                                               widget.onOpenSpacesForTrip(trip),
