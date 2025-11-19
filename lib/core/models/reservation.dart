@@ -54,6 +54,11 @@ class ReservationDetails {
 
   final bool customerDeliversToWarehouse;
 
+  final String? pickupAddress;
+  final String? pickupContactName;
+  final String? pickupContactPhone;
+  final DateTime? pickupDateTime;
+
   final bool usesCustomerBond;
   final bool usesKeikichiBond;
 
@@ -81,6 +86,10 @@ class ReservationDetails {
     required this.destinationNotes,
     required this.saveDestinationForLater,
     required this.customerDeliversToWarehouse,
+    this.pickupAddress,
+    this.pickupContactName,
+    this.pickupContactPhone,
+    this.pickupDateTime,
     required this.usesCustomerBond,
     required this.usesKeikichiBond,
     required this.products,

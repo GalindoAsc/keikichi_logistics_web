@@ -91,9 +91,12 @@ class Trip {
   final double bondPrice;
   final double pickupPrice;
   final bool isInternational;
+  /// Tipo de cambio frente a MXN cuando la moneda base es USD.
+  /// Puede ser null si no aplica.
+  final double? exchangeRateToMXN;
 
   final List<TripSpace> spaces;
-  List<ReservationDetails> reservations;
+  final List<ReservationDetails> reservations;
 
   Trip({
     required this.id,
@@ -108,9 +111,10 @@ class Trip {
     this.bondPrice = 0,
     this.pickupPrice = 0,
     this.isInternational = false,
+    this.exchangeRateToMXN,
     required this.spaces,
     List<ReservationDetails>? reservations,
-  }) : reservations = reservations ?? [];
+  }) : reservations = List<ReservationDetails>.from(reservations ?? const []);
 
   String get dateLabel {
     final d = departureDateTime.toLocal();

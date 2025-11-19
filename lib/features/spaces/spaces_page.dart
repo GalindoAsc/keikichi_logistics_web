@@ -3,9 +3,6 @@ import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 import 'package:keikichi_logistics_web/features/spaces/reservation_dialog.dart';
 
-const bool kCurrentCustomerIsVerified = true;
-const String kCurrentCustomerName = 'Cliente Demo Keikichi';
-
 class SpacesPage extends StatefulWidget {
   final List<Trip> trips;
   final Trip? initialTrip;
@@ -21,6 +18,9 @@ class SpacesPage extends StatefulWidget {
 }
 
 class _SpacesPageState extends State<SpacesPage> {
+  static const bool kCurrentCustomerIsVerified = true;
+  static const String kCurrentCustomerName = 'Cliente Demo Keikichi';
+
   Trip? _selectedTrip;
   final List<int> _selectedSpaceIndexes = [];
 
@@ -84,11 +84,19 @@ class _SpacesPageState extends State<SpacesPage> {
     if (trip == null || _selectedSpaceIndexes.isEmpty) return;
 
     if (!kCurrentCustomerIsVerified) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Cuenta no verificada'),
+          content: const Text(
             'Tu cuenta aún no ha sido verificada por un gerente. No puedes reservar espacios por el momento.',
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Entendido'),
+            ),
+          ],
         ),
       );
       return;
@@ -106,7 +114,7 @@ class _SpacesPageState extends State<SpacesPage> {
     if (reservation == null) return;
 
     setState(() {
-      trip.reservations = [...trip.reservations, reservation];
+      trip.reservations.add(reservation);
       for (final spaceIndex in reservation.spaceIndexes) {
         final listIndex = spaceIndex - 1;
         if (listIndex >= 0 && listIndex < trip.spaces.length) {
@@ -211,7 +219,8 @@ class _SpacesPageState extends State<SpacesPage> {
               if (!selectable) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Este espacio no está disponible.'),
+                    content:
+                        Text('Este espacio ya está reservado u ocupado.'),
                   ),
                 );
                 return;

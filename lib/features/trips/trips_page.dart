@@ -47,6 +47,9 @@ class TripsPage extends StatelessWidget {
     final pickupPriceController = TextEditingController(
       text: existing?.pickupPrice.toString() ?? '20',
     );
+    final exchangeRateController = TextEditingController(
+      text: existing?.exchangeRateToMXN?.toString() ?? (existing == null ? '18.0' : ''),
+    );
     DateTime? selectedDate =
         existing?.departureDateTime ?? DateTime.now();
     TimeOfDay? selectedTime;
@@ -181,6 +184,17 @@ class TripsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   TextField(
+                    controller: exchangeRateController,
+                    enabled: currency == TripCurrency.usd,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText:
+                          'Tipo de cambio (solo si la moneda base es USD)',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
                     controller: basePriceController,
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
@@ -244,6 +258,8 @@ class TripsPage extends StatelessWidget {
                       double.tryParse(bondPriceController.text.trim());
                   final pickupPrice =
                       double.tryParse(pickupPriceController.text.trim());
+                  final exchangeRate =
+                      double.tryParse(exchangeRateController.text.trim());
 
                   if (origin.isEmpty ||
                       destination.isEmpty ||
@@ -285,6 +301,8 @@ class TripsPage extends StatelessWidget {
                       labelPricePerUnit: labelPrice,
                       bondPrice: bondPrice,
                       pickupPrice: pickupPrice,
+                      exchangeRateToMXN:
+                          currency == TripCurrency.usd ? exchangeRate : null,
                       spaces: existing.spaces,
                       reservations: existing.reservations,
                     );
@@ -304,6 +322,8 @@ class TripsPage extends StatelessWidget {
                       labelPricePerUnit: labelPrice,
                       bondPrice: bondPrice,
                       pickupPrice: pickupPrice,
+                      exchangeRateToMXN:
+                          currency == TripCurrency.usd ? exchangeRate : null,
                       spaces: List.generate(
                         capacity ?? 0,
                         (i) => TripSpace(
@@ -398,6 +418,12 @@ class TripsPage extends StatelessWidget {
                                 Text(
                                   'Moneda base: ${trip.currency.code}',
                                 ),
+                                if (trip.currency == TripCurrency.usd &&
+                                    trip.exchangeRateToMXN != null)
+                                  Text(
+                                    'Tipo de cambio ref.: '
+                                    '${trip.exchangeRateToMXN!.toStringAsFixed(2)} MXN',
+                                  ),
                                 const SizedBox(height: 12),
                                 Row(
                                   mainAxisAlignment:

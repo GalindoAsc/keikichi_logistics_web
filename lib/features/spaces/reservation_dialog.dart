@@ -3,11 +3,12 @@ import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 
 const List<String> demoProductNames = [
-  'Basil 5lb',
-  'Basil 10lb',
-  'Menta 10lb',
-  'Zanahoria 25lb',
-  'Pepino 30lb',
+  'Basil',
+  'Menta',
+  'Zanahoria',
+  'Pepino',
+  'Cilantro',
+  'Apio',
 ];
 
 Future<ReservationDetails?> showReservationDialog({
@@ -51,11 +52,13 @@ class _LabelFormData {
 class _ProductFormData {
   _ProductFormData({required this.id})
       : nameController = TextEditingController(),
+        nameFocusNode = FocusNode(),
         quantityController = TextEditingController(text: '0'),
         weightController = TextEditingController();
 
   final String id;
   final TextEditingController nameController;
+  final FocusNode nameFocusNode;
   final TextEditingController quantityController;
   final TextEditingController weightController;
   String unit = 'cajas';
@@ -63,6 +66,7 @@ class _ProductFormData {
 
   void dispose() {
     nameController.dispose();
+    nameFocusNode.dispose();
     quantityController.dispose();
     weightController.dispose();
     for (final label in labels) {
@@ -97,9 +101,17 @@ class _ReservationDialogState extends State<_ReservationDialog> {
       TextEditingController();
   final TextEditingController _destinationNotesController =
       TextEditingController();
-
   bool _saveDestinationForLater = false;
+
   bool _customerProvidesLabels = true;
+
+  final TextEditingController _pickupAddressController = TextEditingController();
+  final TextEditingController _pickupContactNameController =
+      TextEditingController();
+  final TextEditingController _pickupContactPhoneController =
+      TextEditingController();
+  DateTime? _pickupDateTime;
+
   _BondChoice _bondChoice = _BondChoice.customer;
   _LogisticsChoice _logisticsChoice = _LogisticsChoice.customer;
 
@@ -121,6 +133,9 @@ class _ReservationDialogState extends State<_ReservationDialog> {
     _contactPhoneController.dispose();
     _destinationAddressController.dispose();
     _destinationNotesController.dispose();
+    _pickupAddressController.dispose();
+    _pickupContactNameController.dispose();
+    _pickupContactPhoneController.dispose();
     super.dispose();
   }
 
@@ -161,8 +176,55 @@ class _ReservationDialogState extends State<_ReservationDialog> {
         : widget.trip.pickupPrice;
   }
 
-  double get _totalAmount =>
-      _spacesSubtotal() + _labelsSubtotal() + _bondSubtotal() + _logisticsSubtotal();
+  double get _totalAmount {
+    final total =
+        _spacesSubtotal() + _labelsSubtotal() + _bondSubtotal() + _logisticsSubtotal();
+    // En el futuro se podría aplicar widget.trip.exchangeRateToMXN si se
+    // requiere mostrar equivalencias MXN/USD para el total.
+    return total;
+  }
+
+  bool get _requiresPickupDetails =>
+      _logisticsChoice == _LogisticsChoice.keikichi;
+
+  Future<void> _selectPickupDateTime() async {
+    final now = DateTime.now();
+    final initialDate = _pickupDateTime ?? now.add(const Duration(days: 1));
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (pickedDate == null) return;
+    final initialTime = _pickupDateTime != null
+        ? TimeOfDay(hour: _pickupDateTime!.hour, minute: _pickupDateTime!.minute)
+        : const TimeOfDay(hour: 9, minute: 0);
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+    if (pickedTime == null) return;
+    setState(() {
+      _pickupDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
+  }
+
+  String get _pickupDateTimeLabel {
+    final dt = _pickupDateTime;
+    if (dt == null) return 'Seleccionar día y hora de recolección';
+    final date =
+        '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+    final time =
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    return '$date · $time';
+  }
 
   void _addProduct() {
     setState(() {
@@ -225,6 +287,21 @@ class _ReservationDialogState extends State<_ReservationDialog> {
       return;
     }
 
+    if (_requiresPickupDetails) {
+      if (_pickupAddressController.text.trim().isEmpty) {
+        _showError('Indica la dirección de recolección.');
+        return;
+      }
+      if (_pickupContactPhoneController.text.trim().isEmpty) {
+        _showError('Indica el teléfono del contacto de recolección.');
+        return;
+      }
+      if (_pickupDateTime == null) {
+        _showError('Selecciona la fecha y hora de recolección.');
+        return;
+      }
+    }
+
     final products = validProducts
         .map(
           (product) => ProductLine(
@@ -237,9 +314,12 @@ class _ReservationDialogState extends State<_ReservationDialog> {
         )
         .toList();
 
+    final validProductIds = validProducts.map((p) => p.id).toSet();
+
     final labels = <LabelAssignment>[];
     if (!_customerProvidesLabels) {
-      for (final product in validProducts) {
+      for (final product in _products) {
+        if (!validProductIds.contains(product.id)) continue;
         for (final label in product.labels) {
           final name = label.labelNameController.text.trim();
           final qty = int.tryParse(label.quantityController.text) ?? 0;
@@ -273,6 +353,17 @@ class _ReservationDialogState extends State<_ReservationDialog> {
       saveDestinationForLater: _saveDestinationForLater,
       customerDeliversToWarehouse:
           _logisticsChoice == _LogisticsChoice.customer,
+      pickupAddress: _requiresPickupDetails
+          ? _pickupAddressController.text.trim()
+          : null,
+      pickupContactName: _requiresPickupDetails &&
+              _pickupContactNameController.text.trim().isNotEmpty
+          ? _pickupContactNameController.text.trim()
+          : null,
+      pickupContactPhone: _requiresPickupDetails
+          ? _pickupContactPhoneController.text.trim()
+          : null,
+      pickupDateTime: _requiresPickupDetails ? _pickupDateTime : null,
       usesCustomerBond:
           widget.trip.isInternational && _bondChoice == _BondChoice.customer,
       usesKeikichiBond:
@@ -293,6 +384,16 @@ class _ReservationDialogState extends State<_ReservationDialog> {
     Navigator.of(context).pop(reservation);
   }
 
+  Widget _buildSectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        text,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   Widget _buildProductCard(int index, _ProductFormData product) {
     final theme = Theme.of(context);
     return Card(
@@ -305,43 +406,72 @@ class _ReservationDialogState extends State<_ReservationDialog> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: product.nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Producto',
-                      hintText: 'Ej. Basil 5lb',
-                    ),
-                    onChanged: (_) => setState(() {}),
+                  child: RawAutocomplete<String>(
+                    textEditingController: product.nameController,
+                    focusNode: product.nameFocusNode,
+                    optionsBuilder: (textEditingValue) {
+                      final query = textEditingValue.text.toLowerCase();
+                      if (query.isEmpty) {
+                        return demoProductNames;
+                      }
+                      return demoProductNames.where(
+                        (option) => option.toLowerCase().contains(query),
+                      );
+                    },
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onFieldSubmitted) {
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Producto',
+                          hintText: 'Ej. Basil',
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      if (options.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxHeight: 200,
+                              maxWidth: 260,
+                            ),
+                            child: ListView(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              children: options
+                                  .map(
+                                    (option) => ListTile(
+                                      title: Text(option),
+                                      onTap: () => onSelected(option),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    onSelected: (selection) {
+                      setState(() {
+                        product.nameController.text = selection;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: _products.length == 1
-                      ? null
-                      : () => _removeProduct(index),
+                  onPressed:
+                      _products.length == 1 ? null : () => _removeProduct(index),
                   icon: const Icon(Icons.delete_outline),
                   tooltip: 'Eliminar producto',
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                Text(
-                  'Sugerencias:',
-                  style: theme.textTheme.bodySmall,
-                ),
-                ...demoProductNames.map(
-                  (name) => ActionChip(
-                    label: Text(name),
-                    onPressed: () {
-                      setState(() {
-                        product.nameController.text = name;
-                      });
-                    },
-                  ),
                 ),
               ],
             ),
@@ -387,30 +517,64 @@ class _ReservationDialogState extends State<_ReservationDialog> {
                 hintText: 'Opcional',
               ),
             ),
-            if (!_customerProvidesLabels) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Etiquetas para este producto',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              if (product.labels.isEmpty)
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
                 Text(
-                  'Agrega al menos una etiqueta si necesitas impresión.',
+                  'Sugerencias:',
                   style: theme.textTheme.bodySmall,
                 ),
-              for (int i = 0; i < product.labels.length; i++)
-                _buildLabelCard(product, product.labels[i], i),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => _addLabel(product),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Agregar etiqueta'),
+                ...demoProductNames.map(
+                  (name) => ActionChip(
+                    label: Text(name),
+                    onPressed: () {
+                      setState(() {
+                        product.nameController.text = name;
+                      });
+                    },
+                  ),
                 ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabelsForProduct(_ProductFormData product, int index) {
+    final productName = product.nameController.text.trim().isEmpty
+        ? 'Producto ${index + 1}'
+        : product.nameController.text.trim();
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              productName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            if (product.labels.isEmpty)
+              Text(
+                'Agrega instrucciones de impresión para este producto.',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-            ],
+            for (int i = 0; i < product.labels.length; i++)
+              _buildLabelCard(product, product.labels[i], i),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _addLabel(product),
+                icon: const Icon(Icons.add),
+                label: const Text('Agregar etiqueta'),
+              ),
+            ),
           ],
         ),
       ),
@@ -471,33 +635,21 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   Widget build(BuildContext context) {
     final trip = widget.trip;
     return AlertDialog(
-      title: Text(
-        'Reservar ${widget.selectedSpaceIndexes.length} espacio(s)',
-      ),
+      title: const Text('Reservar espacios'),
       content: SizedBox(
-        width: 720,
+        width: 780,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Emisor / Cliente',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              TextFormField(
-                initialValue: widget.currentCustomerName,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: 'Cliente',
-                ),
+              _buildSectionTitle('Emisor / Cliente'),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Cliente'),
+                subtitle: Text(widget.currentCustomerName),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Destino',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
+              _buildSectionTitle('Destino'),
               TextField(
                 controller: _contactNameController,
                 decoration: const InputDecoration(
@@ -515,31 +667,26 @@ class _ReservationDialogState extends State<_ReservationDialog> {
                 controller: _destinationAddressController,
                 maxLines: 2,
                 decoration: const InputDecoration(
-                  labelText: 'Dirección de destino',
+                  labelText: 'Dirección principal',
                 ),
               ),
               TextField(
                 controller: _destinationNotesController,
-                maxLines: 2,
                 decoration: const InputDecoration(
-                  labelText: 'Referencias (opcional)',
+                  labelText: 'Referencias de la dirección (opcional)',
                 ),
               ),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _saveDestinationForLater,
+                title: const Text('Guardar este destino para uso posterior'),
                 onChanged: (value) {
                   if (value == null) return;
                   setState(() => _saveDestinationForLater = value);
                 },
-                title: const Text('Guardar este destino para uso posterior'),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'Productos',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Productos'),
               for (int i = 0; i < _products.length; i++)
                 _buildProductCard(i, _products[i]),
               Align(
@@ -550,34 +697,35 @@ class _ReservationDialogState extends State<_ReservationDialog> {
                   label: const Text('Agregar producto'),
                 ),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'Etiquetas',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Etiquetas'),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text(
-                    '¿El cliente entregará el producto ya etiquetado?'),
+                title:
+                    const Text('¿El cliente entregará el producto ya etiquetado?'),
                 value: _customerProvidesLabels,
                 onChanged: (value) {
-                  setState(() {
-                    _customerProvidesLabels = value;
-                  });
+                  setState(() => _customerProvidesLabels = value);
                 },
               ),
-              if (_customerProvidesLabels)
+              if (_customerProvidesLabels) ...[
                 const Padding(
                   padding: EdgeInsets.only(bottom: 12),
                   child: Text(
                     'Perfecto, no agregaremos cargos por impresión de etiquetas.',
                   ),
                 ),
-              const SizedBox(height: 12),
-              const Text(
-                'Fianza',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              ] else ...[
+                const SizedBox(height: 4),
+                const Text(
+                  'Agrega instrucciones de impresión por producto.',
+                ),
+                const SizedBox(height: 8),
+                for (int i = 0; i < _products.length; i++)
+                  _buildLabelsForProduct(_products[i], i),
+              ],
+              const SizedBox(height: 16),
+              _buildSectionTitle('Fianza'),
               if (trip.isInternational) ...[
                 RadioListTile<_BondChoice>(
                   contentPadding: EdgeInsets.zero,
@@ -602,17 +750,13 @@ class _ReservationDialogState extends State<_ReservationDialog> {
                     setState(() => _bondChoice = value);
                   },
                 ),
-              ]
-              else
+              ] else
                 const Padding(
                   padding: EdgeInsets.only(top: 4, bottom: 12),
                   child: Text('Este viaje es nacional, no requiere fianza.'),
                 ),
-              const SizedBox(height: 12),
-              const Text(
-                'Logística',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Logística'),
               RadioListTile<_LogisticsChoice>(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('El cliente lleva el producto a la bodega'),
@@ -636,12 +780,35 @@ class _ReservationDialogState extends State<_ReservationDialog> {
                   setState(() => _logisticsChoice = value);
                 },
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'Resumen',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
+              if (_requiresPickupDetails) ...[
+                TextField(
+                  controller: _pickupAddressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Dirección de recolección',
+                  ),
+                ),
+                TextField(
+                  controller: _pickupContactNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nombre de contacto (opcional)',
+                  ),
+                ),
+                TextField(
+                  controller: _pickupContactPhoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Teléfono del contacto',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _selectPickupDateTime,
+                  icon: const Icon(Icons.calendar_today),
+                  label: Text(_pickupDateTimeLabel),
+                ),
+              ],
+              const SizedBox(height: 16),
+              _buildSectionTitle('Resumen de precios'),
               Text(
                 'Espacios seleccionados: ${widget.selectedSpaceIndexes.length}',
               ),
