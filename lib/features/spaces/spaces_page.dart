@@ -359,6 +359,7 @@ class _SpacesPageState extends State<SpacesPage> {
     final isSelected = _selectedSpaceIndexes.contains(space.index);
     final selectable = _isSpaceSelectable(space);
     final color = _spaceColor(space.status, theme);
+    final reservationLabel = _spaceReservationLabel(space);
 
     return GestureDetector(
       onTap: () {
@@ -399,7 +400,6 @@ class _SpacesPageState extends State<SpacesPage> {
               _shortStatus(space.status),
               style: theme.textTheme.bodyMedium,
             ),
-            final reservationLabel = _spaceReservationLabel(space);
             if (reservationLabel != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
