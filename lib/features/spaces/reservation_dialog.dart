@@ -11,6 +11,8 @@ const List<String> demoProductNames = [
   'Apio',
 ];
 
+const bool kCustomerHasBondOnFile = false;
+
 Future<List<ReservationDetails>?> showReservationDialog({
   required BuildContext context,
   required Trip trip,
@@ -90,6 +92,7 @@ class _SpaceFormState {
         pickupAddressController = TextEditingController(),
         pickupContactNameController = TextEditingController(),
         pickupContactPhoneController = TextEditingController(),
+        customerBondFileNameController = TextEditingController(),
         products = [initialProduct],
         bondChoice = isInternational ? _BondChoice.customer : _BondChoice.customer,
         logisticsChoice = _LogisticsChoice.customer;
@@ -101,6 +104,7 @@ class _SpaceFormState {
   final TextEditingController pickupAddressController;
   final TextEditingController pickupContactNameController;
   final TextEditingController pickupContactPhoneController;
+  final TextEditingController customerBondFileNameController;
 
   bool saveDestinationForLater = false;
   bool customerProvidesLabels = true;
@@ -122,6 +126,7 @@ class _SpaceFormState {
     pickupAddressController.dispose();
     pickupContactNameController.dispose();
     pickupContactPhoneController.dispose();
+    customerBondFileNameController.dispose();
     for (final product in products) {
       product.dispose();
     }
@@ -149,6 +154,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   late final List<_SpaceFormState> _forms;
   int _productCounter = 0;
   int _labelCounter = 0;
+  late Set<int> _activeSpaceIndexes;
 
   @override
   void initState() {
@@ -157,6 +163,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
       widget.selectedSpaceIndexes.length,
       (_) => _createSpaceForm(),
     );
+    _activeSpaceIndexes = widget.selectedSpaceIndexes.toSet();
   }
 
   @override
@@ -189,7 +196,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   bool get _isPerSpace => _mode == ReservationMode.perSpace;
 
   int get _spacesForCurrentForm =>
-      _isPerSpace ? 1 : widget.selectedSpaceIndexes.length;
+      _isPerSpace ? 1 : _activeSpaceIndexes.length;
   Future<void> _selectPickupDateTime(_SpaceFormState form) async {
     final initialDate =
         form.pickupDateTime ?? DateTime.now().add(const Duration(days: 1));
@@ -334,6 +341,14 @@ class _ReservationDialogState extends State<_ReservationDialog> {
       return false;
     }
 
+    if (widget.trip.isInternational &&
+        form.bondChoice == _BondChoice.customer &&
+        !kCustomerHasBondOnFile &&
+        form.customerBondFileNameController.text.trim().isEmpty) {
+      _showError('Selecciona al menos un archivo de fianza del cliente.');
+      return false;
+    }
+
     if (form.requiresPickupDetails) {
       if (form.pickupAddressController.text.trim().isEmpty) {
         _showError('Indica la dirección de recolección.');
@@ -431,6 +446,15 @@ class _ReservationDialogState extends State<_ReservationDialog> {
           form.bondChoice == _BondChoice.customer,
       usesKeikichiBond: widget.trip.isInternational &&
           form.bondChoice == _BondChoice.keikichi,
+      customerBondFileName:
+          widget.trip.isInternational &&
+                  form.bondChoice == _BondChoice.customer
+              ? (kCustomerHasBondOnFile
+                  ? null
+                  : (form.customerBondFileNameController.text.trim().isEmpty
+                      ? null
+                      : form.customerBondFileNameController.text.trim()))
+              : null,
       products: products,
       labels: labels,
       status: ReservationStatus.pending,
@@ -462,9 +486,14 @@ class _ReservationDialogState extends State<_ReservationDialog> {
     if (_mode == ReservationMode.sameForAll) {
       final form = _forms.first;
       if (!_validateForm(form)) return;
+      if (_activeSpaceIndexes.isEmpty) {
+        _showError('Selecciona al menos un espacio para aplicar la reservación.');
+        return;
+      }
+      final selection = _activeSpaceIndexes.toList()..sort();
       final reservation = _buildReservation(
         form,
-        List<int>.from(widget.selectedSpaceIndexes),
+        selection,
         0,
       );
       Navigator.of(context).pop([reservation]);
@@ -520,6 +549,9 @@ class _ReservationDialogState extends State<_ReservationDialog> {
             setState(() {
               _mode = value;
               _activeSpaceFormIndex = 0;
+              if (value == ReservationMode.sameForAll) {
+                _activeSpaceIndexes = widget.selectedSpaceIndexes.toSet();
+              }
             });
           },
         ),
@@ -545,6 +577,62 @@ class _ReservationDialogState extends State<_ReservationDialog> {
               ? 'Estás reservando ${widget.selectedSpaceIndexes.length} espacio(s). Configura cada formulario y navega entre ellos usando los chips de abajo.'
               : 'Estás reservando ${widget.selectedSpaceIndexes.length} espacio(s). Toda la información se aplicará por igual.',
         ),
+      ],
+    );
+  }
+
+  Widget _buildSameInfoSpaceSelector() {
+    if (_isPerSpace) return const SizedBox.shrink();
+    final totalSpaces = widget.selectedSpaceIndexes.length;
+    final allSelected = _activeSpaceIndexes.length == totalSpaces;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        _buildSectionTitle('Espacios a los que se aplicará la información'),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: widget.selectedSpaceIndexes.map((index) {
+            final isActive = _activeSpaceIndexes.contains(index);
+            return FilterChip(
+              label: Text('Espacio $index'),
+              selected: isActive,
+              onSelected: (_) {
+                setState(() {
+                  if (isActive) {
+                    _activeSpaceIndexes.remove(index);
+                  } else {
+                    _activeSpaceIndexes.add(index);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                if (allSelected) {
+                  _activeSpaceIndexes.clear();
+                } else {
+                  _activeSpaceIndexes = widget.selectedSpaceIndexes.toSet();
+                }
+              });
+            },
+            child: Text(allSelected ? 'Limpiar selección' : 'Seleccionar todos'),
+          ),
+        ),
+        if (_activeSpaceIndexes.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 4),
+            child: Text(
+              'Selecciona al menos un espacio para aplicar la reservación.',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
       ],
     );
   }
@@ -886,6 +974,19 @@ class _ReservationDialogState extends State<_ReservationDialog> {
               setState(() => form.bondChoice = value);
             },
           ),
+          if (trip.isInternational && form.bondChoice == _BondChoice.customer)
+            Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
+              child: kCustomerHasBondOnFile
+                  ? const Text('Fianza del cliente registrada en el sistema.')
+                  : TextField(
+                      controller: form.customerBondFileNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre del archivo de la fianza del cliente',
+                        hintText: 'ej. fianza_cliente_2025.pdf',
+                      ),
+                    ),
+            ),
           RadioListTile<_BondChoice>(
             contentPadding: EdgeInsets.zero,
             title: Text(
@@ -1023,6 +1124,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildModeSelector(),
+              _buildSameInfoSpaceSelector(),
               if (_isPerSpace) ...[
                 const SizedBox(height: 12),
                 _buildSpaceNavigator(),
