@@ -106,7 +106,7 @@ class _TripReservationsTable extends StatelessWidget {
                   DataCell(Text(reservation.customerName)),
                   DataCell(Text(_statusLabel(reservation.status))),
                   DataCell(Text(
-                      '\\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}')),
+                      '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}')),
                   DataCell(Text(reservation.spaceIndexes.join(', '))),
                 ],
               ),
