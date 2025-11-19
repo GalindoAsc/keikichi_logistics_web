@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keikichi_logistics_web/core/models/payment_instructions.dart';
 import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 import 'package:keikichi_logistics_web/features/spaces/reservation_dialog.dart';
@@ -85,10 +86,6 @@ class _SpacesPageState extends State<SpacesPage> {
   ) async {
     final paymentMethod = reservation.paymentMethod ?? 'transferencia';
     final isTransfer = paymentMethod == 'transferencia';
-    final paymentInstruction = isTransfer
-        ? 'Banco Verde · Cuenta 0123456789 · CLABE 012345678901234567\nBeneficiario: Keikichi Produce\nSube tu comprobante en tu portal para que un gerente confirme tu pago.'
-        : 'Presenta este número de orden cuando pagues en efectivo para asociar tu depósito.';
-
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -105,7 +102,17 @@ class _SpacesPageState extends State<SpacesPage> {
               '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}',
             ),
             const SizedBox(height: 12),
-            Text(paymentInstruction),
+            if (isTransfer) ...[
+              Text('Banco: ${PaymentConfig.current.bankName}'),
+              Text('Cuenta: ${PaymentConfig.current.accountName}'),
+              Text('Número de cuenta: ${PaymentConfig.current.accountNumber}'),
+              Text('CLABE: ${PaymentConfig.current.clabe}'),
+              Text('Nota: ${PaymentConfig.current.referenceHint}'),
+              Text('Referencia sugerida: ${reservation.orderCode}'),
+            ] else
+              const Text(
+                'Presenta este número de orden cuando pagues en efectivo para asociar tu depósito.',
+              ),
           ],
         ),
         actions: [
@@ -122,6 +129,12 @@ class _SpacesPageState extends State<SpacesPage> {
     Trip trip,
     List<ReservationDetails> reservations,
   ) async {
+    final transferReservations = reservations
+        .where(
+          (reservation) =>
+              (reservation.paymentMethod ?? 'transferencia') == 'transferencia',
+        )
+        .toList();
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -146,8 +159,19 @@ class _SpacesPageState extends State<SpacesPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                if (transferReservations.isNotEmpty) ...[
+                  Text('Banco: ${PaymentConfig.current.bankName}'),
+                  Text('Cuenta: ${PaymentConfig.current.accountName}'),
+                  Text('Número de cuenta: ${PaymentConfig.current.accountNumber}'),
+                  Text('CLABE: ${PaymentConfig.current.clabe}'),
+                  Text('Nota: ${PaymentConfig.current.referenceHint}'),
+                  Text(
+                    'Referencias sugeridas: ${transferReservations.map((r) => r.orderCode).join(', ')}',
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 const Text(
-                  'Si pagas por transferencia, usa los datos bancarios indicados y sube tu comprobante. Para efectivo, presenta cada número de orden en caja.',
+                  'Si pagas en efectivo, presenta cada número de orden en caja. Para transferencia, sube tu comprobante en el portal.',
                 ),
               ],
             ),
@@ -272,7 +296,11 @@ class _SpacesPageState extends State<SpacesPage> {
     );
   }
 
-  Widget _buildReservationsList(Trip trip) {
+  Widget _buildReservationsList(
+    Trip trip, {
+    ScrollPhysics? physics,
+    bool shrinkWrap = false,
+  }) {
     if (trip.reservations.isEmpty) {
       return const Center(
         child: Text('Aún no hay reservaciones registradas para este viaje.'),
@@ -280,6 +308,9 @@ class _SpacesPageState extends State<SpacesPage> {
     }
 
     return ListView.separated(
+      primary: false,
+      physics: physics,
+      shrinkWrap: shrinkWrap,
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) {
         final reservation = trip.reservations[index];
@@ -306,99 +337,110 @@ class _SpacesPageState extends State<SpacesPage> {
     );
   }
 
-  Widget _buildSpacesGrid(Trip trip, {EdgeInsetsGeometry padding = const EdgeInsets.all(16)}) {
+  Widget _buildSpaceCard(TripSpace space) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: padding,
-      child: GridView.builder(
+    final isSelected = _selectedSpaceIndexes.contains(space.index);
+    final selectable = _isSpaceSelectable(space);
+    final color = _spaceColor(space.status, theme);
+
+    return GestureDetector(
+      onTap: () {
+        if (!selectable) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Este espacio ya está reservado u ocupado.'),
+            ),
+          );
+          return;
+        }
+        _toggleSpaceSelection(space);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outlineVariant,
+            width: isSelected ? 3 : 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Espacio ${space.index}',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _shortStatus(space.status),
+              style: theme.textTheme.bodyMedium,
+            ),
+            if (space.reservation != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  space.reservation!.customerName,
+                  style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpacesGrid(
+    Trip trip, {
+    EdgeInsetsGeometry padding = const EdgeInsets.all(16),
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          child: GridView.builder(
+            padding: padding,
+            physics: const AlwaysScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 2,
+            ),
+            itemCount: trip.spaces.length,
+            itemBuilder: (context, index) {
+              final space = trip.spaces[index];
+              return _buildSpaceCard(space);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  SliverPadding _buildSpacesSliverGrid(Trip trip) {
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
           childAspectRatio: 2,
         ),
-        itemCount: trip.spaces.length,
-        itemBuilder: (context, index) {
-          final space = trip.spaces[index];
-          final isSelected = _selectedSpaceIndexes.contains(space.index);
-          final selectable = _isSpaceSelectable(space);
-          final color = _spaceColor(space.status, theme);
-
-          return GestureDetector(
-            onTap: () {
-              if (!selectable) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Este espacio ya está reservado u ocupado.'),
-                  ),
-                );
-                return;
-              }
-              _toggleSpaceSelection(space);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isSelected
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.outlineVariant,
-                  width: isSelected ? 3 : 1,
-                ),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Espacio ${space.index}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _shortStatus(space.status),
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  if (space.reservation != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        space.reservation!.customerName,
-                        style: theme.textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildMobileHeader(Trip trip) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildTripSelector(),
-        const SizedBox(height: 16),
-        _buildTripSummary(trip, margin: EdgeInsets.zero),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 220,
-          child: Card(
-            child: _buildReservationsList(trip),
-          ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => _buildSpaceCard(trip.spaces[index]),
+          childCount: trip.spaces.length,
         ),
-      ],
+      ),
     );
   }
 
@@ -415,7 +457,12 @@ class _SpacesPageState extends State<SpacesPage> {
                 child: _buildTripSelector(),
               ),
               _buildTripSummary(trip),
-              Expanded(child: _buildReservationsList(trip)),
+              Expanded(
+                child: _buildReservationsList(
+                  trip,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                ),
+              ),
             ],
           ),
         ),
@@ -428,18 +475,48 @@ class _SpacesPageState extends State<SpacesPage> {
   }
 
   Widget _buildNarrowLayout(Trip trip) {
-    return Column(
-      children: [
-        Padding(
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
           padding: const EdgeInsets.all(16),
-          child: _buildMobileHeader(trip),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildSpacesGrid(trip, padding: EdgeInsets.zero),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildTripSelector(),
+                const SizedBox(height: 16),
+                _buildTripSummary(trip, margin: EdgeInsets.zero),
+                const SizedBox(height: 16),
+                Card(
+                  child: SizedBox(
+                    height: 240,
+                    child: _buildReservationsList(
+                      trip,
+                      physics: const BouncingScrollPhysics(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          sliver: SliverToBoxAdapter(
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _selectedSpaceIndexes.isEmpty
+                    ? null
+                    : _handleReservationPressed,
+                icon: const Icon(Icons.event_available_outlined),
+                label: const Text('Reservar espacios'),
+              ),
+            ),
+          ),
+        ),
+        _buildSpacesSliverGrid(trip),
       ],
     );
   }

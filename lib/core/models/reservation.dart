@@ -62,6 +62,7 @@ class ReservationDetails {
 
   final bool usesCustomerBond;
   final bool usesKeikichiBond;
+  final String? customerBondFileName;
 
   final List<ProductLine> products;
   final List<LabelAssignment> labels;
@@ -94,6 +95,7 @@ class ReservationDetails {
     this.pickupDateTime,
     required this.usesCustomerBond,
     required this.usesKeikichiBond,
+    this.customerBondFileName,
     required this.products,
     required this.labels,
     required this.status,
@@ -123,6 +125,7 @@ class ReservationDetails {
     DateTime? pickupDateTime,
     bool? usesCustomerBond,
     bool? usesKeikichiBond,
+    String? customerBondFileName,
     List<ProductLine>? products,
     List<LabelAssignment>? labels,
     ReservationStatus? status,
@@ -153,6 +156,8 @@ class ReservationDetails {
       pickupDateTime: pickupDateTime ?? this.pickupDateTime,
       usesCustomerBond: usesCustomerBond ?? this.usesCustomerBond,
       usesKeikichiBond: usesKeikichiBond ?? this.usesKeikichiBond,
+      customerBondFileName:
+          customerBondFileName ?? this.customerBondFileName,
       products: products ?? this.products,
       labels: labels ?? this.labels,
       status: status ?? this.status,

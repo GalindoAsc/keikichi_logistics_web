@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 
-class TripsPage extends StatelessWidget {
+class TripsPage extends StatefulWidget {
   final List<Trip> trips;
   final void Function(Trip) onAddTrip;
   final void Function(Trip) onUpdateTrip;
@@ -15,6 +15,14 @@ class TripsPage extends StatelessWidget {
     required this.onOpenSpacesForTrip,
   });
 
+  @override
+  State<TripsPage> createState() => _TripsPageState();
+}
+
+class _TripsPageState extends State<TripsPage> {
+  final Set<String> _recentOrigins = {'Irapuato, Gto'};
+  final Set<String> _recentDestinations = {'Los Ángeles, CA', 'CDMX'};
+
   Future<void> _openNewTripDialog(BuildContext context) async {
     await _openTripDialog(context);
   }
@@ -25,12 +33,10 @@ class TripsPage extends StatelessWidget {
   }) async {
     final isEditing = existing != null;
 
-    final originController = TextEditingController(
-      text: existing?.origin ?? '',
-    );
-    final destinationController = TextEditingController(
-      text: existing?.destination ?? '',
-    );
+    final initialOrigin = existing?.origin ?? '';
+    final initialDestination = existing?.destination ?? '';
+    TextEditingController? originFieldController;
+    TextEditingController? destinationFieldController;
     final capacityController = TextEditingController(
       text: existing?.capacitySpaces.toString() ?? '28',
     );
@@ -73,13 +79,69 @@ class TripsPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: originController,
-                    decoration: const InputDecoration(labelText: 'Origen'),
+                  Autocomplete<String>(
+                    initialValue: TextEditingValue(text: initialOrigin),
+                    optionsBuilder: (textEditingValue) {
+                      final query = textEditingValue.text.toLowerCase();
+                      final options = _recentOrigins
+                          .where(
+                            (origin) => query.isEmpty
+                                ? true
+                                : origin.toLowerCase().contains(query),
+                          )
+                          .toList()
+                        ..sort((a, b) => a.compareTo(b));
+                      return options;
+                    },
+                    onSelected: (value) {
+                      originFieldController?.text = value;
+                    },
+                    fieldViewBuilder: (
+                      context,
+                      textEditingController,
+                      focusNode,
+                      onFieldSubmitted,
+                    ) {
+                      originFieldController ??= textEditingController;
+                      return TextField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        decoration:
+                            const InputDecoration(labelText: 'Origen'),
+                      );
+                    },
                   ),
-                  TextField(
-                    controller: destinationController,
-                    decoration: const InputDecoration(labelText: 'Destino'),
+                  Autocomplete<String>(
+                    initialValue: TextEditingValue(text: initialDestination),
+                    optionsBuilder: (textEditingValue) {
+                      final query = textEditingValue.text.toLowerCase();
+                      final options = _recentDestinations
+                          .where(
+                            (destination) => query.isEmpty
+                                ? true
+                                : destination.toLowerCase().contains(query),
+                          )
+                          .toList()
+                        ..sort((a, b) => a.compareTo(b));
+                      return options;
+                    },
+                    onSelected: (value) {
+                      destinationFieldController?.text = value;
+                    },
+                    fieldViewBuilder: (
+                      context,
+                      textEditingController,
+                      focusNode,
+                      onFieldSubmitted,
+                    ) {
+                      destinationFieldController ??= textEditingController;
+                      return TextField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        decoration:
+                            const InputDecoration(labelText: 'Destino'),
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -245,9 +307,10 @@ class TripsPage extends StatelessWidget {
               ),
               FilledButton(
                 onPressed: () {
-                  final origin = originController.text.trim();
-                  final destination =
-                      destinationController.text.trim();
+                  final origin =
+                      originFieldController?.text.trim() ?? initialOrigin.trim();
+                  final destination = destinationFieldController?.text.trim() ??
+                      initialDestination.trim();
                   final capacity =
                       int.tryParse(capacityController.text.trim());
                   final basePrice =
@@ -287,6 +350,15 @@ class TripsPage extends StatelessWidget {
                     selectedTime?.minute ?? 0,
                   );
 
+                  setState(() {
+                    if (origin.isNotEmpty) {
+                      _recentOrigins.add(origin);
+                    }
+                    if (destination.isNotEmpty) {
+                      _recentDestinations.add(destination);
+                    }
+                  });
+
                   if (isEditing && existing != null) {
                     final updated = Trip(
                       id: existing.id,
@@ -307,7 +379,7 @@ class TripsPage extends StatelessWidget {
                       reservations: existing.reservations,
                     );
                     Navigator.pop(context, true);
-                    onUpdateTrip(updated);
+                    widget.onUpdateTrip(updated);
                   } else {
                     final id = 'T-${DateTime.now().millisecondsSinceEpoch}';
                     final newTrip = Trip(
@@ -334,7 +406,7 @@ class TripsPage extends StatelessWidget {
                       ),
                     );
                     Navigator.pop(context, true);
-                    onAddTrip(newTrip);
+                    widget.onAddTrip(newTrip);
                   }
                 },
                 child: Text(isEditing ? 'Guardar' : 'Crear'),
@@ -379,15 +451,15 @@ class TripsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: trips.isEmpty
+              child: widget.trips.isEmpty
                   ? const Center(
                       child: Text('No hay viajes registrados.'),
                     )
                   : ListView.separated(
-                      itemCount: trips.length,
+                      itemCount: widget.trips.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final trip = trips[index];
+                        final trip = widget.trips[index];
                         return Card(
                           child: Padding(
                             padding: const EdgeInsets.all(16),
@@ -448,7 +520,7 @@ class TripsPage extends StatelessWidget {
                                         ),
                                         FilledButton.icon(
                                           onPressed: () =>
-                                              onOpenSpacesForTrip(trip),
+                                              widget.onOpenSpacesForTrip(trip),
                                           icon:
                                               const Icon(Icons.view_column_outlined),
                                           label:
