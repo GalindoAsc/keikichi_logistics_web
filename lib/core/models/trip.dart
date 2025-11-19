@@ -95,6 +95,11 @@ class Trip {
   /// Puede ser null si no aplica.
   final double? exchangeRateToMXN;
 
+  /// Horas antes de la salida del viaje en las que los pagos deben estar confirmados.
+  /// Si una reservación no está pagada antes de este límite, se cancela automáticamente.
+  /// Por defecto son 24 horas antes de la salida.
+  final int paymentDeadlineHours;
+
   final List<TripSpace> spaces;
   final List<ReservationDetails> reservations;
 
@@ -112,6 +117,7 @@ class Trip {
     this.pickupPrice = 0,
     this.isInternational = false,
     this.exchangeRateToMXN,
+    this.paymentDeadlineHours = 24,
     required this.spaces,
     List<ReservationDetails>? reservations,
   }) : reservations = List<ReservationDetails>.from(reservations ?? const []);

@@ -204,7 +204,7 @@ class _ReservationDetailPageState extends State<ReservationDetailPage> {
   }
 
   Future<void> _handleCancelReservation() async {
-    if (!_isOwner && !_isAdmin) return;
+    if (!_isAdmin) return;
     if (_reservation.status == ReservationStatus.cancelled) return;
 
     final confirmed = await showDialog<bool>(
@@ -552,8 +552,8 @@ class _ReservationDetailPageState extends State<ReservationDetailPage> {
 
               const SizedBox(height: 8),
 
-              // Cancelar reservación
-              if (_isOwner || _isAdmin)
+              // Cancelar reservación (solo administradores/gerentes)
+              if (_isAdmin)
                 OutlinedButton.icon(
                   onPressed: _handleCancelReservation,
                   icon: const Icon(Icons.cancel),

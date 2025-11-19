@@ -64,6 +64,9 @@ class _TripsPageState extends State<TripsPage> {
     final exchangeRateController = TextEditingController(
       text: existing?.exchangeRateToMXN?.toString() ?? (existing == null ? '18.0' : ''),
     );
+    final paymentDeadlineController = TextEditingController(
+      text: existing?.paymentDeadlineHours.toString() ?? '24',
+    );
     DateTime? selectedDate =
         existing?.departureDateTime ?? DateTime.now();
     TimeOfDay? selectedTime;
@@ -305,6 +308,16 @@ class _TripsPageState extends State<TripsPage> {
                     'Los montos se entienden en la moneda base seleccionada.',
                     style: TextStyle(fontSize: 12),
                   ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: paymentDeadlineController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Horas antes de salida para confirmar pago',
+                      helperText: 'Las reservaciones sin pago confirmado se cancelarán automáticamente',
+                      helperMaxLines: 2,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -331,6 +344,8 @@ class _TripsPageState extends State<TripsPage> {
                       double.tryParse(pickupPriceController.text.trim());
                   final exchangeRate =
                       double.tryParse(exchangeRateController.text.trim());
+                  final paymentDeadlineHours =
+                      int.tryParse(paymentDeadlineController.text.trim());
 
                   if (origin.isEmpty ||
                       destination.isEmpty ||
@@ -340,7 +355,9 @@ class _TripsPageState extends State<TripsPage> {
                       basePrice == null ||
                       labelPrice == null ||
                       bondPrice == null ||
-                      pickupPrice == null) {
+                      pickupPrice == null ||
+                      paymentDeadlineHours == null ||
+                      paymentDeadlineHours <= 0) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
@@ -383,6 +400,7 @@ class _TripsPageState extends State<TripsPage> {
                       pickupPrice: pickupPrice,
                       exchangeRateToMXN:
                           currency == TripCurrency.usd ? exchangeRate : null,
+                      paymentDeadlineHours: paymentDeadlineHours ?? 24,
                       spaces: existing.spaces,
                       reservations: existing.reservations,
                     );
@@ -404,6 +422,7 @@ class _TripsPageState extends State<TripsPage> {
                       pickupPrice: pickupPrice,
                       exchangeRateToMXN:
                           currency == TripCurrency.usd ? exchangeRate : null,
+                      paymentDeadlineHours: paymentDeadlineHours ?? 24,
                       spaces: List.generate(
                         capacity ?? 0,
                         (i) => TripSpace(

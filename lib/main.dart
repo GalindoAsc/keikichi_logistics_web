@@ -3,6 +3,7 @@ import 'package:keikichi_logistics_web/core/auth/auth_service.dart';
 import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 import 'package:keikichi_logistics_web/core/models/user_role.dart';
+import 'package:keikichi_logistics_web/core/reservation_auto_cancel_service.dart';
 import 'package:keikichi_logistics_web/features/admin/admin_dashboard_page.dart';
 import 'package:keikichi_logistics_web/features/auth/login_page.dart';
 import 'package:keikichi_logistics_web/features/settings/settings_page.dart';
@@ -124,6 +125,7 @@ class _MainShellState extends State<MainShell> {
 
   final List<Trip> _trips = [];
   Trip? _selectedTripForSpaces;
+  ReservationAutoCancelService? _autoCancelService;
 
   bool get _isClient => widget.currentUser.role == UserRole.client;
 
@@ -192,6 +194,19 @@ class _MainShellState extends State<MainShell> {
     if (_trips.isNotEmpty) {
       _selectedTripForSpaces = _trips.first;
     }
+
+    // Iniciar servicio de cancelación automática de reservaciones
+    _autoCancelService = ReservationAutoCancelService(
+      trips: _trips,
+      onTripUpdate: _updateTrip,
+    );
+    _autoCancelService?.start();
+  }
+
+  @override
+  void dispose() {
+    _autoCancelService?.stop();
+    super.dispose();
   }
 
   void _addTrip(Trip trip) {
