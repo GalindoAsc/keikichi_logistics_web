@@ -26,7 +26,7 @@ class KeikichiLogisticsApp extends StatelessWidget {
         colorScheme: colorScheme,
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF4F5F7),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: Colors.white,
           elevation: 2,
           shape: RoundedRectangleBorder(
@@ -105,7 +105,7 @@ class _MainShellState extends State<MainShell> {
         exchangeRateToMXN: 18.2,
         spaces: List.generate(
           28,
-          (i) => TripSpace(
+              (i) => TripSpace(
             id: 'S-T001-${i + 1}',
             tripId: 'T-001',
             index: i + 1,
@@ -130,7 +130,7 @@ class _MainShellState extends State<MainShell> {
         exchangeRateToMXN: null,
         spaces: List.generate(
           30,
-          (i) => TripSpace(
+              (i) => TripSpace(
             id: 'S-T002-${i + 1}',
             tripId: 'T-002',
             index: i + 1,
