@@ -3,6 +3,7 @@ import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 import 'package:keikichi_logistics_web/core/models/user_role.dart';
+import 'package:keikichi_logistics_web/features/spaces/reservation_detail_page.dart';
 
 class AdminDashboardPage extends StatelessWidget {
   final AppUser currentUser;
@@ -57,7 +58,10 @@ class AdminDashboardPage extends StatelessWidget {
                       if (trip.reservations.isEmpty)
                         const Text('Aún no hay reservaciones para este viaje.')
                       else
-                        _TripReservationsTable(trip: trip),
+                        _TripReservationsTable(
+                          trip: trip,
+                          currentUser: currentUser,
+                        ),
                     ],
                   ),
                 ),
@@ -82,36 +86,41 @@ class AdminDashboardPage extends StatelessWidget {
   }
 }
 
-class _TripReservationsTable extends StatelessWidget {
+class _TripReservationsTable extends StatefulWidget {
   final Trip trip;
-  const _TripReservationsTable({required this.trip});
+  final AppUser currentUser;
+  final Function(Trip)? onTripUpdated;
+
+  const _TripReservationsTable({
+    required this.trip,
+    required this.currentUser,
+    this.onTripUpdated,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Orden')),
-          DataColumn(label: Text('Cliente')),
-          DataColumn(label: Text('Estado')),
-          DataColumn(label: Text('Total')),
-          DataColumn(label: Text('Espacios')),
-        ],
-        rows: trip.reservations
-            .map(
-              (reservation) => DataRow(
-                cells: [
-                  DataCell(Text(reservation.orderCode)),
-                  DataCell(Text(reservation.customerName)),
-                  DataCell(Text(_statusLabel(reservation.status))),
-                  DataCell(Text(
-                      '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}')),
-                  DataCell(Text(reservation.spaceIndexes.join(', '))),
-                ],
-              ),
-            )
-            .toList(),
+  State<_TripReservationsTable> createState() => _TripReservationsTableState();
+}
+
+class _TripReservationsTableState extends State<_TripReservationsTable> {
+  void _openReservationDetail(ReservationDetails reservation) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ReservationDetailPage(
+          reservation: reservation,
+          trip: widget.trip,
+          currentUser: widget.currentUser,
+          onReservationUpdated: (updated) {
+            setState(() {
+              final index = widget.trip.reservations.indexWhere(
+                (r) => r.id == updated.id,
+              );
+              if (index != -1) {
+                widget.trip.reservations[index] = updated;
+              }
+            });
+            widget.onTripUpdated?.call(widget.trip);
+          },
+        ),
       ),
     );
   }
@@ -125,5 +134,43 @@ class _TripReservationsTable extends StatelessWidget {
       case ReservationStatus.cancelled:
         return 'Cancelada';
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columns: const [
+          DataColumn(label: Text('Orden')),
+          DataColumn(label: Text('Cliente')),
+          DataColumn(label: Text('Estado')),
+          DataColumn(label: Text('Total')),
+          DataColumn(label: Text('Espacios')),
+          DataColumn(label: Text('Acciones')),
+        ],
+        rows: widget.trip.reservations
+            .map(
+              (reservation) => DataRow(
+                cells: [
+                  DataCell(Text(reservation.orderCode)),
+                  DataCell(Text(reservation.customerName)),
+                  DataCell(Text(_statusLabel(reservation.status))),
+                  DataCell(Text(
+                      '\$${reservation.totalAmount.toStringAsFixed(2)} ${widget.trip.currency.code}')),
+                  DataCell(Text(reservation.spaceIndexes.join(', '))),
+                  DataCell(
+                    IconButton(
+                      icon: const Icon(Icons.visibility),
+                      tooltip: 'Ver detalle',
+                      onPressed: () => _openReservationDetail(reservation),
+                    ),
+                  ),
+                ],
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }

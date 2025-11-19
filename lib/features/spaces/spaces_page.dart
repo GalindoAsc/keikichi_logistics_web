@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/payment_instructions.dart';
 import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
 import 'package:keikichi_logistics_web/core/models/user_role.dart';
 import 'package:keikichi_logistics_web/features/spaces/reservation_dialog.dart';
+import 'package:keikichi_logistics_web/features/spaces/reservation_detail_page.dart';
 
 class SpacesPage extends StatefulWidget {
   final List<Trip> trips;
@@ -85,6 +87,49 @@ class _SpacesPageState extends State<SpacesPage> {
     }
   }
 
+  Widget _buildCopyableDialogField(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                SelectableText(
+                  value,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.copy, size: 18),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Copiado: $value'),
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            tooltip: 'Copiar',
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _showSingleReservationConfirmation(
     Trip trip,
     ReservationDetails reservation,
@@ -93,36 +138,85 @@ class _SpacesPageState extends State<SpacesPage> {
     final isTransfer = paymentMethod == 'transferencia';
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Preconfirmación de pago'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Orden: ${reservation.orderCode}'),
-            Text('Viaje: ${trip.id} · ${trip.origin} → ${trip.destination}'),
-            Text('Espacios reservados: ${reservation.spaceIndexes.length}'),
-            Text(
-              'Total: '
-              '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}',
-            ),
-            const SizedBox(height: 12),
-            if (isTransfer) ...[
-              Text('Banco: ${PaymentConfig.current.bankName}'),
-              Text('Cuenta: ${PaymentConfig.current.accountName}'),
-              Text('Número de cuenta: ${PaymentConfig.current.accountNumber}'),
-              Text('CLABE: ${PaymentConfig.current.clabe}'),
-              Text('Nota: ${PaymentConfig.current.referenceHint}'),
-              Text('Referencia sugerida: ${reservation.orderCode}'),
-            ] else
-              const Text(
-                'Presenta este número de orden cuando pagues en efectivo para asociar tu depósito.',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCopyableDialogField(
+                dialogContext,
+                'Orden',
+                reservation.orderCode,
               ),
-          ],
+              const SizedBox(height: 4),
+              _buildCopyableDialogField(
+                dialogContext,
+                'Viaje',
+                '${trip.id} · ${trip.origin} → ${trip.destination}',
+              ),
+              const SizedBox(height: 4),
+              _buildCopyableDialogField(
+                dialogContext,
+                'Espacios reservados',
+                reservation.spaceIndexes.length.toString(),
+              ),
+              const SizedBox(height: 4),
+              _buildCopyableDialogField(
+                dialogContext,
+                'Total',
+                '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}',
+              ),
+              const SizedBox(height: 12),
+              if (isTransfer) ...[
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
+                  'Datos bancarios:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                _buildCopyableDialogField(
+                  dialogContext,
+                  'Banco',
+                  PaymentConfig.current.bankName,
+                ),
+                _buildCopyableDialogField(
+                  dialogContext,
+                  'Cuenta',
+                  PaymentConfig.current.accountName,
+                ),
+                _buildCopyableDialogField(
+                  dialogContext,
+                  'Número de cuenta',
+                  PaymentConfig.current.accountNumber,
+                ),
+                _buildCopyableDialogField(
+                  dialogContext,
+                  'CLABE',
+                  PaymentConfig.current.clabe,
+                ),
+                _buildCopyableDialogField(
+                  dialogContext,
+                  'Referencia sugerida',
+                  reservation.orderCode,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  PaymentConfig.current.referenceHint,
+                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                ),
+              ] else
+                const Text(
+                  'Presenta este número de orden cuando pagues en efectivo para asociar tu depósito.',
+                ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Listo'),
           ),
         ],
@@ -142,7 +236,7 @@ class _SpacesPageState extends State<SpacesPage> {
         .toList();
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Reservaciones creadas'),
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 360, maxWidth: 480),
@@ -153,25 +247,71 @@ class _SpacesPageState extends State<SpacesPage> {
                 Text('Se generaron ${reservations.length} órdenes:'),
                 const SizedBox(height: 12),
                 ...reservations.map(
-                  (reservation) => ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(reservation.orderCode),
-                    subtitle: Text('Espacio ${reservation.spaceIndexes.join(', ')}'),
-                    trailing: Text(
-                      '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}',
+                  (reservation) => Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildCopyableDialogField(
+                            dialogContext,
+                            'Orden',
+                            reservation.orderCode,
+                          ),
+                          _buildCopyableDialogField(
+                            dialogContext,
+                            'Espacio',
+                            reservation.spaceIndexes.join(', '),
+                          ),
+                          _buildCopyableDialogField(
+                            dialogContext,
+                            'Total',
+                            '\$${reservation.totalAmount.toStringAsFixed(2)} ${trip.currency.code}',
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 if (transferReservations.isNotEmpty) ...[
-                  Text('Banco: ${PaymentConfig.current.bankName}'),
-                  Text('Cuenta: ${PaymentConfig.current.accountName}'),
-                  Text('Número de cuenta: ${PaymentConfig.current.accountNumber}'),
-                  Text('CLABE: ${PaymentConfig.current.clabe}'),
-                  Text('Nota: ${PaymentConfig.current.referenceHint}'),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Datos bancarios:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildCopyableDialogField(
+                    dialogContext,
+                    'Banco',
+                    PaymentConfig.current.bankName,
+                  ),
+                  _buildCopyableDialogField(
+                    dialogContext,
+                    'Cuenta',
+                    PaymentConfig.current.accountName,
+                  ),
+                  _buildCopyableDialogField(
+                    dialogContext,
+                    'Número de cuenta',
+                    PaymentConfig.current.accountNumber,
+                  ),
+                  _buildCopyableDialogField(
+                    dialogContext,
+                    'CLABE',
+                    PaymentConfig.current.clabe,
+                  ),
+                  _buildCopyableDialogField(
+                    dialogContext,
+                    'Referencias sugeridas',
+                    transferReservations.map((r) => r.orderCode).join(', '),
+                  ),
+                  const SizedBox(height: 8),
                   Text(
-                    'Referencias sugeridas: ${transferReservations.map((r) => r.orderCode).join(', ')}',
+                    PaymentConfig.current.referenceHint,
+                    style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -184,7 +324,7 @@ class _SpacesPageState extends State<SpacesPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Entendido'),
           ),
         ],
@@ -334,6 +474,27 @@ class _SpacesPageState extends State<SpacesPage> {
             '\$${reservation.totalAmount.toStringAsFixed(2)}\n${trip.currency.code}',
             textAlign: TextAlign.right,
           ),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ReservationDetailPage(
+                  reservation: reservation,
+                  trip: trip,
+                  currentUser: widget.currentUser,
+                  onReservationUpdated: (updated) {
+                    setState(() {
+                      final index = trip.reservations.indexWhere(
+                        (r) => r.id == updated.id,
+                      );
+                      if (index != -1) {
+                        trip.reservations[index] = updated;
+                      }
+                    });
+                  },
+                ),
+              ),
+            );
+          },
         );
       },
       separatorBuilder: (_, __) => const Divider(height: 1),
