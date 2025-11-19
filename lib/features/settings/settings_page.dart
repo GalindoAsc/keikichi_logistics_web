@@ -63,6 +63,11 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  bool get _canEditPaymentInfo {
+    return widget.currentUser.role == UserRole.superAdmin ||
+        widget.currentUser.role == UserRole.manager;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -101,6 +106,17 @@ class _SettingsPageState extends State<SettingsPage> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
+          if (!_canEditPaymentInfo)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Solo usuarios autorizados pueden modificar esta información.',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
           Form(
             key: _formKey,
             child: Column(
@@ -109,6 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   controller: _bankController,
                   decoration:
                       const InputDecoration(labelText: 'Nombre del banco'),
+                  enabled: _canEditPaymentInfo,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Indica el nombre del banco.';
@@ -121,6 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   controller: _accountNameController,
                   decoration:
                       const InputDecoration(labelText: 'Nombre de la cuenta'),
+                  enabled: _canEditPaymentInfo,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Indica el nombre de la cuenta.';
@@ -134,11 +152,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   decoration: const InputDecoration(
                     labelText: 'Número de cuenta',
                   ),
+                  enabled: _canEditPaymentInfo,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _clabeController,
                   decoration: const InputDecoration(labelText: 'CLABE'),
+                  enabled: _canEditPaymentInfo,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Indica la CLABE para transferencias.';
@@ -152,16 +172,18 @@ class _SettingsPageState extends State<SettingsPage> {
                   decoration: const InputDecoration(
                     labelText: 'Nota / referencia sugerida',
                   ),
+                  enabled: _canEditPaymentInfo,
                 ),
                 const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton.icon(
-                    onPressed: _savePaymentInstructions,
-                    icon: const Icon(Icons.save_outlined),
-                    label: const Text('Guardar cambios'),
+                if (_canEditPaymentInfo)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton.icon(
+                      onPressed: _savePaymentInstructions,
+                      icon: const Icon(Icons.save_outlined),
+                      label: const Text('Guardar cambios'),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
