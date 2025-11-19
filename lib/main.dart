@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:keikichi_logistics_web/core/auth/auth_service.dart';
+import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
+import 'package:keikichi_logistics_web/core/models/user_role.dart';
+import 'package:keikichi_logistics_web/features/admin/admin_dashboard_page.dart';
+import 'package:keikichi_logistics_web/features/auth/login_page.dart';
 import 'package:keikichi_logistics_web/features/settings/settings_page.dart';
 import 'package:keikichi_logistics_web/features/spaces/spaces_page.dart';
 import 'package:keikichi_logistics_web/features/trips/trips_page.dart';
@@ -8,8 +13,30 @@ void main() {
   runApp(const KeikichiLogisticsApp());
 }
 
-class KeikichiLogisticsApp extends StatelessWidget {
+class KeikichiLogisticsApp extends StatefulWidget {
   const KeikichiLogisticsApp({super.key});
+
+  @override
+  State<KeikichiLogisticsApp> createState() => _KeikichiLogisticsAppState();
+}
+
+class _KeikichiLogisticsAppState extends State<KeikichiLogisticsApp> {
+  AppUser? _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUser = AuthService.instance.currentUser;
+  }
+
+  void _handleLoggedIn(AppUser user) {
+    setState(() => _currentUser = user);
+  }
+
+  void _handleLogout() {
+    AuthService.instance.logout();
+    setState(() => _currentUser = null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +45,13 @@ class KeikichiLogisticsApp extends StatelessWidget {
       seedColor: keikichiSeed,
       brightness: Brightness.light,
     );
+
+    final home = _currentUser == null
+        ? LoginPage(onLoggedIn: _handleLoggedIn)
+        : MainShell(
+            currentUser: _currentUser!,
+            onLogout: _handleLogout,
+          );
 
     return MaterialApp(
       title: 'Keikichi Logistics',
@@ -65,25 +99,41 @@ class KeikichiLogisticsApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MainShell(),
+      home: home,
     );
   }
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  final AppUser currentUser;
+  final VoidCallback onLogout;
+  const MainShell({
+    super.key,
+    required this.currentUser,
+    required this.onLogout,
+  });
 
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
-enum AppSection { trips, spaces, settings }
+enum AppSection { trips, spaces, settings, admin }
 
 class _MainShellState extends State<MainShell> {
   AppSection _section = AppSection.trips;
 
   final List<Trip> _trips = [];
   Trip? _selectedTripForSpaces;
+
+  bool get _isClient => widget.currentUser.role == UserRole.client;
+
+  List<AppSection> get _availableSections {
+    final sections = [AppSection.trips, AppSection.spaces, AppSection.settings];
+    if (!_isClient) {
+      sections.add(AppSection.admin);
+    }
+    return sections;
+  }
 
   @override
   void initState() {
@@ -105,7 +155,7 @@ class _MainShellState extends State<MainShell> {
         exchangeRateToMXN: 18.2,
         spaces: List.generate(
           28,
-              (i) => TripSpace(
+          (i) => TripSpace(
             id: 'S-T001-${i + 1}',
             tripId: 'T-001',
             index: i + 1,
@@ -130,7 +180,7 @@ class _MainShellState extends State<MainShell> {
         exchangeRateToMXN: null,
         spaces: List.generate(
           30,
-              (i) => TripSpace(
+          (i) => TripSpace(
             id: 'S-T002-${i + 1}',
             tripId: 'T-002',
             index: i + 1,
@@ -171,10 +221,73 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  NavigationRailDestination _railDestinationFor(AppSection section) {
+    switch (section) {
+      case AppSection.trips:
+        return const NavigationRailDestination(
+          icon: Icon(Icons.list_alt_outlined),
+          selectedIcon: Icon(Icons.list_alt),
+          label: Text('Viajes'),
+        );
+      case AppSection.spaces:
+        return const NavigationRailDestination(
+          icon: Icon(Icons.view_column_outlined),
+          selectedIcon: Icon(Icons.view_column),
+          label: Text('Mapa de espacios'),
+        );
+      case AppSection.settings:
+        return const NavigationRailDestination(
+          icon: Icon(Icons.settings_outlined),
+          selectedIcon: Icon(Icons.settings),
+          label: Text('Ajustes'),
+        );
+      case AppSection.admin:
+        return const NavigationRailDestination(
+          icon: Icon(Icons.admin_panel_settings_outlined),
+          selectedIcon: Icon(Icons.admin_panel_settings),
+          label: Text('Admin'),
+        );
+    }
+  }
+
+  NavigationDestination _bottomDestinationFor(AppSection section) {
+    switch (section) {
+      case AppSection.trips:
+        return const NavigationDestination(
+          icon: Icon(Icons.list_alt_outlined),
+          selectedIcon: Icon(Icons.list_alt),
+          label: 'Viajes',
+        );
+      case AppSection.spaces:
+        return const NavigationDestination(
+          icon: Icon(Icons.view_column_outlined),
+          selectedIcon: Icon(Icons.view_column),
+          label: 'Mapa',
+        );
+      case AppSection.settings:
+        return const NavigationDestination(
+          icon: Icon(Icons.settings_outlined),
+          selectedIcon: Icon(Icons.settings),
+          label: 'Ajustes',
+        );
+      case AppSection.admin:
+        return const NavigationDestination(
+          icon: Icon(Icons.admin_panel_settings_outlined),
+          selectedIcon: Icon(Icons.admin_panel_settings),
+          label: 'Admin',
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final availableSections = _availableSections;
+    final activeSection = availableSections.contains(_section)
+        ? _section
+        : availableSections.first;
+
     Widget content;
-    switch (_section) {
+    switch (activeSection) {
       case AppSection.trips:
         content = TripsPage(
           trips: _trips,
@@ -187,16 +300,24 @@ class _MainShellState extends State<MainShell> {
         content = SpacesPage(
           trips: _trips,
           initialTrip: _selectedTripForSpaces,
+          currentUser: widget.currentUser,
         );
         break;
       case AppSection.settings:
-        content = const SettingsPage();
+        content = SettingsPage(currentUser: widget.currentUser);
+        break;
+      case AppSection.admin:
+        content = AdminDashboardPage(
+          currentUser: widget.currentUser,
+          trips: _trips,
+        );
         break;
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 900;
+        final selectedIndex = availableSections.indexOf(activeSection);
 
         if (isWide) {
           return Scaffold(
@@ -204,27 +325,17 @@ class _MainShellState extends State<MainShell> {
               children: [
                 NavigationRail(
                   labelType: NavigationRailLabelType.all,
-                  selectedIndex: _section.index,
+                  selectedIndex: selectedIndex,
                   onDestinationSelected: (i) {
-                    setState(() => _section = AppSection.values[i]);
+                    setState(() => _section = availableSections[i]);
                   },
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.list_alt_outlined),
-                      selectedIcon: Icon(Icons.list_alt),
-                      label: Text('Viajes'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.view_column_outlined),
-                      selectedIcon: Icon(Icons.view_column),
-                      label: Text('Mapa de espacios'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.settings_outlined),
-                      selectedIcon: Icon(Icons.settings),
-                      label: Text('Ajustes'),
-                    ),
-                  ],
+                  destinations:
+                      availableSections.map(_railDestinationFor).toList(),
+                  trailing: IconButton(
+                    tooltip: 'Cerrar sesión',
+                    onPressed: widget.onLogout,
+                    icon: const Icon(Icons.logout),
+                  ),
                 ),
                 const VerticalDivider(width: 1),
                 Expanded(child: content),
@@ -234,30 +345,24 @@ class _MainShellState extends State<MainShell> {
         }
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Keikichi Logistics')),
-          body: content,
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _section.index,
-            onDestinationSelected: (i) {
-              setState(() => _section = AppSection.values[i]);
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.list_alt_outlined),
-                selectedIcon: Icon(Icons.list_alt),
-                label: 'Viajes',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.view_column_outlined),
-                selectedIcon: Icon(Icons.view_column),
-                label: 'Mapa',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: 'Ajustes',
+          appBar: AppBar(
+            title: const Text('Keikichi Logistics'),
+            actions: [
+              IconButton(
+                tooltip: 'Cerrar sesión',
+                onPressed: widget.onLogout,
+                icon: const Icon(Icons.logout),
               ),
             ],
+          ),
+          body: content,
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (i) {
+              setState(() => _section = availableSections[i]);
+            },
+            destinations:
+                availableSections.map(_bottomDestinationFor).toList(),
           ),
         );
       },

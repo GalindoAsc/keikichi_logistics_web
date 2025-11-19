@@ -45,6 +45,7 @@ class LabelAssignment {
 class ReservationDetails {
   final String id;
   final String orderCode;
+  final String customerId;
   final String customerName;
 
   final String? contactName;
@@ -82,6 +83,7 @@ class ReservationDetails {
   const ReservationDetails({
     required this.id,
     required this.orderCode,
+    required this.customerId,
     required this.customerName,
     required this.contactName,
     required this.contactPhone,
@@ -112,6 +114,7 @@ class ReservationDetails {
   ReservationDetails copyWith({
     String? id,
     String? orderCode,
+    String? customerId,
     String? customerName,
     String? contactName,
     String? contactPhone,
@@ -141,6 +144,7 @@ class ReservationDetails {
     return ReservationDetails(
       id: id ?? this.id,
       orderCode: orderCode ?? this.orderCode,
+      customerId: customerId ?? this.customerId,
       customerName: customerName ?? this.customerName,
       contactName: contactName ?? this.contactName,
       contactPhone: contactPhone ?? this.contactPhone,

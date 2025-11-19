@@ -2,4 +2,5 @@
 
 export 'core/models/reservation.dart';
 export 'core/models/trip.dart';
+export 'core/models/app_user.dart';
 export 'core/models/user_role.dart';

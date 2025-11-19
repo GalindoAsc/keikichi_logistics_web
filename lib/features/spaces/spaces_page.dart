@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/payment_instructions.dart';
 import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
+import 'package:keikichi_logistics_web/core/models/user_role.dart';
 import 'package:keikichi_logistics_web/features/spaces/reservation_dialog.dart';
 
 class SpacesPage extends StatefulWidget {
   final List<Trip> trips;
   final Trip? initialTrip;
+  final AppUser currentUser;
 
   const SpacesPage({
     super.key,
     required this.trips,
+    required this.currentUser,
     this.initialTrip,
   });
 
@@ -19,11 +23,12 @@ class SpacesPage extends StatefulWidget {
 }
 
 class _SpacesPageState extends State<SpacesPage> {
-  static const bool kCurrentCustomerIsVerified = true;
-  static const String kCurrentCustomerName = 'Cliente Demo Keikichi';
-
   Trip? _selectedTrip;
   final List<int> _selectedSpaceIndexes = [];
+
+  bool get _isManagerOrAdmin =>
+      widget.currentUser.role == UserRole.manager ||
+      widget.currentUser.role == UserRole.superAdmin;
 
   @override
   void initState() {
@@ -191,32 +196,13 @@ class _SpacesPageState extends State<SpacesPage> {
     final trip = _selectedTrip;
     if (trip == null || _selectedSpaceIndexes.isEmpty) return;
 
-    if (!kCurrentCustomerIsVerified) {
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Cuenta no verificada'),
-          content: const Text(
-            'Tu cuenta aún no ha sido verificada por un gerente. No puedes reservar espacios por el momento.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Entendido'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
     final sortedSelection = List<int>.from(_selectedSpaceIndexes)..sort();
 
     final reservations = await showReservationDialog(
       context: context,
       trip: trip,
       selectedSpaceIndexes: sortedSelection,
-      currentCustomerName: kCurrentCustomerName,
+      currentUser: widget.currentUser,
     );
 
     if (reservations == null || reservations.isEmpty) return;
@@ -296,14 +282,28 @@ class _SpacesPageState extends State<SpacesPage> {
     );
   }
 
+  List<ReservationDetails> _visibleReservationsForTrip(Trip trip) {
+    if (_isManagerOrAdmin) {
+      return trip.reservations;
+    }
+    return trip.reservations
+        .where((reservation) => reservation.customerId == widget.currentUser.id)
+        .toList();
+  }
+
   Widget _buildReservationsList(
     Trip trip, {
     ScrollPhysics? physics,
     bool shrinkWrap = false,
   }) {
-    if (trip.reservations.isEmpty) {
-      return const Center(
-        child: Text('Aún no hay reservaciones registradas para este viaje.'),
+    final visibleReservations = _visibleReservationsForTrip(trip);
+    if (visibleReservations.isEmpty) {
+      return Center(
+        child: Text(
+          _isManagerOrAdmin
+              ? 'Aún no hay reservaciones registradas para este viaje.'
+              : 'Aún no tienes reservaciones registradas para este viaje.',
+        ),
       );
     }
 
@@ -313,16 +313,20 @@ class _SpacesPageState extends State<SpacesPage> {
       shrinkWrap: shrinkWrap,
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) {
-        final reservation = trip.reservations[index];
+        final reservation = visibleReservations[index];
         final spacesLabel = reservation.spaceIndexes.join(', ');
+        final title = _isManagerOrAdmin
+            ? reservation.customerName
+            : 'Orden ${reservation.orderCode}';
         return ListTile(
           leading: const Icon(Icons.receipt_long),
-          title: Text(reservation.customerName),
+          title: Text(title),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (_isManagerOrAdmin)
+                Text('Orden: ${reservation.orderCode}'),
               Text('Espacios: $spacesLabel'),
-              Text('Orden: ${reservation.orderCode}'),
               Text('Estado: ${_reservationStatusLabel(reservation.status)}'),
             ],
           ),
@@ -333,8 +337,21 @@ class _SpacesPageState extends State<SpacesPage> {
         );
       },
       separatorBuilder: (_, __) => const Divider(height: 1),
-      itemCount: trip.reservations.length,
+      itemCount: visibleReservations.length,
     );
+  }
+
+  String? _spaceReservationLabel(TripSpace space) {
+    final reservation = space.reservation;
+    if (reservation == null) return null;
+    final isOwner = reservation.customerId == widget.currentUser.id;
+    if (_isManagerOrAdmin) {
+      return reservation.customerName;
+    }
+    if (isOwner) {
+      return 'Tu reservación';
+    }
+    return 'Reservado';
   }
 
   Widget _buildSpaceCard(TripSpace space) {
@@ -382,11 +399,12 @@ class _SpacesPageState extends State<SpacesPage> {
               _shortStatus(space.status),
               style: theme.textTheme.bodyMedium,
             ),
-            if (space.reservation != null)
+            final reservationLabel = _spaceReservationLabel(space);
+            if (reservationLabel != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  space.reservation!.customerName,
+                  reservationLabel,
                   style: theme.textTheme.bodySmall,
                   textAlign: TextAlign.center,
                   maxLines: 2,

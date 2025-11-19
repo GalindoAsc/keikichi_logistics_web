@@ -3,17 +3,17 @@
 enum UserRole {
   superAdmin,
   manager,
-  customer,
+  client,
 }
 
-extension UserRoleLabel on UserRole {
+extension UserRoleX on UserRole {
   String get label {
     switch (this) {
       case UserRole.superAdmin:
         return 'SuperAdmin';
       case UserRole.manager:
         return 'Gerente';
-      case UserRole.customer:
+      case UserRole.client:
         return 'Cliente';
     }
   }

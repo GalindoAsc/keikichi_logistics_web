@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/reservation.dart';
 import 'package:keikichi_logistics_web/core/models/trip.dart';
+import 'package:keikichi_logistics_web/core/models/user_role.dart';
 
 const List<String> demoProductNames = [
   'Basil',
@@ -17,15 +19,34 @@ Future<List<ReservationDetails>?> showReservationDialog({
   required BuildContext context,
   required Trip trip,
   required List<int> selectedSpaceIndexes,
-  required String currentCustomerName,
-}) {
+  required AppUser currentUser,
+}) async {
+  if (currentUser.role == UserRole.client && !currentUser.isVerified) {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cuenta no verificada'),
+        content: const Text(
+          'Tu cuenta aún no ha sido verificada por un gerente. No puedes reservar espacios por el momento.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Entendido'),
+          ),
+        ],
+      ),
+    );
+    return null;
+  }
+
   return showDialog<List<ReservationDetails>>(
     context: context,
     barrierDismissible: false,
     builder: (context) => _ReservationDialog(
       trip: trip,
       selectedSpaceIndexes: selectedSpaceIndexes,
-      currentCustomerName: currentCustomerName,
+      currentUser: currentUser,
     ),
   );
 }
@@ -136,12 +157,12 @@ class _SpaceFormState {
 class _ReservationDialog extends StatefulWidget {
   final Trip trip;
   final List<int> selectedSpaceIndexes;
-  final String currentCustomerName;
+  final AppUser currentUser;
 
   const _ReservationDialog({
     required this.trip,
     required this.selectedSpaceIndexes,
-    required this.currentCustomerName,
+    required this.currentUser,
   });
 
   @override
@@ -149,7 +170,7 @@ class _ReservationDialog extends StatefulWidget {
 }
 
 class _ReservationDialogState extends State<_ReservationDialog> {
-  ReservationMode _mode = ReservationMode.sameForAll;
+  late ReservationMode _mode;
   int _activeSpaceFormIndex = 0;
   late final List<_SpaceFormState> _forms;
   int _productCounter = 0;
@@ -159,6 +180,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   @override
   void initState() {
     super.initState();
+    _mode = _isSingleSpace ? ReservationMode.perSpace : ReservationMode.sameForAll;
     _forms = List<_SpaceFormState>.generate(
       widget.selectedSpaceIndexes.length,
       (_) => _createSpaceForm(),
@@ -192,6 +214,8 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   }
 
   _SpaceFormState get _currentForm => _forms[_activeSpaceFormIndex];
+
+  bool get _isSingleSpace => widget.selectedSpaceIndexes.length == 1;
 
   bool get _isPerSpace => _mode == ReservationMode.perSpace;
 
@@ -419,7 +443,8 @@ class _ReservationDialogState extends State<_ReservationDialog> {
     return ReservationDetails(
       id: reservationId,
       orderCode: orderCode,
-      customerName: widget.currentCustomerName,
+      customerId: widget.currentUser.id,
+      customerName: widget.currentUser.name,
       contactName: form.contactNameController.text.trim().isEmpty
           ? null
           : form.contactNameController.text.trim(),
@@ -530,6 +555,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   }
 
   Widget _buildModeSelector() {
+    if (_isSingleSpace) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -582,7 +608,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   }
 
   Widget _buildSameInfoSpaceSelector() {
-    if (_isPerSpace) return const SizedBox.shrink();
+    if (_isPerSpace || _isSingleSpace) return const SizedBox.shrink();
     final totalSpaces = widget.selectedSpaceIndexes.length;
     final allSelected = _activeSpaceIndexes.length == totalSpaces;
     return Column(
@@ -638,6 +664,7 @@ class _ReservationDialogState extends State<_ReservationDialog> {
   }
 
   Widget _buildSpaceNavigator() {
+    if (_isSingleSpace) return const SizedBox.shrink();
     return Wrap(
       spacing: 8,
       runSpacing: 8,
