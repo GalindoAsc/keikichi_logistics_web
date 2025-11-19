@@ -57,6 +57,7 @@ class _MainShellState extends State<MainShell> {
         labelPricePerUnit: 0.5,
         bondPrice: 25,
         pickupPrice: 20,
+        exchangeRateToMXN: 18.2,
         spaces: List.generate(
           28,
           (i) => TripSpace(
@@ -81,6 +82,7 @@ class _MainShellState extends State<MainShell> {
         labelPricePerUnit: 5,
         bondPrice: 0,
         pickupPrice: 350,
+        exchangeRateToMXN: null,
         spaces: List.generate(
           30,
           (i) => TripSpace(
