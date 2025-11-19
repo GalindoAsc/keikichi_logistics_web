@@ -44,6 +44,7 @@ class LabelAssignment {
 /// Detalle completo de la reservación de espacios.
 class ReservationDetails {
   final String id;
+  final String orderCode;
   final String customerName;
 
   final String? contactName;
@@ -79,6 +80,7 @@ class ReservationDetails {
 
   const ReservationDetails({
     required this.id,
+    required this.orderCode,
     required this.customerName,
     required this.contactName,
     required this.contactPhone,
@@ -104,4 +106,65 @@ class ReservationDetails {
     required this.logisticsSubtotal,
     required this.totalAmount,
   });
+
+  ReservationDetails copyWith({
+    String? id,
+    String? orderCode,
+    String? customerName,
+    String? contactName,
+    String? contactPhone,
+    String? destinationAddress,
+    String? destinationNotes,
+    bool? saveDestinationForLater,
+    bool? customerDeliversToWarehouse,
+    String? pickupAddress,
+    String? pickupContactName,
+    String? pickupContactPhone,
+    DateTime? pickupDateTime,
+    bool? usesCustomerBond,
+    bool? usesKeikichiBond,
+    List<ProductLine>? products,
+    List<LabelAssignment>? labels,
+    ReservationStatus? status,
+    String? paymentMethod,
+    String? paymentReceiptFileName,
+    List<int>? spaceIndexes,
+    double? spacesSubtotal,
+    double? labelsSubtotal,
+    double? bondSubtotal,
+    double? logisticsSubtotal,
+    double? totalAmount,
+  }) {
+    return ReservationDetails(
+      id: id ?? this.id,
+      orderCode: orderCode ?? this.orderCode,
+      customerName: customerName ?? this.customerName,
+      contactName: contactName ?? this.contactName,
+      contactPhone: contactPhone ?? this.contactPhone,
+      destinationAddress: destinationAddress ?? this.destinationAddress,
+      destinationNotes: destinationNotes ?? this.destinationNotes,
+      saveDestinationForLater:
+          saveDestinationForLater ?? this.saveDestinationForLater,
+      customerDeliversToWarehouse:
+          customerDeliversToWarehouse ?? this.customerDeliversToWarehouse,
+      pickupAddress: pickupAddress ?? this.pickupAddress,
+      pickupContactName: pickupContactName ?? this.pickupContactName,
+      pickupContactPhone: pickupContactPhone ?? this.pickupContactPhone,
+      pickupDateTime: pickupDateTime ?? this.pickupDateTime,
+      usesCustomerBond: usesCustomerBond ?? this.usesCustomerBond,
+      usesKeikichiBond: usesKeikichiBond ?? this.usesKeikichiBond,
+      products: products ?? this.products,
+      labels: labels ?? this.labels,
+      status: status ?? this.status,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      paymentReceiptFileName:
+          paymentReceiptFileName ?? this.paymentReceiptFileName,
+      spaceIndexes: spaceIndexes ?? this.spaceIndexes,
+      spacesSubtotal: spacesSubtotal ?? this.spacesSubtotal,
+      labelsSubtotal: labelsSubtotal ?? this.labelsSubtotal,
+      bondSubtotal: bondSubtotal ?? this.bondSubtotal,
+      logisticsSubtotal: logisticsSubtotal ?? this.logisticsSubtotal,
+      totalAmount: totalAmount ?? this.totalAmount,
+    );
+  }
 }

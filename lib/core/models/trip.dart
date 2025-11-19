@@ -126,4 +126,6 @@ class Trip {
     if (d.hour == 0 && d.minute == 0) return 'Sin hora';
     return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   }
+
+  String get currencyLabel => currency.code;
 }
