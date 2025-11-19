@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:keikichi_logistics_web/core/models/app_user.dart';
 import 'package:keikichi_logistics_web/core/models/payment_instructions.dart';
+import 'package:keikichi_logistics_web/core/models/user_role.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final AppUser currentUser;
+  const SettingsPage({super.key, required this.currentUser});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -67,6 +70,24 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Text(widget.currentUser.name.isNotEmpty
+                    ? widget.currentUser.name.substring(0, 1).toUpperCase()
+                    : '?'),
+              ),
+              title: Text(widget.currentUser.name),
+              subtitle: Text(
+                '${widget.currentUser.emailOrPhone}\nRol: ${widget.currentUser.role.label}' +
+                    (widget.currentUser.isVerified
+                        ? '\nCuenta verificada'
+                        : '\nPendiente de verificación'),
+              ),
+              isThreeLine: true,
+            ),
+          ),
+          const SizedBox(height: 24),
           const Text(
             'Aquí configuraremos más adelante:\n'
             '- Usuarios y roles\n'
