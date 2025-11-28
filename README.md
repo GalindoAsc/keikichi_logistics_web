@@ -107,15 +107,17 @@ cd keikichi_logistics_web
 
 ### 2. Configurar variables de entorno
 
-El archivo `.env` ya está configurado para desarrollo. Si necesitas modificarlo:
+**⚠️ IMPORTANTE:** Debes crear el archivo `.env` desde el template:
 
 ```bash
-# Revisar variables
-cat .env
+# Copiar el template de variables de entorno
+cp .env.example .env
 
-# O editar
+# Revisar/editar las variables (opcional para desarrollo)
 nano .env
 ```
+
+Para desarrollo local, los valores por defecto en `.env.example` ya funcionan. Solo cámbialos si necesitas ajustar algo específico.
 
 **Variables importantes:**
 - `POSTGRES_PASSWORD`: Cambiar en producción
