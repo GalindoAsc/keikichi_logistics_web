@@ -9,6 +9,9 @@ WORKDIR /app
 # Copiar package files
 COPY package*.json ./
 
+# Copiar archivos de configuración necesarios para Vite
+COPY tsconfig.json tsconfig.node.json vite.config.ts tailwind.config.js postcss.config.js ./
+
 # Instalar dependencias
 RUN npm install
 

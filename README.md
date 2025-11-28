@@ -2,6 +2,37 @@
 
 Plataforma web para gestión de transporte logístico, venta de espacios de tarimas en tráileres, reservaciones y pagos.
 
+---
+
+## 🚀 Inicio Rápido
+
+**¿Primera vez aquí?** Sigue estas guías paso a paso:
+
+1. **[📖 QUICKSTART.md](QUICKSTART.md)** - Guía detallada para principiantes (sin asumir conocimientos previos)
+2. **[⚡ COMANDOS_RAPIDOS.md](COMANDOS_RAPIDOS.md)** - Referencia rápida de comandos (copia y pega)
+3. **[🧪 TESTING.md](TESTING.md)** - Cómo probar que todo funciona correctamente
+
+**Si ya tienes experiencia con Docker**, los comandos esenciales son:
+
+```bash
+# 1. Clonar y configurar
+git clone https://github.com/GalindoAsc/keikichi_logistics_web.git
+cd keikichi_logistics_web
+git checkout claude/keikichi-logistics-app-01X28hvdbJLTa6iEePksh4JB
+cp .env.example .env
+
+# 2. Iniciar servicios (tarda 3-5 min la primera vez)
+cd infra
+docker compose -f docker-compose.dev.yml up -d --build
+
+# 3. Acceder a:
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:8000
+# API Docs: http://localhost:8000/docs
+```
+
+---
+
 ## 📋 Tabla de Contenidos
 
 - [Stack Tecnológico](#-stack-tecnológico)
@@ -107,15 +138,17 @@ cd keikichi_logistics_web
 
 ### 2. Configurar variables de entorno
 
-El archivo `.env` ya está configurado para desarrollo. Si necesitas modificarlo:
+**⚠️ IMPORTANTE:** Debes crear el archivo `.env` desde el template:
 
 ```bash
-# Revisar variables
-cat .env
+# Copiar el template de variables de entorno
+cp .env.example .env
 
-# O editar
+# Revisar/editar las variables (opcional para desarrollo)
 nano .env
 ```
+
+Para desarrollo local, los valores por defecto en `.env.example` ya funcionan. Solo cámbialos si necesitas ajustar algo específico.
 
 **Variables importantes:**
 - `POSTGRES_PASSWORD`: Cambiar en producción
