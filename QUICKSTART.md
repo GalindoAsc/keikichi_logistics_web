@@ -8,9 +8,13 @@ Esta guía te llevará paso a paso desde cero hasta tener la aplicación corrien
 
 ### ¿Qué necesitas tener instalado?
 
-1. **Docker Desktop** - Para correr la aplicación en contenedores
-   - Descarga: https://www.docker.com/products/docker-desktop
-   - Versión mínima: 24.0+
+1. **OrbStack** - Para correr la aplicación en contenedores (alternativa rápida a Docker Desktop)
+   - Descarga: https://orbstack.dev/
+   - Plataforma: macOS (recomendado para Mac con Apple Silicon o Intel)
+   - **Ventajas:** Más rápido, usa menos recursos, inicio instantáneo
+
+   > **Nota:** Si prefieres Docker Desktop, también funciona. Los comandos son los mismos.
+   > Docker Desktop: https://www.docker.com/products/docker-desktop
 
 2. **Git** - Para descargar el código
    - Descarga: https://git-scm.com/downloads
@@ -165,20 +169,25 @@ SECRET_KEY=dev-secret-key-not-for-production...
 
 ---
 
-## 🎯 Paso 3: Iniciar Docker Desktop
+## 🎯 Paso 3: Iniciar OrbStack
 
-### 3.1 Abre Docker Desktop
+### 3.1 Abre OrbStack
 
-- **En Mac:** Busca "Docker" en tus aplicaciones y ábrelo
-- **En Windows:** Busca "Docker Desktop" en el menú inicio y ábrelo
+- **En Mac:** Presiona `Cmd + Espacio`, escribe "OrbStack" y presiona Enter
+- O búscalo en tus Aplicaciones
 
-### 3.2 Espera a que Docker Desktop esté listo
+### 3.2 Espera a que OrbStack esté listo
 
-Verás un ícono de ballena 🐳 en tu barra de tareas/menú superior.
+Verás un ícono de OrbStack en tu barra de menú superior (arriba a la derecha).
 
-**Espera hasta que diga:** "Docker Desktop is running"
+**El ícono debe estar visible** (generalmente es un cubo o logo de OrbStack).
 
-Esto puede tomar 30-60 segundos la primera vez.
+**Ventaja de OrbStack:** Se inicia casi instantáneamente (1-2 segundos), mucho más rápido que Docker Desktop.
+
+> **Si usas Docker Desktop en lugar de OrbStack:**
+> - Busca "Docker Desktop" y ábrelo
+> - Espera a ver el ícono de ballena 🐳 en la barra de menú
+> - Espera hasta que diga "Docker Desktop is running" (30-60 segundos)
 
 ---
 
@@ -482,9 +491,11 @@ El `-v` significa "volumes" (elimina también los volúmenes donde está la base
 
 Para volver a trabajar en días posteriores:
 
-### 9.1 Abre Docker Desktop
+### 9.1 Abre OrbStack
 
-Asegúrate de que Docker Desktop esté corriendo (ballena 🐳 en la barra de tareas).
+Asegúrate de que OrbStack esté corriendo (ícono de OrbStack en la barra de menú superior).
+
+> **Si usas Docker Desktop:** Asegúrate de que esté corriendo (ballena 🐳 en la barra de menú).
 
 ### 9.2 Navega a la carpeta del proyecto
 
@@ -523,15 +534,17 @@ docker compose -f docker-compose.dev.yml up -d --build
 ### Problema 1: "docker: command not found"
 
 **Solución:**
-- Docker Desktop no está instalado o no está corriendo
-- Instala Docker Desktop desde: https://www.docker.com/products/docker-desktop
+- OrbStack (o Docker Desktop) no está instalado o no está corriendo
+- **Con OrbStack:** Instala desde https://orbstack.dev/
+- **Con Docker Desktop:** Instala desde https://www.docker.com/products/docker-desktop
 - Ábrelo y espera a que inicie completamente
 
 ### Problema 2: "Cannot connect to the Docker daemon"
 
 **Solución:**
-- Docker Desktop no está corriendo
-- Abre Docker Desktop y espera a que diga "Docker Desktop is running"
+- OrbStack (o Docker Desktop) no está corriendo
+- **Con OrbStack:** Abre OrbStack (se inicia en 1-2 segundos)
+- **Con Docker Desktop:** Abre Docker Desktop y espera a que diga "Docker Desktop is running" (puede tomar 30-60 segundos)
 
 ### Problema 3: Un contenedor dice "Exit 1" o "Exited"
 
@@ -637,7 +650,7 @@ Si nada de esto funciona, comparte:
 
 Marca todo lo que funciona:
 
-- [ ] Docker Desktop está instalado y corriendo
+- [ ] OrbStack (o Docker Desktop) está instalado y corriendo
 - [ ] Clonaste el repositorio
 - [ ] Creaste el archivo `.env`
 - [ ] Ejecutaste `docker compose -f docker-compose.dev.yml up -d --build`
