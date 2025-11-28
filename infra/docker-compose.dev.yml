@@ -90,6 +90,7 @@ services:
       - ../frontend/package.json:/app/package.json:rw
       - ../frontend/vite.config.ts:/app/vite.config.ts:rw
       - ../frontend/tsconfig.json:/app/tsconfig.json:rw
+      - ../frontend/tsconfig.node.json:/app/tsconfig.node.json:rw
       - ../frontend/tailwind.config.js:/app/tailwind.config.js:rw
       - ../frontend/postcss.config.js:/app/postcss.config.js:rw
       # Volumen anónimo para node_modules (no sobrescribir)
