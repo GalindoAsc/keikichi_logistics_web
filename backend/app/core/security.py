@@ -9,9 +9,22 @@ from app.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def create_access_token(subject: str, expires_minutes: int | None = None, extra_claims: Dict[str, Any] | None = None) -> str:
+def create_access_token(
+    subject: str,
+    expires_minutes: int | None = None,
+    extra_claims: Dict[str, Any] | None = None,
+) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes or settings.access_token_expire_minutes)
-    to_encode: Dict[str, Any] = {"sub": subject, "exp": expire}
+    to_encode: Dict[str, Any] = {"sub": subject, "exp": expire, "type": "access"}
+    if extra_claims:
+        to_encode.update(extra_claims)
+    return jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+
+def create_refresh_token(subject: str, expires_days: int | None = None, extra_claims: Dict[str, Any] | None = None) -> str:
+    expire_minutes = (expires_days or settings.refresh_token_expire_days) * 24 * 60
+    expire = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
+    to_encode: Dict[str, Any] = {"sub": subject, "exp": expire, "type": "refresh"}
     if extra_claims:
         to_encode.update(extra_claims)
     return jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)

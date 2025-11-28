@@ -25,6 +25,8 @@ async def get_current_user(
         payload = verify_token(token)
     except ValueError:
         raise UnauthorizedException()
+    if payload.get("type") != "access":
+        raise UnauthorizedException()
     user_id = payload.get("sub")
     if not user_id:
         raise UnauthorizedException()
