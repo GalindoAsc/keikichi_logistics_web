@@ -4,6 +4,7 @@ Este roadmap convierte el brief técnico en acciones concretas para arrancar el 
 
 ## Objetivos del próximo ciclo
 > Consulta también **STAGE-1.md** para el desglose detallado de esta etapa.
+=======
 - Tener backend con estructura modular (modelos, esquemas, routers y servicios) conectada a PostgreSQL y migraciones iniciales.
 - Exponer autenticación completa (`/api/v1/auth`) con registro/login/refresh y usuario administrador por defecto.
 - Publicar CRUD inicial de viajes y generación automática de espacios.
