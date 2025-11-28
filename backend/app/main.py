@@ -4,9 +4,13 @@ Keikichi Logistics - FastAPI Application
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
+from sqlalchemy.ext.asyncio import AsyncSession
 
-# Crear app FastAPI
+from app import models
+from app.config import settings
+from app.api.v1.router import router as api_router
+from app.database import engine, AsyncSessionLocal
+
 app = FastAPI(
     title="Keikichi Logistics API",
     description="API para gestión de transporte logístico",
@@ -15,19 +19,25 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://localhost"],
+    allow_origins=[str(origin) for origin in settings.backend_cors_origins] or ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(api_router)
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
+
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
     return {
         "message": "Keikichi Logistics API",
         "version": "1.0.0",
@@ -38,40 +48,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {
         "status": "healthy",
-        "environment": os.getenv("ENVIRONMENT", "development"),
+        "environment": settings.environment,
     }
-
-
-@app.get("/api/v1/info")
-async def api_info():
-    """API information endpoint"""
-    return {
-        "api_version": "v1",
-        "modules": {
-            "infrastructure": "✅ Completado",
-            "database": "⏳ Pendiente",
-            "authentication": "⏳ Pendiente",
-            "trips": "⏳ Pendiente",
-            "spaces": "⏳ Pendiente",
-            "reservations": "⏳ Pendiente",
-            "payments": "⏳ Pendiente",
-            "documents": "⏳ Pendiente",
-            "messages": "⏳ Pendiente",
-            "admin": "⏳ Pendiente",
-            "websockets": "⏳ Pendiente",
-        },
-    }
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-    )
