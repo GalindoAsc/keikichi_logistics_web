@@ -13,6 +13,10 @@ class Token(BaseModel):
     user: Optional["UserOut"] = None
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 class TokenRefresh(BaseModel):
     access_token: str
     token_type: str = "bearer"
