@@ -8,7 +8,8 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = authStore.getState().accessToken;
   if (token) {
-    config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config.headers = { ...config.headers, Authorization: `Bearer ${token}` } as any;
   }
   return config;
 });

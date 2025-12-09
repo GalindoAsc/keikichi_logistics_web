@@ -13,6 +13,9 @@ class DocumentType(str, enum.Enum):
     etiquetas = "etiquetas"
     comprobante_pago = "comprobante_pago"
     constancia_fiscal = "constancia_fiscal"
+    ine_front = "ine_front"
+    ine_back = "ine_back"
+    ine_selfie = "ine_selfie"
     otro = "otro"
 
 
@@ -23,6 +26,7 @@ class ClientDocument(Base):
     client_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     reservation_id = Column(UUID(as_uuid=True), ForeignKey("reservations.id", ondelete="SET NULL"))
     doc_type = Column(Enum(DocumentType, name="document_type"), nullable=False)
+    display_name = Column(String(255), nullable=True)
     filename = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
     expires_at = Column(Date)

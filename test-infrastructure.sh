@@ -114,10 +114,10 @@ echo ""
 
 # 6. Verificar logs
 echo "6️⃣  Verificando logs de servicios..."
-docker compose -f docker-compose.dev.yml logs --tail=5 keikichi_db | grep -q "database system is ready to accept connections"
+docker compose -f docker-compose.dev.yml logs --tail=100 keikichi_db | grep -q "database system is ready to accept connections"
 check_step "PostgreSQL logs OK"
 
-docker compose -f docker-compose.dev.yml logs --tail=10 keikichi_backend | grep -q "Application startup complete"
+docker compose -f docker-compose.dev.yml logs --tail=100 keikichi_backend | grep -q "Application startup complete"
 check_step "Backend logs OK"
 echo ""
 

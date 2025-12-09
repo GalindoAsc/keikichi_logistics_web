@@ -9,6 +9,10 @@ from app.models.client_document import ClientDocument, DocumentType
 from app.models.system_config import SystemConfig
 from app.models.audit_log import AuditLog
 from app.models.message import Message
+from app.models.catalog import Product, Unit
+from app.models.load_item import LoadItem
+from app.models.label_price import LabelPrice
+from app.models.waitlist import Waitlist
 
 __all__ = [
     "Base",
@@ -24,9 +28,11 @@ __all__ = [
     "PaymentMethod",
     "PaymentStatus",
     "ReservationSpace",
+    "LoadItem",
     "ClientDocument",
     "DocumentType",
     "SystemConfig",
     "AuditLog",
     "Message",
+    "LabelPrice",
 ]

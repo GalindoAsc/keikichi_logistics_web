@@ -35,3 +35,22 @@ async def get_current_user(
     if not user:
         raise UnauthorizedException()
     return user
+
+
+async def require_manager_or_superadmin(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user.is_manager_like():
+        raise UnauthorizedException("Not enough permissions")
+    return current_user
+
+
+async def require_verified(current_user: User = Depends(get_current_user)) -> User:
+    from app.models.user import VerificationStatus
+    if current_user.verification_status != VerificationStatus.verified:
+        # Also check if they are manager/admin, they should bypass this?
+        # Maybe not, but usually admins are verified by default or manually.
+        # Let's allow managers/admins to bypass
+        if current_user.is_manager_like():
+            return current_user
+            
+        raise UnauthorizedException("Account not verified. Please complete identity verification.")
+    return current_user

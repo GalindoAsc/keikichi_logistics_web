@@ -25,14 +25,14 @@ services:
     environment:
       - ENVIRONMENT=development
       - DEBUG=true
-      - DATABASE_URL=postgresql+asyncpg://keikichi:devpassword@db:5432/keikichi_dev
+      - DATABASE_URL=postgresql+asyncpg://keikichi:devpassword@${POSTGRES_HOST:-db}:5432/keikichi_dev
       - SECRET_KEY=dev-secret-key-not-for-production
       - JWT_SECRET_KEY=dev-jwt-secret-key-not-for-production
       - JWT_ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=60
       - REFRESH_TOKEN_EXPIRE_DAYS=30
-      - DEFAULT_ADMIN_EMAIL=admin@dev.local
-      - DEFAULT_ADMIN_PASSWORD=Admin123!
+      - DEFAULT_ADMIN_EMAIL=admin@keikichi.com
+      - DEFAULT_ADMIN_PASSWORD=Admin123!ChangeMe
       - DEFAULT_ADMIN_NAME=Dev Admin
       - BACKEND_CORS_ORIGINS=["http://localhost:5173","http://localhost:3000"]
     volumes:
@@ -65,6 +65,7 @@ services:
 
 volumes:
   postgres_dev_data:
+
 
 networks:
   keikichi_dev_network:

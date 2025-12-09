@@ -8,6 +8,7 @@ export interface Space {
   hold_expires_at?: string;
   held_by?: string;
   is_mine?: boolean;
+  has_pending_reservation?: boolean;
 }
 
 export interface SpaceSummary {

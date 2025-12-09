@@ -1,7 +1,8 @@
 import enum
 import uuid
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Numeric, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Numeric, String, Text, JSON, Integer
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.models.base import Base
@@ -40,11 +41,21 @@ class Reservation(Base):
     total_amount = Column(Numeric(10, 2), nullable=False)
     discount_amount = Column(Numeric(10, 2), nullable=False, default=0)
     discount_reason = Column(String(255))
-    cargo_type = Column(String(100))
-    cargo_description = Column(Text)
-    cargo_weight = Column(Numeric(10, 2))
-    cargo_value = Column(Numeric(12, 2))
+    # International & Bond
+    is_international = Column(Boolean, default=False)
+    use_own_bond = Column(Boolean, default=False)
+    bond_file_id = Column(UUID(as_uuid=True), ForeignKey("client_documents.id"), nullable=True)
+    
+    # Labeling    # General Labeling (List of items)
+    labeling_details = Column(JSON, nullable=True)  # List of {quantity, dimensions, file_id}
+    
+    # Pickup
+    request_pickup = Column(Boolean, default=False)
+    pickup_details = Column(JSON, nullable=True)
+    
+    # Invoice
     requires_invoice = Column(Boolean, nullable=False, default=False)
+    invoice_data_id = Column(UUID(as_uuid=True), ForeignKey("client_documents.id"), nullable=True)
     invoice_pdf_path = Column(String(500))
     invoice_xml_path = Column(String(500))
     ticket_pdf_path = Column(String(500))
@@ -53,3 +64,5 @@ class Reservation(Base):
     payment_confirmed_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    items = relationship("LoadItem", back_populates="reservation", cascade="all, delete-orphan")

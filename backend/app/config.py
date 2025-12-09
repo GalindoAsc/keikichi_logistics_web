@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     secret_key: str = Field(..., alias="SECRET_KEY")
     timezone: str = Field("UTC", alias="TIMEZONE")
 
+    # Database - can be overridden by DATABASE_URL
+    database_url_override: str | None = Field(None, alias="DATABASE_URL")
     postgres_host: str = Field("db", alias="POSTGRES_HOST")
     postgres_port: int = Field(5432, alias="POSTGRES_PORT")
     postgres_db: str = Field("keikichi_logistics", alias="POSTGRES_DB")
@@ -38,15 +40,32 @@ class Settings(BaseSettings):
     default_admin_name: str = Field("Administrador", alias="DEFAULT_ADMIN_NAME")
 
     default_spaces_per_trip: int = Field(28, alias="DEFAULT_SPACES_PER_TRIP")
-    space_hold_minutes: int = Field(15, alias="SPACE_HOLD_MINUTES")
+    space_hold_minutes: int = Field(10, alias="SPACE_HOLD_MINUTES")
     reservation_cancel_hours: int = Field(24, alias="RESERVATION_CANCEL_HOURS")
     default_currency: str = Field("MXN", alias="DEFAULT_CURRENCY")
+    default_currency: str = Field("MXN", alias="DEFAULT_CURRENCY")
     default_tax_rate: float = Field(0.16, alias="DEFAULT_TAX_RATE")
+
+    # Email Settings
+    mail_username: str = Field("admin@keikichi.com", alias="MAIL_USERNAME")
+    mail_password: str = Field("password", alias="MAIL_PASSWORD")
+    mail_from: str = Field("admin@keikichi.com", alias="MAIL_FROM")
+    mail_port: int = Field(587, alias="MAIL_PORT")
+    mail_server: str = Field("smtp.gmail.com", alias="MAIL_SERVER")
+    mail_from_name: str = Field("Keikichi Logistics", alias="MAIL_FROM_NAME")
+    mail_starttls: bool = Field(True, alias="MAIL_STARTTLS")
+    mail_ssl_tls: bool = Field(False, alias="MAIL_SSL_TLS")
+    use_credentials: bool = Field(True, alias="USE_CREDENTIALS")
+    validate_certs: bool = Field(True, alias="VALIDATE_CERTS")
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 
     @property
     def database_url(self) -> str:
+        # Prefer DATABASE_URL if provided (docker-compose sets this)
+        if self.database_url_override:
+            return self.database_url_override
+        # Otherwise construct from individual components
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"

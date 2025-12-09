@@ -1,8 +1,9 @@
 from datetime import date, time, datetime
 from typing import List, Optional
+from uuid import UUID
 from pydantic import BaseModel
 
-from app.models.trip import TripStatus
+from app.models.trip import TripStatus, PickupCostType
 
 
 class TripBase(BaseModel):
@@ -11,8 +12,14 @@ class TripBase(BaseModel):
     departure_date: date
     departure_time: Optional[time] = None
     status: TripStatus = TripStatus.scheduled
+    is_international: bool = False
     total_spaces: int
     price_per_space: float
+    pickup_cost: Optional[float] = 0.0
+    pickup_cost_type: PickupCostType = PickupCostType.flat_rate
+    bond_cost: float = 500.00
+    currency: str = "USD"
+    exchange_rate: float = 1.0
     individual_pricing: bool = False
     tax_included: bool = True
     tax_rate: float = 0.16
@@ -37,8 +44,14 @@ class TripUpdate(BaseModel):
     departure_date: Optional[date] = None
     departure_time: Optional[time] = None
     status: Optional[TripStatus] = None
+    is_international: Optional[bool] = None
     total_spaces: Optional[int] = None
     price_per_space: Optional[float] = None
+    pickup_cost: Optional[float] = None
+    pickup_cost_type: Optional[PickupCostType] = None
+    bond_cost: Optional[float] = None
+    currency: Optional[str] = None
+    exchange_rate: Optional[float] = None
     individual_pricing: Optional[bool] = None
     tax_included: Optional[bool] = None
     tax_rate: Optional[float] = None
@@ -54,7 +67,7 @@ class TripUpdate(BaseModel):
 
 
 class TripOut(TripBase):
-    id: str
+    id: UUID
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     available_spaces: Optional[int] = None
@@ -62,5 +75,4 @@ class TripOut(TripBase):
     blocked_spaces: Optional[int] = None
     on_hold_spaces: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

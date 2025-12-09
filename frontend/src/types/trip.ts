@@ -1,6 +1,7 @@
 import { Space } from "./space";
 
 export type TripStatus = "scheduled" | "in_transit" | "completed" | "cancelled";
+export type PickupCostType = "flat_rate" | "per_pallet";
 
 export interface Trip {
   id: string;
@@ -9,8 +10,14 @@ export interface Trip {
   departure_date: string;
   departure_time?: string;
   status: TripStatus;
+  is_international: boolean;
   total_spaces: number;
   price_per_space: number;
+  pickup_cost?: number;
+  pickup_cost_type: PickupCostType;
+  bond_cost: number;
+  currency: string;
+  exchange_rate: number;
   individual_pricing: boolean;
   tax_included: boolean;
   tax_rate: number;
@@ -28,4 +35,31 @@ export interface Trip {
   blocked_spaces?: number;
   on_hold_spaces?: number;
   spaces?: Space[];
+}
+
+export interface TripCreate {
+  origin: string;
+  destination: string;
+  departure_date: string;
+  departure_time?: string;
+  is_international: boolean;
+  total_spaces: number;
+  price_per_space: number;
+  pickup_cost?: number;
+  pickup_cost_type: PickupCostType;
+  bond_cost: number;
+  currency: string;
+  exchange_rate: number;
+  individual_pricing: boolean;
+  tax_included: boolean;
+  tax_rate: number;
+  payment_deadline_hours: number;
+  notes_public?: string;
+  notes_internal?: string;
+  truck_identifier?: string;
+  trailer_identifier?: string;
+  truck_plate?: string;
+  trailer_plate?: string;
+  driver_name?: string;
+  driver_phone?: string;
 }

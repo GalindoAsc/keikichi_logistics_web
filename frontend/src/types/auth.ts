@@ -1,12 +1,20 @@
 export type UserRole = "superadmin" | "manager" | "client";
 
+export type VerificationStatus = "pending_documents" | "pending_review" | "verified" | "rejected";
+
 export interface User {
   id: string;
-  email: string;
+  email?: string;
   full_name: string;
   role: UserRole;
   is_active: boolean;
   is_verified: boolean;
+  verification_status: VerificationStatus;
+  phone?: string;
+  rejection_reason?: string;
+  ine_front_file_id?: string;
+  ine_back_file_id?: string;
+  ine_selfie_file_id?: string;
 }
 
 export interface LoginRequest {
@@ -15,7 +23,7 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  email: string;
+  email?: string;
   password: string;
   full_name: string;
   phone?: string;

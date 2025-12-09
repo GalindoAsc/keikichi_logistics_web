@@ -1,0 +1,335 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.0, pytest-8.0.2, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/galindoasc/keikichi_logistics_web/backend
+plugins: asyncio-0.23.8, anyio-4.12.0
+asyncio: mode=Mode.STRICT
+collecting ... collected 18 items
+
+tests/test_system_flows.py::TestSystemFlows::test_1_health_check PASSED  [  5%]
+tests/test_system_flows.py::TestSystemFlows::test_2_register_client PASSED [ 11%]
+tests/test_system_flows.py::TestSystemFlows::test_3_login_client PASSED  [ 16%]
+tests/test_system_flows.py::TestSystemFlows::test_4_get_me PASSED        [ 22%]
+tests/test_system_flows.py::TestSystemFlows::test_5_update_profile PASSED [ 27%]
+tests/test_system_flows.py::TestSystemFlows::test_6_create_trip PASSED   [ 33%]
+tests/test_system_flows.py::TestSystemFlows::test_7_list_trips PASSED    [ 38%]
+tests/test_system_flows.py::TestSystemFlows::test_8_get_trip_detail PASSED [ 44%]
+tests/test_system_flows.py::TestSystemFlows::test_9_update_trip_status PASSED [ 50%]
+tests/test_system_flows.py::TestSystemFlows::test_10_bulk_delete_trips_logic_check PASSED [ 55%]
+tests/test_system_flows.py::TestSystemFlows::test_11_create_reservation FAILED [ 61%]
+tests/test_system_flows.py::TestSystemFlows::test_12_cancel_reservation FAILED [ 66%]
+tests/test_system_flows.py::TestSystemFlows::test_13_admin_list_reservations PASSED [ 72%]
+tests/test_system_flows.py::TestSystemFlows::test_14_delete_reservation FAILED [ 77%]
+tests/test_system_flows.py::TestSystemFlows::test_15_get_system_config PASSED [ 83%]
+tests/test_system_flows.py::TestSystemFlows::test_16_update_exchange_rate PASSED [ 88%]
+tests/test_system_flows.py::TestSystemFlows::test_17_upload_document PASSED [ 94%]
+tests/test_system_flows.py::TestSystemFlows::test_18_list_my_documents PASSED [100%]
+
+=================================== FAILURES ===================================
+__________________ TestSystemFlows.test_11_create_reservation __________________
+
+self = <test_system_flows.TestSystemFlows object at 0x10d918410>
+client = <httpx.AsyncClient object at 0x10da07c50>
+user_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZTBiZmViYS1mMTM0LTQ3ZmQtOGUxMS05ZDAzYWI1NDU5MTAiLCJleHAiOjE3NjUyNjkyOTEsInR5cGUiOiJhY2Nlc3MifQ.D0hKOFlDjVfmjbLgDKbErJs0oCiDhKiK1GKTYrxYuj8'
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDYxOGVhZC1jNWJlLTQxMmMtOTRlMi0xMzE3NjQzYjE2MzciLCJleHAiOjE3NjUyNjkyOTEsInR5cGUiOiJhY2Nlc3MifQ.P6kSEW-9IFOy-yh0MznExk3VqPLospLMH7mHEgbM228'
+
+    async def test_11_create_reservation(self, client: AsyncClient, user_token, admin_token):
+        # Setup trip
+        trip_res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Res Test", "destination": "City", "departure_date": "2025-01-01", "price_per_space": 100, "total_spaces": 10
+        })
+        trip_id = trip_res.json()["id"]
+    
+        # Get spaces
+        spaces_res = await client.get(f"/api/v1/trips/{trip_id}/spaces", headers={"Authorization": f"Bearer {user_token}"})
+        assert spaces_res.status_code == 200
+        spaces = spaces_res.json()
+        assert len(spaces) >= 2
+        space_ids = [s["id"] for s in spaces[:2]]
+    
+        # Create Hold
+        hold_res = await client.post("/api/v1/reservations/hold", headers={"Authorization": f"Bearer {user_token}"}, json={
+            "trip_id": trip_id,
+            "space_ids": space_ids
+        })
+>       assert hold_res.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_system_flows.py:164: AssertionError
+__________________ TestSystemFlows.test_12_cancel_reservation __________________
+
+self = <test_system_flows.TestSystemFlows object at 0x10d8eaf90>
+client = <httpx.AsyncClient object at 0x10dc43110>
+user_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZTBiZmViYS1mMTM0LTQ3ZmQtOGUxMS05ZDAzYWI1NDU5MTAiLCJleHAiOjE3NjUyNjkyOTEsInR5cGUiOiJhY2Nlc3MifQ.D0hKOFlDjVfmjbLgDKbErJs0oCiDhKiK1GKTYrxYuj8'
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDYxOGVhZC1jNWJlLTQxMmMtOTRlMi0xMzE3NjQzYjE2MzciLCJleHAiOjE3NjUyNjkyOTIsInR5cGUiOiJhY2Nlc3MifQ.8fZLTs3ZzVh18dLA0-Cs5Cynqyjb1RD7MwSIpIpCo90'
+
+    async def test_12_cancel_reservation(self, client: AsyncClient, user_token, admin_token):
+        # Setup trip
+        trip_res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Res Cancel", "destination": "City", "departure_date": "2025-01-01", "price_per_space": 100, "total_spaces": 10
+        })
+        trip_id = trip_res.json()["id"]
+    
+        # Get spaces
+        spaces_res = await client.get(f"/api/v1/trips/{trip_id}/spaces", headers={"Authorization": f"Bearer {user_token}"})
+        space_ids = [spaces_res.json()[0]["id"]]
+    
+        # Hold
+        await client.post("/api/v1/reservations/hold", headers={"Authorization": f"Bearer {user_token}"}, json={
+            "trip_id": trip_id, "space_ids": space_ids
+        })
+    
+        # Reserve
+        res_res = await client.post("/api/v1/reservations", headers={"Authorization": f"Bearer {user_token}"}, json={
+            "trip_id": trip_id, "space_ids": space_ids, "payment_method": "cash",
+            "items": [{"product_name": "Item", "box_count": 1, "total_weight": 1}],
+             "requires_invoice": False
+        })
+>       reservation_id = res_res.json()["id"]
+E       KeyError: 'id'
+
+tests/test_system_flows.py:202: KeyError
+__________________ TestSystemFlows.test_14_delete_reservation __________________
+
+self = <test_system_flows.TestSystemFlows object at 0x10d8b32b0>
+client = <httpx.AsyncClient object at 0x10dd260b0>
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDYxOGVhZC1jNWJlLTQxMmMtOTRlMi0xMzE3NjQzYjE2MzciLCJleHAiOjE3NjUyNjkyOTIsInR5cGUiOiJhY2Nlc3MifQ.8fZLTs3ZzVh18dLA0-Cs5Cynqyjb1RD7MwSIpIpCo90'
+user_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZTBiZmViYS1mMTM0LTQ3ZmQtOGUxMS05ZDAzYWI1NDU5MTAiLCJleHAiOjE3NjUyNjkyOTIsInR5cGUiOiJhY2Nlc3MifQ.klh4ThR9o01HZmol2qETy6k7rGokbvoRKHgqUqzGjRc'
+
+    async def test_14_delete_reservation(self, client: AsyncClient, admin_token, user_token):
+         # Create
+        trip_res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Res Del", "destination": "City", "departure_date": "2025-01-01", "price_per_space": 100, "total_spaces": 10
+        })
+        trip_id = trip_res.json()["id"]
+    
+        # Get spaces
+        spaces_res = await client.get(f"/api/v1/trips/{trip_id}/spaces", headers={"Authorization": f"Bearer {user_token}"})
+        space_ids = [spaces_res.json()[0]["id"]]
+    
+        # Hold
+        await client.post("/api/v1/reservations/hold", headers={"Authorization": f"Bearer {user_token}"}, json={
+            "trip_id": trip_id, "space_ids": space_ids
+        })
+    
+        # Reserve
+        res_res = await client.post("/api/v1/reservations", headers={"Authorization": f"Bearer {user_token}"}, json={
+            "trip_id": trip_id, "space_ids": space_ids, "payment_method": "cash",
+            "items": [{"product_name": "Item", "box_count": 1, "total_weight": 1}],
+             "requires_invoice": False
+        })
+>       reservation_id = res_res.json()["id"]
+E       KeyError: 'id'
+
+tests/test_system_flows.py:239: KeyError
+=============================== warnings summary ===============================
+app/schemas/auth.py:45
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/auth.py:45: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserOut(BaseModel):
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:211: 276 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:211: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+app/schemas/user.py:9
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:9: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserBase(BaseModel):
+
+app/schemas/user.py:31
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(UserBase):
+
+app/schemas/user.py:77
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:77: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('email', 'phone')
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi_mail/schemas.py:91
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi_mail/schemas.py:91: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+app/schemas/trip.py:70
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/trip.py:70: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class TripOut(TripBase):
+
+app/schemas/space.py:10
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/space.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class SpaceBase(BaseModel):
+
+app/schemas/reservation.py:27
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:27: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class HoldSpacesResponse(BaseModel):
+
+app/schemas/reservation.py:64
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:64: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class LoadItemResponse(LoadItemCreate):
+
+app/schemas/reservation.py:152
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:152: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationSpaceDetail(BaseModel):
+
+app/schemas/reservation.py:162
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:162: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationTripDetail(BaseModel):
+
+app/schemas/reservation.py:178
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:178: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationResponse(BaseModel):
+
+app/schemas/reservation.py:243
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:243: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationListItem(BaseModel):
+
+app/schemas/label_price.py:18
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/label_price.py:18: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class LabelPriceOut(LabelPriceBase):
+
+app/api/v1/system_config.py:28
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/system_config.py:28: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class SystemConfigResponse(SystemConfigBase):
+
+app/schemas/client_document.py:24
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/client_document.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ClientDocumentOut(ClientDocumentBase):
+
+app/schemas/catalog.py:17
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/catalog.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Product(ProductBase):
+
+app/schemas/catalog.py:35
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/catalog.py:35: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Unit(UnitBase):
+
+app/schemas/notification.py:25
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/notification.py:25: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class NotificationResponse(NotificationBase):
+
+app/schemas/fleet.py:22
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/fleet.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class FleetDriverOut(FleetDriverBase):
+
+app/schemas/fleet.py:49
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/fleet.py:49: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class FleetVehicleOut(FleetVehicleBase):
+
+app/main.py:42
+  /Users/galindoasc/keikichi_logistics_web/backend/app/main.py:42: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+app/main.py:82
+  /Users/galindoasc/keikichi_logistics_web/backend/app/main.py:82: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:169: 617 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:169: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or inspect.isasyncgenfunction(obj)
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:433: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:433: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(func)
+
+tests/test_system_flows.py::TestSystemFlows::test_1_health_check
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:1005: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py::TestSystemFlows::test_1_health_check
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:662: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    old_loop_policy = asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py::TestSystemFlows::test_1_health_check
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:667: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(policy)
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:751: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    _restore_event_loop_policy(asyncio.get_event_loop_policy()),
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:977: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(new_loop_policy)
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:978: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:766: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py: 65 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/_utils.py:42: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:811: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:835: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(previous_policy)
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:847: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py: 24 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/jose/jwt.py:311: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = timegm(datetime.utcnow().utctimetuple())
+
+tests/test_system_flows.py::TestSystemFlows::test_6_create_trip
+tests/test_system_flows.py::TestSystemFlows::test_8_get_trip_detail
+tests/test_system_flows.py::TestSystemFlows::test_9_update_trip_status
+tests/test_system_flows.py::TestSystemFlows::test_10_bulk_delete_trips_logic_check
+tests/test_system_flows.py::TestSystemFlows::test_10_bulk_delete_trips_logic_check
+tests/test_system_flows.py::TestSystemFlows::test_10_bulk_delete_trips_logic_check
+tests/test_system_flows.py::TestSystemFlows::test_11_create_reservation
+tests/test_system_flows.py::TestSystemFlows::test_12_cancel_reservation
+tests/test_system_flows.py::TestSystemFlows::test_14_delete_reservation
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/trips.py:75: PydanticDeprecatedSince20: The `from_orm` method is deprecated; set `model_config['from_attributes']=True` and use `model_validate` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    return TripOut.from_orm(trip)
+
+tests/test_system_flows.py::TestSystemFlows::test_7_list_trips
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/trips.py:24: PydanticDeprecatedSince20: The `from_orm` method is deprecated; set `model_config['from_attributes']=True` and use `model_validate` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    TripOut.from_orm(trip).model_copy(update={
+
+tests/test_system_flows.py::TestSystemFlows::test_8_get_trip_detail
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/trips.py:40: PydanticDeprecatedSince20: The `from_orm` method is deprecated; set `model_config['from_attributes']=True` and use `model_validate` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    return TripOut.from_orm(trip).model_copy(update={
+
+tests/test_system_flows.py::TestSystemFlows::test_9_update_trip_status
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/trips.py:133: PydanticDeprecatedSince20: The `from_orm` method is deprecated; set `model_config['from_attributes']=True` and use `model_validate` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    return TripOut.from_orm(trip)
+
+tests/test_system_flows.py::TestSystemFlows::test_18_list_my_documents
+  <sys>:0: SAWarning: Can't sort tables for DROP; an unresolvable foreign key dependency exists between tables: client_documents, reservations, trips, users; and backend does not support ALTER.  To restore at least a partial sort, apply use_alter=True to ForeignKey and ForeignKeyConstraint objects involved in the cycle to mark these as known cycles that will be ignored.
+
+tests/test_system_flows.py::TestSystemFlows::test_18_list_my_documents
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:671: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(old_loop_policy)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_system_flows.py::TestSystemFlows::test_11_create_reservation
+FAILED tests/test_system_flows.py::TestSystemFlows::test_12_cancel_reservation
+FAILED tests/test_system_flows.py::TestSystemFlows::test_14_delete_reservation
+================= 3 failed, 15 passed, 1168 warnings in 3.76s ==================

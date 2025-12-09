@@ -1,0 +1,156 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.0, pytest-8.0.2, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/galindoasc/keikichi_logistics_web/backend
+plugins: asyncio-0.23.8, anyio-4.12.0
+asyncio: mode=Mode.STRICT
+collecting ... collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_system_flows.py __________________
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/_pytest/python.py:538: in importtestmodule
+    mod = import_path(path, mode=importmode, root=config.rootpath)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/_pytest/pathlib.py:566: in import_path
+    importlib.import_module(module_name)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+<frozen importlib._bootstrap>:1398: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/_pytest/assertion/rewrite.py:169: in exec_module
+    source_stat, co = _rewrite_test(fn, self.config)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/_pytest/assertion/rewrite.py:351: in _rewrite_test
+    tree = ast.parse(source, filename=strfn)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/ast.py:46: in parse
+    return compile(source, filename, mode, flags,
+E     File "/Users/galindoasc/keikichi_logistics_web/backend/tests/test_system_flows.py", line 213
+E       )
+E        ^
+E   IndentationError: unindent does not match any outer indentation level
+=============================== warnings summary ===============================
+app/schemas/auth.py:45
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/auth.py:45: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserOut(BaseModel):
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:211: 273 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:211: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+app/schemas/user.py:9
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:9: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserBase(BaseModel):
+
+app/schemas/user.py:31
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(UserBase):
+
+app/schemas/user.py:77
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:77: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('email', 'phone')
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi_mail/schemas.py:91
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi_mail/schemas.py:91: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+app/schemas/trip.py:70
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/trip.py:70: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class TripOut(TripBase):
+
+app/schemas/space.py:10
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/space.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class SpaceBase(BaseModel):
+
+app/schemas/reservation.py:27
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:27: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class HoldSpacesResponse(BaseModel):
+
+app/schemas/reservation.py:64
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:64: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class LoadItemResponse(LoadItemCreate):
+
+app/schemas/reservation.py:152
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:152: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationSpaceDetail(BaseModel):
+
+app/schemas/reservation.py:162
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:162: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationTripDetail(BaseModel):
+
+app/schemas/reservation.py:178
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:178: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationResponse(BaseModel):
+
+app/schemas/reservation.py:243
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:243: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationListItem(BaseModel):
+
+app/schemas/label_price.py:18
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/label_price.py:18: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class LabelPriceOut(LabelPriceBase):
+
+app/api/v1/system_config.py:28
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/system_config.py:28: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class SystemConfigResponse(SystemConfigBase):
+
+app/schemas/client_document.py:24
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/client_document.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ClientDocumentOut(ClientDocumentBase):
+
+app/schemas/catalog.py:17
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/catalog.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Product(ProductBase):
+
+app/schemas/catalog.py:35
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/catalog.py:35: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Unit(UnitBase):
+
+app/schemas/notification.py:25
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/notification.py:25: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class NotificationResponse(NotificationBase):
+
+app/schemas/fleet.py:22
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/fleet.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class FleetDriverOut(FleetDriverBase):
+
+app/schemas/fleet.py:49
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/fleet.py:49: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class FleetVehicleOut(FleetVehicleBase):
+
+app/main.py:42
+  /Users/galindoasc/keikichi_logistics_web/backend/app/main.py:42: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+app/main.py:82
+  /Users/galindoasc/keikichi_logistics_web/backend/app/main.py:82: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/test_system_flows.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+======================== 298 warnings, 1 error in 0.07s ========================

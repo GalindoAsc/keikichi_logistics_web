@@ -1,21 +1,22 @@
 from datetime import datetime
 from typing import List, Optional
+from uuid import UUID
 from pydantic import BaseModel
 
 from app.models.space import SpaceStatus
 
 
 class SpaceBase(BaseModel):
-    id: str
+    id: UUID
     space_number: int
     status: SpaceStatus
     price: Optional[float] = None
     hold_expires_at: Optional[datetime] = None
-    held_by: Optional[str] = None
+    held_by: Optional[UUID] = None
     is_mine: Optional[bool] = None
+    has_pending_reservation: Optional[bool] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class SpaceSummary(BaseModel):

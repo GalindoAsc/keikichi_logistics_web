@@ -1,0 +1,1210 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.0, pytest-8.0.2, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/galindoasc/keikichi_logistics_web/backend
+plugins: asyncio-0.23.8, anyio-4.12.0
+asyncio: mode=Mode.STRICT
+collecting ... collected 18 items
+
+tests/test_system_flows.py::TestSystemFlows::test_1_health_check PASSED  [  5%]
+tests/test_system_flows.py::TestSystemFlows::test_2_register_client FAILED [ 11%]
+tests/test_system_flows.py::TestSystemFlows::test_3_login_client FAILED  [ 16%]
+tests/test_system_flows.py::TestSystemFlows::test_4_get_me FAILED        [ 22%]
+tests/test_system_flows.py::TestSystemFlows::test_5_update_profile FAILED [ 27%]
+tests/test_system_flows.py::TestSystemFlows::test_6_create_trip FAILED   [ 33%]
+tests/test_system_flows.py::TestSystemFlows::test_7_list_trips FAILED    [ 38%]
+tests/test_system_flows.py::TestSystemFlows::test_8_get_trip_detail FAILED [ 44%]
+tests/test_system_flows.py::TestSystemFlows::test_9_update_trip_status FAILED [ 50%]
+tests/test_system_flows.py::TestSystemFlows::test_10_bulk_delete_trips_logic_check FAILED [ 55%]
+tests/test_system_flows.py::TestSystemFlows::test_11_create_reservation FAILED [ 61%]
+tests/test_system_flows.py::TestSystemFlows::test_12_cancel_reservation FAILED [ 66%]
+tests/test_system_flows.py::TestSystemFlows::test_13_admin_list_reservations FAILED [ 72%]
+tests/test_system_flows.py::TestSystemFlows::test_14_delete_reservation FAILED [ 77%]
+tests/test_system_flows.py::TestSystemFlows::test_15_get_system_config FAILED [ 83%]
+tests/test_system_flows.py::TestSystemFlows::test_16_update_exchange_rate FAILED [ 88%]
+tests/test_system_flows.py::TestSystemFlows::test_17_upload_document FAILED [ 94%]
+tests/test_system_flows.py::TestSystemFlows::test_18_list_my_documents PASSED [100%]
+
+=================================== FAILURES ===================================
+____________________ TestSystemFlows.test_2_register_client ____________________
+
+dsn = None
+
+    async def connect(dsn=None, *,
+                      host=None, port=None,
+                      user=None, password=None, passfile=None,
+                      service=None,
+                      servicefile=None,
+                      database=None,
+                      loop=None,
+                      timeout=60,
+                      statement_cache_size=100,
+                      max_cached_statement_lifetime=300,
+                      max_cacheable_statement_size=1024 * 15,
+                      command_timeout=None,
+                      ssl=None,
+                      direct_tls=None,
+                      connection_class=Connection,
+                      record_class=protocol.Record,
+                      server_settings=None,
+                      target_session_attrs=None,
+                      krbsrvname=None,
+                      gsslib=None):
+        r"""A coroutine to establish a connection to a PostgreSQL server.
+    
+        The connection parameters may be specified either as a connection
+        URI in *dsn*, or as specific keyword arguments, or both.
+        If both *dsn* and keyword arguments are specified, the latter
+        override the corresponding values parsed from the connection URI.
+        The default values for the majority of arguments can be specified
+        using `environment variables <postgres envvars_>`_.
+    
+        Returns a new :class:`~asyncpg.connection.Connection` object.
+    
+        :param dsn:
+            Connection arguments specified using as a single string in the
+            `libpq connection URI format`_:
+            ``postgres://user:password@host:port/database?option=value``.
+            The following options are recognized by asyncpg: ``host``,
+            ``port``, ``user``, ``database`` (or ``dbname``), ``password``,
+            ``passfile``, ``sslmode``, ``sslcert``, ``sslkey``, ``sslrootcert``,
+            and ``sslcrl``.  Unlike libpq, asyncpg will treat unrecognized
+            options as `server settings`_ to be used for the connection.
+    
+            .. note::
+    
+               The URI must be *valid*, which means that all components must
+               be properly quoted with :py:func:`urllib.parse.quote_plus`, and
+               any literal IPv6 addresses must be enclosed in square brackets.
+               For example:
+    
+               .. code-block:: text
+    
+                  postgres://dbuser@[fe80::1ff:fe23:4567:890a%25eth0]/dbname
+    
+        :param host:
+            Database host address as one of the following:
+    
+            - an IP address or a domain name;
+            - an absolute path to the directory containing the database
+              server Unix-domain socket (not supported on Windows);
+            - a sequence of any of the above, in which case the addresses
+              will be tried in order, and the first successful connection
+              will be returned.
+    
+            If not specified, asyncpg will try the following, in order:
+    
+            - host address(es) parsed from the *dsn* argument,
+            - the value of the ``PGHOST`` environment variable,
+            - on Unix, common directories used for PostgreSQL Unix-domain
+              sockets: ``"/run/postgresql"``, ``"/var/run/postgresl"``,
+              ``"/var/pgsql_socket"``, ``"/private/tmp"``, and ``"/tmp"``,
+            - ``"localhost"``.
+    
+        :param port:
+            Port number to connect to at the server host
+            (or Unix-domain socket file extension).  If multiple host
+            addresses were specified, this parameter may specify a
+            sequence of port numbers of the same length as the host sequence,
+            or it may specify a single port number to be used for all host
+            addresses.
+    
+            If not specified, the value parsed from the *dsn* argument is used,
+            or the value of the ``PGPORT`` environment variable, or ``5432`` if
+            neither is specified.
+    
+        :param user:
+            The name of the database role used for authentication.
+    
+            If not specified, the value parsed from the *dsn* argument is used,
+            or the value of the ``PGUSER`` environment variable, or the
+            operating system name of the user running the application.
+    
+        :param database:
+            The name of the database to connect to.
+    
+            If not specified, the value parsed from the *dsn* argument is used,
+            or the value of the ``PGDATABASE`` environment variable, or the
+            computed value of the *user* argument.
+    
+        :param password:
+            Password to be used for authentication, if the server requires
+            one.  If not specified, the value parsed from the *dsn* argument
+            is used, or the value of the ``PGPASSWORD`` environment variable.
+            Note that the use of the environment variable is discouraged as
+            other users and applications may be able to read it without needing
+            specific privileges.  It is recommended to use *passfile* instead.
+    
+            Password may be either a string, or a callable that returns a string.
+            If a callable is provided, it will be called each time a new connection
+            is established.
+    
+        :param passfile:
+            The name of the file used to store passwords
+            (defaults to ``~/.pgpass``, or ``%APPDATA%\postgresql\pgpass.conf``
+            on Windows).
+    
+        :param service:
+            The name of the postgres connection service stored in the postgres
+            connection service file.
+    
+        :param servicefile:
+            The location of the connnection service file used to store
+            connection parameters.
+    
+        :param loop:
+            An asyncio event loop instance.  If ``None``, the default
+            event loop will be used.
+    
+        :param float timeout:
+            Connection timeout in seconds.
+    
+        :param int statement_cache_size:
+            The size of prepared statement LRU cache.  Pass ``0`` to
+            disable the cache.
+    
+        :param int max_cached_statement_lifetime:
+            The maximum time in seconds a prepared statement will stay
+            in the cache.  Pass ``0`` to allow statements be cached
+            indefinitely.
+    
+        :param int max_cacheable_statement_size:
+            The maximum size of a statement that can be cached (15KiB by
+            default).  Pass ``0`` to allow all statements to be cached
+            regardless of their size.
+    
+        :param float command_timeout:
+            The default timeout for operations on this connection
+            (the default is ``None``: no timeout).
+    
+        :param ssl:
+            Pass ``True`` or an `ssl.SSLContext <SSLContext_>`_ instance to
+            require an SSL connection.  If ``True``, a default SSL context
+            returned by `ssl.create_default_context() <create_default_context_>`_
+            will be used.  The value can also be one of the following strings:
+    
+            - ``'disable'`` - SSL is disabled (equivalent to ``False``)
+            - ``'prefer'`` - try SSL first, fallback to non-SSL connection
+              if SSL connection fails
+            - ``'allow'`` - try without SSL first, then retry with SSL if the first
+              attempt fails.
+            - ``'require'`` - only try an SSL connection.  Certificate
+              verification errors are ignored
+            - ``'verify-ca'`` - only try an SSL connection, and verify
+              that the server certificate is issued by a trusted certificate
+              authority (CA)
+            - ``'verify-full'`` - only try an SSL connection, verify
+              that the server certificate is issued by a trusted CA and
+              that the requested server host name matches that in the
+              certificate.
+    
+            The default is ``'prefer'``: try an SSL connection and fallback to
+            non-SSL connection if that fails.
+    
+            .. note::
+    
+               *ssl* is ignored for Unix domain socket communication.
+    
+            Example of programmatic SSL context configuration that is equivalent
+            to ``sslmode=verify-full&sslcert=..&sslkey=..&sslrootcert=..``:
+    
+            .. code-block:: pycon
+    
+                >>> import asyncpg
+                >>> import asyncio
+                >>> import ssl
+                >>> async def main():
+                ...     # Load CA bundle for server certificate verification,
+                ...     # equivalent to sslrootcert= in DSN.
+                ...     sslctx = ssl.create_default_context(
+                ...         ssl.Purpose.SERVER_AUTH,
+                ...         cafile="path/to/ca_bundle.pem")
+                ...     # If True, equivalent to sslmode=verify-full, if False:
+                ...     # sslmode=verify-ca.
+                ...     sslctx.check_hostname = True
+                ...     # Load client certificate and private key for client
+                ...     # authentication, equivalent to sslcert= and sslkey= in
+                ...     # DSN.
+                ...     sslctx.load_cert_chain(
+                ...         "path/to/client.cert",
+                ...         keyfile="path/to/client.key",
+                ...     )
+                ...     con = await asyncpg.connect(user='postgres', ssl=sslctx)
+                ...     await con.close()
+                >>> asyncio.run(main())
+    
+            Example of programmatic SSL context configuration that is equivalent
+            to ``sslmode=require`` (no server certificate or host verification):
+    
+            .. code-block:: pycon
+    
+                >>> import asyncpg
+                >>> import asyncio
+                >>> import ssl
+                >>> async def main():
+                ...     sslctx = ssl.create_default_context(
+                ...         ssl.Purpose.SERVER_AUTH)
+                ...     sslctx.check_hostname = False
+                ...     sslctx.verify_mode = ssl.CERT_NONE
+                ...     con = await asyncpg.connect(user='postgres', ssl=sslctx)
+                ...     await con.close()
+                >>> asyncio.run(main())
+    
+        :param bool direct_tls:
+            Pass ``True`` to skip PostgreSQL STARTTLS mode and perform a direct
+            SSL connection. Must be used alongside ``ssl`` param.
+    
+        :param dict server_settings:
+            An optional dict of server runtime parameters.  Refer to
+            PostgreSQL documentation for
+            a `list of supported options <server settings_>`_.
+    
+        :param type connection_class:
+            Class of the returned connection object.  Must be a subclass of
+            :class:`~asyncpg.connection.Connection`.
+    
+        :param type record_class:
+            If specified, the class to use for records returned by queries on
+            this connection object.  Must be a subclass of
+            :class:`~asyncpg.Record`.
+    
+        :param SessionAttribute target_session_attrs:
+            If specified, check that the host has the correct attribute.
+            Can be one of:
+    
+            - ``"any"`` - the first successfully connected host
+            - ``"primary"`` - the host must NOT be in hot standby mode
+            - ``"standby"`` - the host must be in hot standby mode
+            - ``"read-write"`` - the host must allow writes
+            - ``"read-only"`` - the host most NOT allow writes
+            - ``"prefer-standby"`` - first try to find a standby host, but if
+              none of the listed hosts is a standby server,
+              return any of them.
+    
+            If not specified, the value parsed from the *dsn* argument is used,
+            or the value of the ``PGTARGETSESSIONATTRS`` environment variable,
+            or ``"any"`` if neither is specified.
+    
+        :param str krbsrvname:
+            Kerberos service name to use when authenticating with GSSAPI. This
+            must match the server configuration. Defaults to 'postgres'.
+    
+        :param str gsslib:
+            GSS library to use for GSSAPI/SSPI authentication. Can be 'gssapi'
+            or 'sspi'. Defaults to 'sspi' on Windows and 'gssapi' otherwise.
+    
+        :return: A :class:`~asyncpg.connection.Connection` instance.
+    
+        Example:
+    
+        .. code-block:: pycon
+    
+            >>> import asyncpg
+            >>> import asyncio
+            >>> async def run():
+            ...     con = await asyncpg.connect(user='postgres')
+            ...     types = await con.fetch('SELECT * FROM pg_type')
+            ...     print(types)
+            ...
+            >>> asyncio.run(run())
+            [<Record typname='bool' typnamespace=11 ...
+    
+        .. versionadded:: 0.10.0
+           Added ``max_cached_statement_use_count`` parameter.
+    
+        .. versionchanged:: 0.11.0
+           Removed ability to pass arbitrary keyword arguments to set
+           server settings.  Added a dedicated parameter ``server_settings``
+           for that.
+    
+        .. versionadded:: 0.11.0
+           Added ``connection_class`` parameter.
+    
+        .. versionadded:: 0.16.0
+           Added ``passfile`` parameter
+           (and support for password files in general).
+    
+        .. versionadded:: 0.18.0
+           Added ability to specify multiple hosts in the *dsn*
+           and *host* arguments.
+    
+        .. versionchanged:: 0.21.0
+           The *password* argument now accepts a callable or an async function.
+    
+        .. versionchanged:: 0.22.0
+           Added the *record_class* parameter.
+    
+        .. versionchanged:: 0.22.0
+           The *ssl* argument now defaults to ``'prefer'``.
+    
+        .. versionchanged:: 0.24.0
+           The ``sslcert``, ``sslkey``, ``sslrootcert``, and ``sslcrl`` options
+           are supported in the *dsn* argument.
+    
+        .. versionchanged:: 0.25.0
+           The ``sslpassword``, ``ssl_min_protocol_version``,
+           and ``ssl_max_protocol_version`` options are supported in the *dsn*
+           argument.
+    
+        .. versionchanged:: 0.25.0
+           Default system root CA certificates won't be loaded when specifying a
+           particular sslmode, following the same behavior in libpq.
+    
+        .. versionchanged:: 0.25.0
+           The ``sslcert``, ``sslkey``, ``sslrootcert``, and ``sslcrl`` options
+           in the *dsn* argument now have consistent default values of files under
+           ``~/.postgresql/`` as libpq.
+    
+        .. versionchanged:: 0.26.0
+           Added the *direct_tls* parameter.
+    
+        .. versionchanged:: 0.28.0
+           Added the *target_session_attrs* parameter.
+    
+        .. versionchanged:: 0.30.0
+           Added the *krbsrvname* and *gsslib* parameters.
+    
+        .. versionchanged:: 0.31.0
+           Added the *servicefile* and *service* parameters.
+    
+        .. _SSLContext: https://docs.python.org/3/library/ssl.html#ssl.SSLContext
+        .. _create_default_context:
+            https://docs.python.org/3/library/ssl.html#ssl.create_default_context
+        .. _server settings:
+            https://www.postgresql.org/docs/current/static/runtime-config.html
+        .. _postgres envvars:
+            https://www.postgresql.org/docs/current/static/libpq-envars.html
+        .. _libpq connection URI format:
+            https://www.postgresql.org/docs/current/static/
+            libpq-connect.html#LIBPQ-CONNSTRING
+        """
+        if not issubclass(connection_class, Connection):
+            raise exceptions.InterfaceError(
+                'connection_class is expected to be a subclass of '
+                'asyncpg.Connection, got {!r}'.format(connection_class))
+    
+        if record_class is not protocol.Record:
+            _check_record_class(record_class)
+    
+        if loop is None:
+            loop = asyncio.get_event_loop()
+    
+        async with compat.timeout(timeout):
+>           return await connect_utils._connect(
+                loop=loop,
+                connection_class=connection_class,
+                record_class=record_class,
+                dsn=dsn,
+                host=host,
+                port=port,
+                user=user,
+                password=password,
+                passfile=passfile,
+                service=service,
+                servicefile=servicefile,
+                ssl=ssl,
+                direct_tls=direct_tls,
+                database=database,
+                server_settings=server_settings,
+                command_timeout=command_timeout,
+                statement_cache_size=statement_cache_size,
+                max_cached_statement_lifetime=max_cached_statement_lifetime,
+                max_cacheable_statement_size=max_cacheable_statement_size,
+                target_session_attrs=target_session_attrs,
+                krbsrvname=krbsrvname,
+                gsslib=gsslib,
+            )
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/asyncpg/connection.py:2443: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/asyncpg/connect_utils.py:1218: in _connect
+    conn = await _connect_addr(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/asyncpg/connect_utils.py:1054: in _connect_addr
+    return await __connect_addr(params, True, *args)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/asyncpg/connect_utils.py:1099: in __connect_addr
+    tr, pr = await connector
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/asyncpg/connect_utils.py:969: in _create_ssl_connection
+    tr, pr = await loop.create_connection(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py:1143: in create_connection
+    sock = await self._connect_sock(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py:1042: in _connect_sock
+    await self.sock_connect(sock, address)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_UnixSelectorEventLoop running=False closed=False debug=False>
+sock = <socket.socket [closed] fd=-1, family=2, type=1, proto=6>
+address = ('192.168.117.2', 5432)
+
+    async def sock_connect(self, sock, address):
+        """Connect to a remote socket at address.
+    
+        This method is a coroutine.
+        """
+        base_events._check_ssl_socket(sock)
+        if self._debug and sock.gettimeout() != 0:
+            raise ValueError("the socket must be non-blocking")
+    
+        if sock.family == socket.AF_INET or (
+                base_events._HAS_IPv6 and sock.family == socket.AF_INET6):
+            resolved = await self._ensure_resolved(
+                address, family=sock.family, type=sock.type, proto=sock.proto,
+                loop=self,
+            )
+            _, _, _, _, address = resolved[0]
+    
+        fut = self.create_future()
+        self._sock_connect(fut, sock, address)
+        try:
+>           return await fut
+E           asyncio.exceptions.CancelledError
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/selector_events.py:645: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+self = <test_system_flows.TestSystemFlows object at 0x11050b110>
+client = <httpx.AsyncClient object at 0x11050ae90>
+
+    async def test_2_register_client(self, client: AsyncClient):
+        import time
+        unique_str = str(int(time.time()))
+        email = f"new_client_{unique_str}@example.com"
+    
+>       response = await client.post("/api/v1/auth/register", json={
+            "email": email,
+            "password": "password123",
+            "full_name": "Test Client",
+            "phone": "1234567890"
+        })
+
+tests/test_system_flows.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_client.py:1877: in post
+    return await self.request(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_client.py:1559: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_client.py:1646: in send
+    response = await self._send_handling_auth(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_client.py:1674: in _send_handling_auth
+    response = await self._send_handling_redirects(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_client.py:1711: in _send_handling_redirects
+    response = await self._send_single_request(request)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_client.py:1748: in _send_single_request
+    response = await transport.handle_async_request(request)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_transports/asgi.py:162: in handle_async_request
+    await self.app(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/applications.py:123: in __call__
+    await self.middleware_stack(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/middleware/cors.py:83: in __call__
+    await self.app(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/middleware/exceptions.py:62: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/_exception_handler.py:64: in wrapped_app
+    raise exc
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/routing.py:758: in __call__
+    await self.middleware_stack(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/routing.py:778: in app
+    await route.handle(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/routing.py:299: in handle
+    await self.app(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/routing.py:79: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/_exception_handler.py:64: in wrapped_app
+    raise exc
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/routing.py:74: in app
+    response = await func(request)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:299: in app
+    raise e
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:294: in app
+    raw_response = await run_endpoint_function(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:191: in run_endpoint_function
+    return await dependant.call(**values)
+app/api/v1/auth.py:19: in register
+    user = await service.create_user(
+app/services/user_service.py:31: in create_user
+    if email and await self.get_user_by_email(email):
+app/services/user_service.py:17: in get_user_by_email
+    result = await self.db.execute(select(User).where(User.email == email))
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/ext/asyncio/session.py:449: in execute
+    result = await greenlet_spawn(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/orm/session.py:2239: in _execute_internal
+    conn = self._connection_for_bind(bind)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/orm/session.py:2108: in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+<string>:2: in _connection_for_bind
+    ???
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/orm/session.py:1187: in _connection_for_bind
+    conn = bind.connect()
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3277: in connect
+    return self._connection_cls(self)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/engine/base.py:143: in __init__
+    self._dbapi_connection = engine.raw_connection()
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3301: in raw_connection
+    return self.pool.connect()
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:447: in connect
+    return _ConnectionFairy._checkout(self)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:1264: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:711: in checkout
+    rec = pool._do_get()
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/impl.py:177: in _do_get
+    with util.safe_reraise():
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/impl.py:175: in _do_get
+    return self._create_connection()
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:388: in _create_connection
+    return _ConnectionRecord(self)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:673: in __init__
+    self.__connect()
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:899: in __connect
+    with util.safe_reraise():
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/pool/base.py:895: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/engine/create.py:661: in connect
+    return dialect.connect(*cargs, **cparams)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/engine/default.py:629: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:955: in connect
+    await_only(creator_fn(*arg, **kw)),
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/asyncpg/connection.py:2442: in connect
+    async with compat.timeout(timeout):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x1107bd240>
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is not None:
+                # Since there are no new cancel requests, we're
+                # handling this.
+                if issubclass(exc_type, exceptions.CancelledError):
+>                   raise TimeoutError from exc_val
+E                   TimeoutError
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/timeouts.py:114: TimeoutError
+_____________________ TestSystemFlows.test_3_login_client ______________________
+
+self = <test_system_flows.TestSystemFlows object at 0x1105362c0>
+client = <httpx.AsyncClient object at 0x11050ac10>
+
+    async def test_3_login_client(self, client: AsyncClient):
+        # Relies on test_2 or we create fresh.
+        # Better to be self-contained or use fixtures.
+        # We will use the 'user_token' fixture for other tests,
+        # here we test the endpoint failure case.
+        response = await client.post("/api/v1/auth/login", data={
+            "username": "nonexistent@example.com",
+            "password": "wrongpassword"
+        })
+>       assert response.status_code in [401, 404]
+E       assert 422 in [401, 404]
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_system_flows.py:40: AssertionError
+________________________ TestSystemFlows.test_4_get_me _________________________
+
+self = <test_system_flows.TestSystemFlows object at 0x110536520>
+client = <httpx.AsyncClient object at 0x1107cc9d0>, user_token = None
+
+    async def test_4_get_me(self, client: AsyncClient, user_token):
+>       assert user_token is not None
+E       assert None is not None
+
+tests/test_system_flows.py:43: AssertionError
+____________________ TestSystemFlows.test_5_update_profile _____________________
+
+self = <test_system_flows.TestSystemFlows object at 0x110526690>
+client = <httpx.AsyncClient object at 0x1107ce8b0>, user_token = None
+
+    async def test_5_update_profile(self, client: AsyncClient, user_token):
+        new_phone = "9876543210"
+        response = await client.put("/api/v1/users/me",
+            headers={"Authorization": f"Bearer {user_token}"},
+            json={"phone": new_phone}
+        )
+>       assert response.status_code == 200
+E       assert 405 == 200
+E        +  where 405 = <Response [405 Method Not Allowed]>.status_code
+
+tests/test_system_flows.py:56: AssertionError
+______________________ TestSystemFlows.test_6_create_trip ______________________
+
+self = <test_system_flows.TestSystemFlows object at 0x11054de10>
+client = <httpx.AsyncClient object at 0x110831250>, admin_token = None
+
+    async def test_6_create_trip(self, client: AsyncClient, admin_token):
+        trip_data = {
+            "origin": "Test City A",
+            "destination": "Test City B",
+            "departure_date": "2025-12-25T10:00:00",
+            "arrival_date": "2025-12-26T10:00:00",
+            "price_per_space": 1000.0,
+            "currency": "MXN",
+            "total_spaces": 10,
+            "is_international": False
+        }
+        response = await client.post("/api/v1/trips",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json=trip_data
+        )
+>       assert response.status_code == 201
+E       assert 307 == 201
+E        +  where 307 = <Response [307 Temporary Redirect]>.status_code
+
+tests/test_system_flows.py:76: AssertionError
+______________________ TestSystemFlows.test_7_list_trips _______________________
+
+self = <test_system_flows.TestSystemFlows object at 0x11054df20>
+client = <httpx.AsyncClient object at 0x110860af0>, admin_token = None
+
+    async def test_7_list_trips(self, client: AsyncClient, admin_token):
+        response = await client.get("/api/v1/trips",
+            headers={"Authorization": f"Bearer {admin_token}"}
+        )
+>       assert response.status_code == 200
+E       assert 307 == 200
+E        +  where 307 = <Response [307 Temporary Redirect]>.status_code
+
+tests/test_system_flows.py:86: AssertionError
+____________________ TestSystemFlows.test_8_get_trip_detail ____________________
+
+self = <test_system_flows.TestSystemFlows object at 0x1104ff850>
+client = <httpx.AsyncClient object at 0x1108618c0>, admin_token = None
+
+    async def test_8_get_trip_detail(self, client: AsyncClient, admin_token):
+        # We need a trip ID. We can create one or rely on fixture.
+        # Implementing a quick helper inside the test class might be messy.
+        # Ideally, we'd use a fixture, but let's create one inline for clarity/isolation.
+        response = await client.post("/api/v1/trips",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json={
+                "origin": "Detail Test",
+                "destination": "City",
+                "departure_date": "2025-01-01T12:00:00",
+                "price_per_space": 500,
+                "currency": "USD"
+            }
+        )
+>       trip_id = response.json()["id"]
+
+tests/test_system_flows.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_models.py:762: in json
+    return jsonlib.loads(self.content, **kwargs)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x105e33cb0>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+__________________ TestSystemFlows.test_9_update_trip_status ___________________
+
+self = <test_system_flows.TestSystemFlows object at 0x1104ff950>
+client = <httpx.AsyncClient object at 0x110820e50>, admin_token = None
+
+    async def test_9_update_trip_status(self, client: AsyncClient, admin_token):
+        # Create
+        res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Status Test", "destination": "City", "departure_date": "2025-01-01T00:00:00", "price_per_space": 500
+        })
+>       trip_id = res.json()["id"]
+
+tests/test_system_flows.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_models.py:762: in json
+    return jsonlib.loads(self.content, **kwargs)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x105e33cb0>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+____________ TestSystemFlows.test_10_bulk_delete_trips_logic_check _____________
+
+self = <test_system_flows.TestSystemFlows object at 0x11067d8b0>
+client = <httpx.AsyncClient object at 0x110821b50>, admin_token = None
+
+    async def test_10_bulk_delete_trips_logic_check(self, client: AsyncClient, admin_token):
+        # Create 3 trips
+        ids = []
+        for i in range(3):
+            res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+                "origin": f"Bulk {i}", "destination": "Dest", "departure_date": "2025-01-01T00:00:00", "price_per_space": 100
+            })
+>           ids.append(res.json()["id"])
+
+tests/test_system_flows.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_models.py:762: in json
+    return jsonlib.loads(self.content, **kwargs)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x105e33cb0>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+__________________ TestSystemFlows.test_11_create_reservation __________________
+
+self = <test_system_flows.TestSystemFlows object at 0x11067d7c0>
+client = <httpx.AsyncClient object at 0x110845f40>, user_token = None
+admin_token = None
+
+    async def test_11_create_reservation(self, client: AsyncClient, user_token, admin_token):
+        # Need a trip first
+        trip_res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Res Test", "destination": "City", "departure_date": "2025-01-01T00:00:00", "price_per_space": 100, "total_spaces": 10
+        })
+>       trip_id = trip_res.json()["id"]
+
+tests/test_system_flows.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_models.py:762: in json
+    return jsonlib.loads(self.content, **kwargs)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x105e33cb0>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+__________________ TestSystemFlows.test_12_cancel_reservation __________________
+
+self = <test_system_flows.TestSystemFlows object at 0x1106e8670>
+client = <httpx.AsyncClient object at 0x110850320>, user_token = None
+admin_token = None
+
+    async def test_12_cancel_reservation(self, client: AsyncClient, user_token, admin_token):
+        # Setup trip and reservation
+        trip_res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Res Cancel", "destination": "City", "departure_date": "2025-01-01T00:00:00", "price_per_space": 100, "total_spaces": 10
+        })
+>       trip_id = trip_res.json()["id"]
+
+tests/test_system_flows.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_models.py:762: in json
+    return jsonlib.loads(self.content, **kwargs)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x105e33cb0>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+_______________ TestSystemFlows.test_13_admin_list_reservations ________________
+
+self = <test_system_flows.TestSystemFlows object at 0x1106e8bb0>
+client = <httpx.AsyncClient object at 0x1108358d0>, admin_token = None
+
+    async def test_13_admin_list_reservations(self, client: AsyncClient, admin_token):
+        response = await client.get("/api/v1/reservations", headers={"Authorization": f"Bearer {admin_token}"})
+>       assert response.status_code == 200
+E       assert 307 == 200
+E        +  where 307 = <Response [307 Temporary Redirect]>.status_code
+
+tests/test_system_flows.py:180: AssertionError
+__________________ TestSystemFlows.test_14_delete_reservation __________________
+
+self = <test_system_flows.TestSystemFlows object at 0x10ad99640>
+client = <httpx.AsyncClient object at 0x1108365f0>, admin_token = None
+user_token = None
+
+    async def test_14_delete_reservation(self, client: AsyncClient, admin_token, user_token):
+         # Create
+        trip_res = await client.post("/api/v1/trips", headers={"Authorization": f"Bearer {admin_token}"}, json={
+            "origin": "Res Del", "destination": "City", "departure_date": "2025-01-01T00:00:00", "price_per_space": 100, "total_spaces": 10
+        })
+        res_res = await client.post("/api/v1/reservations", headers={"Authorization": f"Bearer {user_token}"}, json={
+>           "trip_id": trip_res.json()["id"], "spaces_count": 1
+        })
+
+tests/test_system_flows.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/httpx/_models.py:762: in json
+    return jsonlib.loads(self.content, **kwargs)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x105e33cb0>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+__________________ TestSystemFlows.test_15_get_system_config ___________________
+
+self = <test_system_flows.TestSystemFlows object at 0x110523710>
+client = <httpx.AsyncClient object at 0x112675a50>, admin_token = None
+
+    async def test_15_get_system_config(self, client: AsyncClient, admin_token):
+        response = await client.get("/api/v1/system-config", headers={"Authorization": f"Bearer {admin_token}"})
+>       assert response.status_code == 200
+E       assert 307 == 200
+E        +  where 307 = <Response [307 Temporary Redirect]>.status_code
+
+tests/test_system_flows.py:205: AssertionError
+_________________ TestSystemFlows.test_16_update_exchange_rate _________________
+
+self = <test_system_flows.TestSystemFlows object at 0x110523890>
+client = <httpx.AsyncClient object at 0x1114744d0>, admin_token = None
+
+    async def test_16_update_exchange_rate(self, client: AsyncClient, admin_token):
+        response = await client.post("/api/v1/system-config",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json={"key": "exchange_rate", "value": "20.50", "description": "Update Test"}
+        )
+>       assert response.status_code == 200
+E       assert 307 == 200
+E        +  where 307 = <Response [307 Temporary Redirect]>.status_code
+
+tests/test_system_flows.py:215: AssertionError
+___________________ TestSystemFlows.test_17_upload_document ____________________
+
+self = <test_system_flows.TestSystemFlows object at 0x11070a570>
+client = <httpx.AsyncClient object at 0x111474d10>, user_token = None
+
+    async def test_17_upload_document(self, client: AsyncClient, user_token):
+        # We need to simulate a file upload.
+        # This is complex in httpx without actual file IO, but we can pass bytes.
+        files = {'file': ('test.txt', b'test content', 'text/plain')}
+        response = await client.post("/api/v1/documents/upload",
+            headers={"Authorization": f"Bearer {user_token}"},
+            data={"doc_type": "otro"},
+            files=files
+        )
+        # Note: if it requires user_id in path or body, check router.
+        # usually /api/v1/documents/upload
+        if response.status_code != 200:
+             # Just asserting it didn't crash 500
+>            assert response.status_code in [200, 201, 400, 422]
+E            assert 401 in [200, 201, 400, 422]
+E             +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_system_flows.py:233: AssertionError
+=============================== warnings summary ===============================
+app/schemas/auth.py:45
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/auth.py:45: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserOut(BaseModel):
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:211: 273 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/routing.py:211: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+app/schemas/user.py:9
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:9: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserBase(BaseModel):
+
+app/schemas/user.py:31
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(UserBase):
+
+app/schemas/user.py:77
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/user.py:77: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('email', 'phone')
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi_mail/schemas.py:91
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi_mail/schemas.py:91: PydanticDeprecatedSince212: Using `@model_validator` with mode='after' on a classmethod is deprecated. Instead, use an instance method. See the documentation at https://docs.pydantic.dev/2.12/concepts/validators/#model-after-validator. Deprecated in Pydantic V2.12 to be removed in V3.0.
+    @model_validator(mode="after")
+
+app/schemas/trip.py:70
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/trip.py:70: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class TripOut(TripBase):
+
+app/schemas/space.py:10
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/space.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class SpaceBase(BaseModel):
+
+app/schemas/reservation.py:27
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:27: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class HoldSpacesResponse(BaseModel):
+
+app/schemas/reservation.py:64
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:64: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class LoadItemResponse(LoadItemCreate):
+
+app/schemas/reservation.py:152
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:152: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationSpaceDetail(BaseModel):
+
+app/schemas/reservation.py:162
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:162: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationTripDetail(BaseModel):
+
+app/schemas/reservation.py:178
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:178: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationResponse(BaseModel):
+
+app/schemas/reservation.py:243
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/reservation.py:243: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ReservationListItem(BaseModel):
+
+app/schemas/label_price.py:18
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/label_price.py:18: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class LabelPriceOut(LabelPriceBase):
+
+app/api/v1/system_config.py:28
+  /Users/galindoasc/keikichi_logistics_web/backend/app/api/v1/system_config.py:28: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class SystemConfigResponse(SystemConfigBase):
+
+app/schemas/client_document.py:24
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/client_document.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ClientDocumentOut(ClientDocumentBase):
+
+app/schemas/catalog.py:17
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/catalog.py:17: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Product(ProductBase):
+
+app/schemas/catalog.py:35
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/catalog.py:35: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Unit(UnitBase):
+
+app/schemas/notification.py:25
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/notification.py:25: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class NotificationResponse(NotificationBase):
+
+app/schemas/fleet.py:22
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/fleet.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class FleetDriverOut(FleetDriverBase):
+
+app/schemas/fleet.py:49
+  /Users/galindoasc/keikichi_logistics_web/backend/app/schemas/fleet.py:49: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class FleetVehicleOut(FleetVehicleBase):
+
+app/main.py:42
+  /Users/galindoasc/keikichi_logistics_web/backend/app/main.py:42: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/fastapi/applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+app/main.py:82
+  /Users/galindoasc/keikichi_logistics_web/backend/app/main.py:82: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:169: 598 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:169: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or inspect.isasyncgenfunction(obj)
+
+../../../../Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:433: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:433: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(func)
+
+tests/test_system_flows.py::TestSystemFlows::test_1_health_check
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:1005: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:751: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    _restore_event_loop_policy(asyncio.get_event_loop_policy()),
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:977: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(new_loop_policy)
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:978: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:766: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py: 32 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/starlette/_utils.py:42: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:811: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:835: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(previous_policy)
+
+tests/test_system_flows.py: 18 warnings
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:847: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_system_flows.py::TestSystemFlows::test_2_register_client - ...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_3_login_client - ass...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_4_get_me - assert No...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_5_update_profile - a...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_6_create_trip - asse...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_7_list_trips - asser...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_8_get_trip_detail - ...
+FAILED tests/test_system_flows.py::TestSystemFlows::test_9_update_trip_status
+FAILED tests/test_system_flows.py::TestSystemFlows::test_10_bulk_delete_trips_logic_check
+FAILED tests/test_system_flows.py::TestSystemFlows::test_11_create_reservation
+FAILED tests/test_system_flows.py::TestSystemFlows::test_12_cancel_reservation
+FAILED tests/test_system_flows.py::TestSystemFlows::test_13_admin_list_reservations
+FAILED tests/test_system_flows.py::TestSystemFlows::test_14_delete_reservation
+FAILED tests/test_system_flows.py::TestSystemFlows::test_15_get_system_config
+FAILED tests/test_system_flows.py::TestSystemFlows::test_16_update_exchange_rate
+FAILED tests/test_system_flows.py::TestSystemFlows::test_17_upload_document
+============ 16 failed, 2 passed, 1073 warnings in 60.42s (0:01:00) ============
+Task was destroyed but it is pending!
+task: <Task pending name='Task-6' coro=<<async_generator_athrow without __name__>()> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/tasks.py:991, Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-11' coro=<<async_generator_athrow without __name__>()> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/tasks.py:991, Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-72' coro=<<async_generator_athrow without __name__>()> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/tasks.py:991, Task.task_wakeup()]>>

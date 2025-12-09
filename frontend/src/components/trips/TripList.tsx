@@ -3,7 +3,7 @@ import { useTrips } from "../../hooks/useTrips";
 import LoadingSpinner from "../shared/LoadingSpinner";
 
 const TripList = () => {
-  const { data, isLoading } = useTrips();
+  const { data, isLoading } = useTrips(true);
 
   if (isLoading) {
     return (
@@ -18,7 +18,7 @@ const TripList = () => {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 p-1">
       {data.map((trip) => (
         <TripCard key={trip.id} trip={trip} />
       ))}

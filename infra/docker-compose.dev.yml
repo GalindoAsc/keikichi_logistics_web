@@ -21,7 +21,7 @@ services:
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-keikichi} -d ${POSTGRES_DB:-keikichi_logistics_dev}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-keikichi} -d ${POSTGRES_DB:-keikichi_logistics_dev}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
       - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-30}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-["http://localhost:3000","http://localhost:5173","http://localhost"]}
-      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL:-admin@keikichi.local}
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL:-admin@keikichi.com}
       - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD:-Admin123!ChangeMe}
       - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME:-Administrador Sistema}
       - UPLOAD_DIR=/app/uploads
@@ -55,14 +55,14 @@ services:
       - ALLOWED_FILE_TYPES=${ALLOWED_FILE_TYPES:-pdf,jpg,jpeg,png,xml}
     volumes:
       # Hot reload: montar código fuente
-      - ../backend/app:/app/app:rw
+      - ../backend:/app:rw
       # Volumen compartido para uploads
       - ../uploads:/app/uploads:rw
     depends_on:
       keikichi_db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
