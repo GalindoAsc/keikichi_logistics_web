@@ -1,28 +1,12 @@
 version: '3.8'
 
 # ============================================
-# KEIKICHI LOGISTICS - PORTAINER DEPLOYMENT
-# Para Synology DS 224+ con Cloudflare
+# KEIKICHI LOGISTICS - PORTAINER (Upload)
 # ============================================
 #
-# INSTRUCCIONES PARA PORTAINER:
-# 1. En Portainer, ve a Stacks → Add stack
-# 2. Nombre: keikichi
-# 3. Copia este archivo o súbelo
-# 4. Configura las variables de entorno (ver abajo)
-# 5. Deploy the stack
-#
-# VARIABLES DE ENTORNO REQUERIDAS EN PORTAINER:
-# - POSTGRES_DB=keikichi_db
-# - POSTGRES_USER=keikichi
-# - POSTGRES_PASSWORD=<tu_password_seguro>
-# - SECRET_KEY=<clave_secreta_64_caracteres>
-# - JWT_SECRET_KEY=<otra_clave_secreta_64_caracteres>
-# - DEFAULT_ADMIN_EMAIL=admin@keikichi.com
-# - DEFAULT_ADMIN_PASSWORD=Admin123!ChangeMe
-# - VITE_API_URL=https://keikichi.com/api/v1
-# - VITE_WS_URL=wss://keikichi.com/ws
-# - BACKEND_CORS_ORIGINS=https://keikichi.com,https://www.keikichi.com
+# ANTES DE DESPLEGAR, crear estos volúmenes en Portainer:
+# 1. keikichi_uploads -> /volume1/docker/keikichi/uploads
+# 2. keikichi_ssl -> /volume1/docker/keikichi/nginx/ssl
 # ============================================
 
 services:
@@ -69,7 +53,7 @@ services:
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-https://keikichi.com}
       - TZ=America/Mexico_City
     volumes:
-      - /volume1/docker/keikichi/uploads:/app/uploads
+      - keikichi_uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -81,12 +65,6 @@ services:
       start_period: 40s
     networks:
       - keikichi_network
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
 
   # ========== FRONTEND ==========
   frontend:
@@ -102,14 +80,8 @@ services:
       - backend
     networks:
       - keikichi_network
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
 
-  # ========== NGINX (Reverse Proxy + SSL) ==========
+  # ========== NGINX ==========
   nginx:
     image: nginx:alpine
     container_name: keikichi_nginx
@@ -119,24 +91,22 @@ services:
       - "443:443"
     volumes:
       - /volume1/docker/keikichi/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
-      - /volume1/docker/keikichi/nginx/ssl:/etc/nginx/ssl:ro
-      - /volume1/docker/keikichi/uploads:/app/uploads:ro
+      - keikichi_ssl:/etc/nginx/ssl:ro
+      - keikichi_uploads:/app/uploads:ro
     depends_on:
       - frontend
       - backend
     networks:
       - keikichi_network
-    deploy:
-      resources:
-        limits:
-          memory: 64M
-        reservations:
-          memory: 32M
 
 # ========== VOLUMES ==========
 volumes:
   keikichi_postgres_data:
     driver: local
+  keikichi_uploads:
+    external: true
+  keikichi_ssl:
+    external: true
 
 # ========== NETWORKS ==========
 networks:
