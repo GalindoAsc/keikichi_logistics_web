@@ -1,12 +1,19 @@
 version: '3.8'
 
 # ============================================
-# KEIKICHI LOGISTICS - PORTAINER (Upload)
+# KEIKICHI LOGISTICS - PORTAINER STACK
 # ============================================
 #
-# ANTES DE DESPLEGAR, crear estos volúmenes en Portainer:
-# 1. keikichi_uploads -> /volume1/docker/keikichi/uploads
-# 2. keikichi_ssl -> /volume1/docker/keikichi/nginx/ssl
+# ANTES DE DESPLEGAR, construir las imágenes por SSH:
+#
+# cd /volume1/docker/keikichi
+# docker build -t keikichi_backend:latest -f backend/Dockerfile.prod backend/
+# docker build -t keikichi_frontend:latest \
+#   --build-arg VITE_API_URL=https://keikichi.com/api/v1 \
+#   --build-arg VITE_WS_URL=wss://keikichi.com/ws \
+#   frontend/
+#
+# Luego subir este archivo como Stack en Portainer.
 # ============================================
 
 services:
@@ -33,9 +40,7 @@ services:
 
   # ========== BACKEND ==========
   backend:
-    build:
-      context: /volume1/docker/keikichi/backend
-      dockerfile: Dockerfile.prod
+    image: keikichi_backend:latest
     container_name: keikichi_backend
     restart: always
     environment:
@@ -68,12 +73,7 @@ services:
 
   # ========== FRONTEND ==========
   frontend:
-    build:
-      context: /volume1/docker/keikichi/frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_URL=${VITE_API_URL:-https://keikichi.com/api/v1}
-        - VITE_WS_URL=${VITE_WS_URL:-wss://keikichi.com/ws}
+    image: keikichi_frontend:latest
     container_name: keikichi_frontend
     restart: always
     depends_on:
@@ -90,7 +90,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /volume1/docker/keikichi/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - keikichi_nginx_conf:/etc/nginx/conf.d:ro
       - keikichi_ssl:/etc/nginx/ssl:ro
       - keikichi_uploads:/app/uploads:ro
     depends_on:
@@ -106,6 +106,8 @@ volumes:
   keikichi_uploads:
     external: true
   keikichi_ssl:
+    external: true
+  keikichi_nginx_conf:
     external: true
 
 # ========== NETWORKS ==========
