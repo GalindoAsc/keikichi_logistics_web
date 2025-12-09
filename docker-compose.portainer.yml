@@ -1,0 +1,144 @@
+version: '3.8'
+
+# ============================================
+# KEIKICHI LOGISTICS - PORTAINER DEPLOYMENT
+# Para Synology DS 224+ con Cloudflare
+# ============================================
+#
+# INSTRUCCIONES PARA PORTAINER:
+# 1. En Portainer, ve a Stacks → Add stack
+# 2. Nombre: keikichi
+# 3. Copia este archivo o súbelo
+# 4. Configura las variables de entorno (ver abajo)
+# 5. Deploy the stack
+#
+# VARIABLES DE ENTORNO REQUERIDAS EN PORTAINER:
+# - POSTGRES_DB=keikichi_db
+# - POSTGRES_USER=keikichi
+# - POSTGRES_PASSWORD=<tu_password_seguro>
+# - SECRET_KEY=<clave_secreta_64_caracteres>
+# - JWT_SECRET_KEY=<otra_clave_secreta_64_caracteres>
+# - DEFAULT_ADMIN_EMAIL=admin@keikichi.com
+# - DEFAULT_ADMIN_PASSWORD=Admin123!ChangeMe
+# - VITE_API_URL=https://keikichi.com/api/v1
+# - VITE_WS_URL=wss://keikichi.com/ws
+# - BACKEND_CORS_ORIGINS=https://keikichi.com,https://www.keikichi.com
+# ============================================
+
+services:
+  # ========== DATABASE ==========
+  db:
+    image: postgres:15-alpine
+    container_name: keikichi_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-keikichi_db}
+      POSTGRES_USER: ${POSTGRES_USER:-keikichi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: America/Mexico_City
+    volumes:
+      - keikichi_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-keikichi} -d ${POSTGRES_DB:-keikichi_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - keikichi_network
+
+  # ========== BACKEND ==========
+  backend:
+    build:
+      context: /volume1/docker/keikichi/backend
+      dockerfile: Dockerfile.prod
+    container_name: keikichi_backend
+    restart: always
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-keikichi}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-keikichi_db}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-30}
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL:-admin@keikichi.com}
+      - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD:-Admin123!ChangeMe}
+      - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME:-Administrador}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-https://keikichi.com}
+      - TZ=America/Mexico_City
+    volumes:
+      - /volume1/docker/keikichi/uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - keikichi_network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # ========== FRONTEND ==========
+  frontend:
+    build:
+      context: /volume1/docker/keikichi/frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-https://keikichi.com/api/v1}
+        - VITE_WS_URL=${VITE_WS_URL:-wss://keikichi.com/ws}
+    container_name: keikichi_frontend
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - keikichi_network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # ========== NGINX (Reverse Proxy + SSL) ==========
+  nginx:
+    image: nginx:alpine
+    container_name: keikichi_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /volume1/docker/keikichi/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - /volume1/docker/keikichi/nginx/ssl:/etc/nginx/ssl:ro
+      - /volume1/docker/keikichi/uploads:/app/uploads:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - keikichi_network
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+
+# ========== VOLUMES ==========
+volumes:
+  keikichi_postgres_data:
+    driver: local
+
+# ========== NETWORKS ==========
+networks:
+  keikichi_network:
+    driver: bridge
