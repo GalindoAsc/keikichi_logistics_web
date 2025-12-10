@@ -1,6 +1,7 @@
 #!/usr/bin/expect
 
 set timeout 60
+exp_internal 1
 set host [lindex $argv 0]
 set user [lindex $argv 1]
 set port [lindex $argv 2]
