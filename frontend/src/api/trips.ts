@@ -3,7 +3,7 @@ import { Trip } from "../types/trip";
 import { TripSpacesResponse } from "../types/space";
 
 export const fetchTrips = async (futureOnly: boolean = false): Promise<Trip[]> => {
-  const { data } = await api.get<Trip[]>("/trips", { params: { future_only: futureOnly } });
+  const { data } = await api.get<Trip[]>("/trips/", { params: { future_only: futureOnly } });
   return data;
 };
 
@@ -19,7 +19,7 @@ export const fetchTripSpaces = async (id: string): Promise<TripSpacesResponse> =
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createTrip = async (data: any): Promise<Trip> => {
-  const { data: response } = await api.post<Trip>("/trips", data);
+  const { data: response } = await api.post<Trip>("/trips/", data);
   return response;
 };
 
