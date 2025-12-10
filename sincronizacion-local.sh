@@ -20,9 +20,10 @@ echo -e "${BLUE}>>> [LOCAL] Conectando al NAS (${NAS_HOST})...${NC}"
 
 # Usar sshpass para autenticación robusta
 echo -e "${GREEN}>>> Ejecutando comandos en NAS...${NC}"
+export SSHPASS="$NAS_PASS"
 
-# Force SSH to only use password authentication and ignore keys
-sshpass -p "$NAS_PASS" ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no -o PreferredAuthentications=password,keyboard-interactive "$NAS_USER@$NAS_HOST" \
+# Force SSH to only use password authentication and ignore keys. Enable verbose output.
+sshpass -e ssh -v -o StrictHostKeyChecking=no -o PubkeyAuthentication=no -o PreferredAuthentications=password,keyboard-interactive "$NAS_USER@$NAS_HOST" \
 "cd $NAS_DIR && echo '>>> Pulling changes...' && git pull && chmod +x deploy.sh && ./deploy.sh deploy"
 
 
