@@ -9,7 +9,7 @@ services:
   # ========== DATABASE ==========
   db:
     image: postgres:15-alpine
-    container_name: keikichi_db_prod
+    container_name: keikichi_db
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -19,23 +19,20 @@ services:
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - keikichi_prod_network
-    # No exponer puerto externamente en producción
-    # ports:
-    #   - "5432:5432"
+      - keikichi_network
 
   # ========== BACKEND ==========
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: keikichi_backend_prod
+    container_name: keikichi_backend
     restart: always
     environment:
       - ENVIRONMENT=production
@@ -57,13 +54,13 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
     networks:
-      - keikichi_prod_network
+      - keikichi_network
     # Recursos limitados para NAS
     deploy:
       resources:
@@ -80,12 +77,12 @@ services:
       args:
         - VITE_API_URL=${VITE_API_URL}
         - VITE_WS_URL=${VITE_WS_URL}
-    container_name: keikichi_frontend_prod
+    container_name: keikichi_frontend
     restart: always
     depends_on:
       - backend
     networks:
-      - keikichi_prod_network
+      - keikichi_network
     deploy:
       resources:
         limits:
@@ -96,11 +93,12 @@ services:
   # ========== NGINX (Reverse Proxy) ==========
   nginx:
     image: nginx:alpine
-    container_name: keikichi_nginx_prod
+    container_name: keikichi_nginx
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      # Mapeamos puertos alternativos para evitar conflictos con Synology DSM
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
@@ -109,7 +107,7 @@ services:
       - frontend
       - backend
     networks:
-      - keikichi_prod_network
+      - keikichi_network
     deploy:
       resources:
         limits:
@@ -124,5 +122,6 @@ volumes:
 
 # ========== NETWORKS ==========
 networks:
-  keikichi_prod_network:
+  keikichi_network:
     driver: bridge
+    name: keikichi_network

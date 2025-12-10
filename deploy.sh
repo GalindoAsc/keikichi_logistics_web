@@ -74,9 +74,9 @@ deploy() {
     echo -e "${YELLOW}Descargando imágenes base...${NC}"
     docker-compose -f docker-compose.prod.yml pull db nginx
     
-    # Build de imágenes
+    # Build de imágenes (usando cache para velocidad)
     echo -e "${YELLOW}Construyendo imágenes...${NC}"
-    docker-compose -f docker-compose.prod.yml build --no-cache
+    docker-compose -f docker-compose.prod.yml build
     
     # Detener contenedores antiguos
     echo -e "${YELLOW}Deteniendo contenedores anteriores...${NC}"
@@ -92,6 +92,10 @@ deploy() {
     
     # Verificar salud
     verify_health
+
+    # Limpiar imágenes antiguas (sin uso)
+    echo -e "${YELLOW}Limpiando imágenes antiguas...${NC}"
+    docker image prune -f
 }
 
 # Función para verificar salud
