@@ -128,12 +128,13 @@ const CreateTripPage = () => {
                 trailer_plate: trip.trailer_plate || "",
                 driver_name: trip.driver_name || "",
                 driver_phone: trip.driver_phone || "",
+                currency: (trip.currency as "USD" | "MXN") || "USD",
             });
         }
     }, [trip, reset]);
 
     const isInternationalVal = watch("is_international");
-    const isInternational = isInternationalVal === true || isInternationalVal === "true";
+    const isInternational = isInternationalVal === true || String(isInternationalVal) === "true";
 
     const onSubmit = async (data: TripFormData) => {
         try {
