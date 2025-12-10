@@ -4,7 +4,10 @@ from datetime import date, datetime
 from decimal import Decimal
 from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, Boolean, JSON
 
-# ... (imports)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import UUID
+from app.models.base import Base
 
 class TripQuote(Base):
     """
