@@ -16,7 +16,7 @@ export default function AdminTripsPage() {
 
     const { data: trips, isLoading, refetch } = useQuery({
         queryKey: ["admin-trips", statusFilter],
-        queryFn: () => fetchTrips()
+        queryFn: () => fetchTrips(false)
     });
 
     const filteredTrips = trips?.filter(trip => statusFilter === "all" || trip.status === statusFilter);
