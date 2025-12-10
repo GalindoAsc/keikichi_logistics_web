@@ -19,15 +19,9 @@ git push origin main
 
 echo -e "${BLUE}>>> [REMOTO] Conectando al NAS (${NAS_HOST})...${NC}"
 
-# Usar expect para manejar la contraseña automáticamente
-/usr/bin/expect <<EOF
-set timeout 60
-spawn ssh -p $NAS_PORT $NAS_USER@$NAS_HOST "cd $NAS_DIR && echo '>>> Pulling latest changes...' && git pull && echo '>>> Executing deploy script...' && chmod +x deploy.sh && ./deploy.sh deploy"
-expect {
-  "yes/no" { send "yes\r"; exp_continue }
-  "*?assword:*" { send "$NAS_PASS\r" }
-}
-expect eof
-EOF
+# Usar script expect externo
+chmod +x login.exp
+./login.exp "$NAS_HOST" "$NAS_USER" "$NAS_PORT" "$NAS_PASS" "cd $NAS_DIR && echo '>>> Pulling latest changes...' && git pull && echo '>>> Executing deploy script...' && chmod +x deploy.sh && ./deploy.sh deploy"
+
 
 echo -e "${GREEN}>>> ¡Despliegue REMOTO completado!${NC}"
