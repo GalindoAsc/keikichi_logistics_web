@@ -169,14 +169,18 @@ const Header = () => {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - higher than header z-50 */}
           <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/50 z-[90] md:hidden"
             onClick={closeMobileMenu}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
           />
 
-          {/* Slide-out Drawer from Left */}
-          <div className="fixed top-0 left-0 w-72 h-full bg-white z-50 md:hidden overflow-y-auto shadow-2xl transform transition-transform duration-300">
+          {/* Slide-out Drawer from Left - highest z-index */}
+          <div
+            className="fixed top-0 left-0 w-72 h-full bg-white z-[100] md:hidden overflow-y-auto shadow-2xl"
+            style={{ position: 'fixed', top: 0, left: 0, width: '288px', height: '100vh', zIndex: 100 }}
+          >
             {/* Drawer Header */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 bg-slate-50">
               <img src="/keikichi_logo.jpg" alt="Keikichi" className="h-8" />
