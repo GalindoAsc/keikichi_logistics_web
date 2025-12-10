@@ -10,8 +10,8 @@ set command [lindex $argv 4]
 
 puts "DEBUG: Received password: '$password'"
 
-# Disable host key checking and force TTY
-spawn ssh -o StrictHostKeyChecking=no -tt -p $port $user@$host $command
+# Disable host key checking, force TTY, and force password auth
+spawn ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no -o PreferredAuthentications=password,keyboard-interactive -tt -p $port $user@$host $command
 
 expect {
     "yes/no" {
@@ -19,9 +19,9 @@ expect {
         exp_continue
     }
     "*?assword:*" {
-        puts "\n>>> Sending password..."
-        sleep 1
-        send "$password\r"
+        puts "\n>>> Sending password (attempting)..."
+        sleep 2
+        send -- "$password\r"
     }
 }
 expect eof
