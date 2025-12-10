@@ -33,34 +33,34 @@ const TripCard = ({ trip }: { trip: Trip }) => {
   };
 
   return (
-    <div className="group bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm rounded-3xl p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-zinc-900/5">
+    <div className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border border-white/50 dark:border-slate-800 shadow-sm rounded-3xl p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ring-1 ring-zinc-900/5 dark:ring-white/10">
       {/* Top Banner (Status) */}
       <div className="flex items-center justify-between mb-5">
-        <span className={`text-[11px] font-bold px-3 py-1 rounded-full border tracking-wide ${statusColors[trip.status as keyof typeof statusColors] || "bg-zinc-100 text-zinc-500"}`}>
+        <span className={`text-[11px] font-bold px-3 py-1 rounded-full border tracking-wide ${statusColors[trip.status as keyof typeof statusColors] || "bg-zinc-100 dark:bg-slate-800 text-zinc-500 dark:text-slate-400"}`}>
           {trip.status.toUpperCase()}
         </span>
 
         {canEdit && (
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="p-2 hover:bg-zinc-100 rounded-full outline-none transition-colors">
-                <MoreVertical className="w-4 h-4 text-zinc-400" />
+              <button className="p-2 hover:bg-zinc-100 dark:hover:bg-slate-800 rounded-full outline-none transition-colors">
+                <MoreVertical className="w-4 h-4 text-zinc-400 dark:text-slate-500" />
               </button>
             </DropdownMenu.Trigger>
 
             <DropdownMenu.Portal>
-              <DropdownMenu.Content className="min-w-[160px] bg-white rounded-2xl shadow-xl border border-zinc-100 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-200">
+              <DropdownMenu.Content className="min-w-[160px] bg-white dark:bg-slate-950 rounded-2xl shadow-xl border border-zinc-100 dark:border-slate-800 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-200">
                 <DropdownMenu.Item asChild>
                   <Link
                     to={`/admin/trips/${trip.id}/edit`}
-                    className="text-sm font-medium text-zinc-700 flex items-center gap-2 px-3 py-2 hover:bg-zinc-50 rounded-xl cursor-pointer outline-none transition-colors"
+                    className="text-sm font-medium text-zinc-700 dark:text-slate-300 flex items-center gap-2 px-3 py-2 hover:bg-zinc-50 dark:hover:bg-slate-900 rounded-xl cursor-pointer outline-none transition-colors"
                   >
                     <Edit className="w-4 h-4" />
                     Editar
                   </Link>
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
-                  className="text-sm font-medium text-rose-600 flex items-center gap-2 px-3 py-2 hover:bg-rose-50 rounded-xl cursor-pointer outline-none transition-colors"
+                  className="text-sm font-medium text-rose-600 dark:text-rose-500 flex items-center gap-2 px-3 py-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl cursor-pointer outline-none transition-colors"
                   onClick={handleDelete}
                 >
                   <Trash className="w-4 h-4" />
@@ -75,14 +75,14 @@ const TripCard = ({ trip }: { trip: Trip }) => {
       {/* Main Route Info */}
       <div className="space-y-5 mb-7">
         <div className="flex items-start gap-4">
-          <div className="mt-1 p-2.5 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-            <MapPin className="w-5 h-5 text-primary" />
+          <div className="mt-1 p-2.5 bg-primary/10 dark:bg-primary/20 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+            <MapPin className="w-5 h-5 text-primary dark:text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-2xl font-heading font-bold text-zinc-900 leading-tight group-hover:text-primary transition-colors">
+            <h3 className="text-2xl font-heading font-bold text-zinc-900 dark:text-white leading-tight group-hover:text-primary dark:group-hover:text-indigo-400 transition-colors">
               {trip.destination}
             </h3>
-            <p className="text-sm text-zinc-500 font-medium flex items-center gap-1 mt-1">
+            <p className="text-sm text-zinc-500 dark:text-slate-400 font-medium flex items-center gap-1 mt-1">
               Desde {trip.origin}
             </p>
           </div>
@@ -90,26 +90,26 @@ const TripCard = ({ trip }: { trip: Trip }) => {
 
         {/* Details Grid */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-zinc-50/80 rounded-2xl p-3 flex items-center gap-3 border border-zinc-100/50">
-            <div className="p-1.5 bg-white rounded-full shadow-sm">
-              <Calendar className="w-4 h-4 text-zinc-400" />
+          <div className="bg-zinc-50/80 dark:bg-slate-800/50 rounded-2xl p-3 flex items-center gap-3 border border-zinc-100/50 dark:border-slate-700/50">
+            <div className="p-1.5 bg-white dark:bg-slate-700 rounded-full shadow-sm">
+              <Calendar className="w-4 h-4 text-zinc-400 dark:text-slate-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Salida</span>
-              <span className="text-sm font-semibold text-zinc-700 font-numeric">
+              <span className="text-[10px] uppercase font-bold text-zinc-400 dark:text-slate-500 tracking-wider">Salida</span>
+              <span className="text-sm font-semibold text-zinc-700 dark:text-slate-200 font-numeric">
                 {trip.departure_date ? format(new Date(trip.departure_date), "d MMM", { locale: es }) : 'TBD'}
               </span>
             </div>
           </div>
 
-          <div className="bg-zinc-50/80 rounded-2xl p-3 flex items-center gap-3 border border-zinc-100/50">
-            <div className="p-1.5 bg-white rounded-full shadow-sm">
-              <Users className="w-4 h-4 text-zinc-400" />
+          <div className="bg-zinc-50/80 dark:bg-slate-800/50 rounded-2xl p-3 flex items-center gap-3 border border-zinc-100/50 dark:border-slate-700/50">
+            <div className="p-1.5 bg-white dark:bg-slate-700 rounded-full shadow-sm">
+              <Users className="w-4 h-4 text-zinc-400 dark:text-slate-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Espacios</span>
-              <span className="text-sm font-semibold text-zinc-700 font-numeric">
-                {trip.available_spaces ?? trip.total_spaces} <span className="text-zinc-400 font-normal">/ {trip.total_spaces}</span>
+              <span className="text-[10px] uppercase font-bold text-zinc-400 dark:text-slate-500 tracking-wider">Espacios</span>
+              <span className="text-sm font-semibold text-zinc-700 dark:text-slate-200 font-numeric">
+                {trip.available_spaces ?? trip.total_spaces} <span className="text-zinc-400 dark:text-slate-500 font-normal">/ {trip.total_spaces}</span>
               </span>
             </div>
           </div>
@@ -119,7 +119,7 @@ const TripCard = ({ trip }: { trip: Trip }) => {
       {/* Footer Action */}
       <Link
         to={`/trips/${trip.id}`}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-white border border-zinc-200 text-zinc-700 font-semibold rounded-2xl hover:bg-zinc-50 hover:border-zinc-300 transition-all group-hover:border-primary/20 group-hover:bg-primary/5 group-hover:text-primary group-hover:shadow-sm"
+        className="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-800 border border-zinc-200 dark:border-slate-700 text-zinc-700 dark:text-slate-200 font-semibold rounded-2xl hover:bg-zinc-50 dark:hover:bg-slate-700 hover:border-zinc-300 dark:hover:border-slate-600 transition-all group-hover:border-primary/20 dark:group-hover:border-indigo-500/30 group-hover:bg-primary/5 dark:group-hover:bg-indigo-500/10 group-hover:text-primary dark:group-hover:text-indigo-400 group-hover:shadow-sm"
       >
         Ver Disponibilidad
         <ArrowRight className="w-4 h-4" />

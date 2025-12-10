@@ -7,7 +7,7 @@ const RootLayout = () => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       <GlobalNotificationHandler />
       <Header />
       <main className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6">

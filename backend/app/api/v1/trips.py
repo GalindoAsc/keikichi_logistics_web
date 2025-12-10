@@ -15,17 +15,21 @@ router = APIRouter()
 @router.get("/", response_model=list[TripOut])
 async def list_trips(status: TripStatus | None = None, future_only: bool = False, db: AsyncSession = Depends(get_db_session)):
     service = TripService(db)
-    trips = await service.list_trips(status, future_only)
+    trips_data = await service.list_trips_with_stats(status, future_only)
+    
     enriched: list[TripOut] = []
-    for trip in trips:
-        spaces = await service.list_spaces(trip)
-        summary = _build_summary(spaces)
+    for item in trips_data:
+        trip = item["trip"]
+        # Use model_validate to create the base Pydantic model from ORM object
+        trip_out = TripOut.model_validate(trip)
+        
+        # Manually copied logic from previous model_copy approach but using the pre-calculated stats
         enriched.append(
-            TripOut.model_validate(trip).model_copy(update={
-                "available_spaces": summary.available,
-                "reserved_spaces": summary.reserved,
-                "blocked_spaces": summary.blocked,
-                "on_hold_spaces": summary.on_hold,
+            trip_out.model_copy(update={
+                "available_spaces": item["available_spaces"],
+                "reserved_spaces": item["reserved_spaces"],
+                "blocked_spaces": item["blocked_spaces"],
+                "on_hold_spaces": item["on_hold_spaces"],
             })
         )
     return enriched

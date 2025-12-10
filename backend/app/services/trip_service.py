@@ -16,6 +16,8 @@ class TripService:
         self.db = db
 
     async def list_trips(self, status: TripStatus | None = None, future_only: bool = False) -> List[Trip]:
+        # Legacy method kept for compatibility if needed, but optimizing to simple eager load if possible
+        # For now, just alias to standard select
         stmt = select(Trip)
         if status:
             stmt = stmt.where(Trip.status == status)
@@ -24,6 +26,58 @@ class TripService:
             stmt = stmt.where(Trip.departure_date >= today)
         result = await self.db.execute(stmt.order_by(Trip.departure_date))
         return list(result.scalars().all())
+
+    async def list_trips_with_stats(self, status: TripStatus | None = None, future_only: bool = False) -> List[dict]:
+        """
+        Optimized query to fetch trips with space counts in a single round-trip.
+        Returns a list of dicts suitable for creating TripOut models with extra fields.
+        """
+        # Build the aggregation query
+        stmt = (
+            select(
+                Trip,
+                func.count(Space.id).filter(Space.status == SpaceStatus.available).label("available_spaces"),
+                func.count(Space.id).filter(Space.status == SpaceStatus.reserved).label("reserved_spaces"),
+                func.count(Space.id).filter(Space.status == SpaceStatus.blocked).label("blocked_spaces"),
+                func.count(Space.id).filter(Space.status == SpaceStatus.on_hold).label("on_hold_spaces"),
+            )
+            .outerjoin(Space, Space.trip_id == Trip.id)
+            .group_by(Trip.id)
+            .order_by(Trip.departure_date)
+        )
+
+        if status:
+            stmt = stmt.where(Trip.status == status)
+        
+        if future_only:
+            today = datetime.utcnow().date()
+            stmt = stmt.where(Trip.departure_date >= today)
+
+        result = await self.db.execute(stmt)
+        
+        # Transform result to list of dicts combining Trip model + stats
+        trips_data = []
+        for row in result:
+            trip, available, reserved, blocked, on_hold = row
+            # Convert Trip model to dict (using Pydantic v2 helper if available or __dict__)
+            # Here we just use the object and we'll attach stats later or construct a specific response
+            
+            # Since we need to return something compatible with TripOut model validation
+            # We can rely on Pydantic's from_attributes=True (orm_mode) to read from the Trip object,
+            # but we need to inject the extra fields.
+            # Best way is to construct the enriched object here.
+            
+            # Use a wrapper structure or dict
+            trip_dict = {
+                "trip": trip,
+                "available_spaces": available or 0,
+                "reserved_spaces": reserved or 0,
+                "blocked_spaces": blocked or 0,
+                "on_hold_spaces": on_hold or 0
+            }
+            trips_data.append(trip_dict)
+            
+        return trips_data
 
     async def get_trip(self, trip_id: str) -> Trip:
         from uuid import UUID

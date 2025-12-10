@@ -25,7 +25,7 @@ class Trip(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     origin = Column(String(255), nullable=False)
     destination = Column(String(255), nullable=False)
-    departure_date = Column(Date, nullable=False)
+    departure_date = Column(Date, nullable=False, index=True)
     departure_time = Column(Time)
     status = Column(Enum(TripStatus, name="trip_status"), nullable=False, default=TripStatus.scheduled, index=True)
     is_international = Column(Boolean, nullable=False, default=False)
