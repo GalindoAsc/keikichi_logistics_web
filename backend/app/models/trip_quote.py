@@ -9,6 +9,13 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 from app.models.base import Base
 
+class QuoteStatus(str, enum.Enum):
+    pending = "pending"
+    quoted = "quoted"
+    negotiating = "negotiating"
+    accepted = "accepted"
+    rejected = "rejected"
+
 class TripQuote(Base):
     """
     Solicitud de viaje completo/privado por parte de un cliente.
