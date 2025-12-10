@@ -6,6 +6,9 @@
 
 set -e
 
+# Synology PATH fix
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
+
 # Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'

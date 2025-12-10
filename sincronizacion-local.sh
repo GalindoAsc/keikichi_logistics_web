@@ -19,7 +19,6 @@ echo -e "${BLUE}>>> [LOCAL] Conectando al NAS (${NAS_HOST})...${NC}"
 echo -e "${GREEN}>>> Ejecutando comandos en NAS...${NC}"
 
 # Usar SSH estándar con llave (sin contraseña)
-# Local usa puerto 22 por defecto
 ssh -o StrictHostKeyChecking=no "$NAS_USER@$NAS_HOST" \
 "cd $NAS_DIR && echo '>>> Pulling changes...' && git pull && chmod +x deploy.sh && ./deploy.sh deploy"
 
