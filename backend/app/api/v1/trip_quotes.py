@@ -9,8 +9,8 @@ from sqlalchemy import select, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.database import get_db
-from app.core.security import get_current_user, require_roles
+from app.api.deps import get_db_session, get_current_user
+from app.core.permissions import require_manager_or_superadmin
 from app.models import User, UserRole, Trip, TripStatus
 from app.models.trip_quote import TripQuote, QuoteStatus
 
@@ -87,7 +87,7 @@ class TripQuoteOut(BaseModel):
 @router.post("", response_model=TripQuoteOut, status_code=201)
 async def create_quote_request(
     data: TripQuoteCreate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     """Cliente solicita una cotización de viaje completo."""
@@ -158,7 +158,7 @@ async def create_quote_request(
 @router.get("", response_model=List[TripQuoteOut])
 async def list_quotes(
     status: Optional[str] = Query(None),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     """Lista cotizaciones. Clientes ven las suyas, admins ven todas."""
@@ -212,7 +212,7 @@ async def list_quotes(
 @router.get("/{quote_id}", response_model=TripQuoteOut)
 async def get_quote(
     quote_id: UUID,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     """Obtener detalle de una cotización."""
@@ -264,8 +264,8 @@ async def get_quote(
 async def admin_set_quote(
     quote_id: UUID,
     data: AdminQuotePrice,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.manager, UserRole.superadmin]))
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(require_manager_or_superadmin)
 ):
     """Admin asigna un precio a la cotización."""
     result = await db.execute(select(TripQuote).where(TripQuote.id == quote_id))
@@ -295,7 +295,7 @@ async def admin_set_quote(
 async def client_respond(
     quote_id: UUID,
     data: ClientQuoteResponse,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     """Cliente responde a la cotización: aceptar, negociar o rechazar."""
@@ -361,8 +361,8 @@ async def client_respond(
 @router.delete("/{quote_id}")
 async def delete_quote(
     quote_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.manager, UserRole.superadmin]))
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(require_manager_or_superadmin)
 ):
     """Admin elimina una cotización."""
     result = await db.execute(select(TripQuote).where(TripQuote.id == quote_id))
