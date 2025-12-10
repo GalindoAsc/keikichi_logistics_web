@@ -21,8 +21,8 @@ echo -e "${BLUE}>>> [LOCAL] Conectando al NAS (${NAS_HOST})...${NC}"
 # Usar sshpass para autenticación robusta
 echo -e "${GREEN}>>> Ejecutando comandos en NAS...${NC}"
 
-# Pass password via stdin to duplicate simple manual entry
-echo "$NAS_PASS" | sshpass -d 0 ssh -tt -o StrictHostKeyChecking=no -o PubkeyAuthentication=no -o PreferredAuthentications=password "$NAS_USER@$NAS_HOST" \
+# Pass password via stdin. Removed -tt to avoid TTY conflict with sshpass.
+echo "$NAS_PASS" | sshpass -d 0 ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no -o PreferredAuthentications=password "$NAS_USER@$NAS_HOST" \
 "cd $NAS_DIR && echo '>>> Pulling changes...' && git pull && chmod +x deploy.sh && ./deploy.sh deploy"
 
 
