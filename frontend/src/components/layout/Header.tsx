@@ -176,7 +176,7 @@ const Header = () => {
           />
 
           {/* Slide-out Menu */}
-          <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-40 md:hidden overflow-y-auto">
+          <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-50 md:hidden overflow-y-auto">
             <div className="px-4 py-6 space-y-1">
               {/* User Info */}
               {user && (
