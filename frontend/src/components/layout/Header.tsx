@@ -175,8 +175,15 @@ const Header = () => {
             onClick={closeMobileMenu}
           />
 
-          {/* Slide-out Menu */}
-          <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-50 md:hidden overflow-y-auto">
+          {/* Slide-out Drawer from Left */}
+          <div className="fixed top-0 left-0 w-72 h-full bg-white z-50 md:hidden overflow-y-auto shadow-2xl transform transition-transform duration-300">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 bg-slate-50">
+              <img src="/keikichi_logo.jpg" alt="Keikichi" className="h-8" />
+              <button onClick={closeMobileMenu} className="p-2 rounded-lg hover:bg-slate-200">
+                <X className="w-5 h-5 text-slate-600" />
+              </button>
+            </div>
             <div className="px-4 py-6 space-y-1">
               {/* User Info */}
               {user && (
