@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { LogOut, LayoutDashboard, CalendarDays, Map, Settings, List, Menu, X, QrCode } from "lucide-react";
 import { authStore } from "../../stores/authStore";
 import NotificationBell from "./NotificationBell";
@@ -166,154 +167,164 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <>
-          {/* Backdrop - higher than header z-50 */}
+      {/* Mobile Menu Overlay - Moved to Portal to avoid stacking context issues */}
+      {mobileMenuOpen && createPortal(
+        <div className="relative z-[9999]">
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50 z-[90] md:hidden"
+            className="fixed inset-0 bg-black/50 transition-opacity"
             onClick={closeMobileMenu}
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+            aria-hidden="true"
           />
 
-          {/* Slide-out Drawer from Left - highest z-index */}
+          {/* Slide-out Drawer */}
           <div
-            className="fixed top-0 left-0 w-72 h-full bg-white z-[100] md:hidden overflow-y-auto shadow-2xl"
-            style={{ position: 'fixed', top: 0, left: 0, width: '288px', height: '100vh', zIndex: 100 }}
+            className="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col h-full"
+            role="dialog"
+            aria-modal="true"
           >
             {/* Drawer Header */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 bg-slate-50">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 bg-slate-50 flex-shrink-0">
               <img src="/keikichi_logo.jpg" alt="Keikichi" className="h-8" />
-              <button onClick={closeMobileMenu} className="p-2 rounded-lg hover:bg-slate-200">
+              <button
+                onClick={closeMobileMenu}
+                className="p-2 rounded-lg hover:bg-slate-200 transition-colors"
+                aria-label="Cerrar menú"
+              >
                 <X className="w-5 h-5 text-slate-600" />
               </button>
             </div>
-            <div className="px-4 py-6 space-y-1">
-              {/* User Info */}
-              {user && (
-                <div className="pb-4 mb-4 border-b border-slate-200">
-                  <p className="text-sm font-medium text-slate-900">
-                    {user.full_name}
-                  </p>
-                  <p className="text-xs text-slate-500 capitalize mt-1">
-                    {user.role}
-                  </p>
-                </div>
-              )}
 
-              {/* Navigation Links */}
-              {isAdmin ? (
-                <>
-                  <Link
-                    to="/admin/dashboard"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                    <span className="font-medium">Dashboard</span>
-                  </Link>
-                  <Link
-                    to="/admin/reservations"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <CalendarDays className="w-5 h-5" />
-                    <span className="font-medium">Reservaciones</span>
-                  </Link>
-                  <Link
-                    to="/admin/trips"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <Map className="w-5 h-5" />
-                    <span className="font-medium">Viajes</span>
-                  </Link>
-                  <Link
-                    to="/admin/scanner"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <QrCode className="w-5 h-5" />
-                    <span className="font-medium">Escáner QR</span>
-                  </Link>
-                  <Link
-                    to="/admin/settings"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span className="font-medium">Ajustes</span>
-                  </Link>
-                </>
-              ) : user ? (
-                <>
-                  <Link
-                    to="/"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <Map className="w-5 h-5" />
-                    <span className="font-medium">Reservar</span>
-                  </Link>
-                  <Link
-                    to="/reservations"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <List className="w-5 h-5" />
-                    <span className="font-medium">Mis Reservaciones</span>
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span className="font-medium">Mi Perfil</span>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    <Map className="w-5 h-5" />
-                    <span className="font-medium">Ver Viajes</span>
-                  </Link>
-                  <div className="border-t border-slate-200 my-2 pt-2">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <div className="space-y-1">
+                {/* User Info */}
+                {user && (
+                  <div className="pb-4 mb-4 border-b border-slate-200">
+                    <p className="text-sm font-medium text-slate-900 truncate">
+                      {user.full_name}
+                    </p>
+                    <p className="text-xs text-slate-500 capitalize mt-1">
+                      {user.role}
+                    </p>
+                  </div>
+                )}
+
+                {/* Navigation Links */}
+                {isAdmin ? (
+                  <>
                     <Link
-                      to="/auth/login"
+                      to="/admin/dashboard"
                       className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
                       onClick={closeMobileMenu}
                     >
-                      <span className="font-medium">Iniciar Sesión</span>
+                      <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Dashboard</span>
                     </Link>
                     <Link
-                      to="/auth/register"
-                      className="flex items-center gap-3 px-4 py-3 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      to="/admin/reservations"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
                       onClick={closeMobileMenu}
                     >
-                      <span className="font-medium">Registrarse</span>
+                      <CalendarDays className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Reservaciones</span>
                     </Link>
-                  </div>
-                </>
-              )}
+                    <Link
+                      to="/admin/trips"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <Map className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Viajes</span>
+                    </Link>
+                    <Link
+                      to="/admin/scanner"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <QrCode className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Escáner QR</span>
+                    </Link>
+                    <Link
+                      to="/admin/settings"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <Settings className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Ajustes</span>
+                    </Link>
+                  </>
+                ) : user ? (
+                  <>
+                    <Link
+                      to="/"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <Map className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Reservar</span>
+                    </Link>
+                    <Link
+                      to="/reservations"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <List className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Mis Reservaciones</span>
+                    </Link>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <Settings className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Mi Perfil</span>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/"
+                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <Map className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">Ver Viajes</span>
+                    </Link>
+                    <div className="border-t border-slate-200 my-2 pt-2">
+                      <Link
+                        to="/auth/login"
+                        className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                        onClick={closeMobileMenu}
+                      >
+                        <span className="font-medium">Iniciar Sesión</span>
+                      </Link>
+                      <Link
+                        to="/auth/register"
+                        className="flex items-center gap-3 px-4 py-3 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        onClick={closeMobileMenu}
+                      >
+                        <span className="font-medium">Registrarse</span>
+                      </Link>
+                    </div>
+                  </>
+                )}
 
-              {/* Logout Button */}
-              {user && (
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full mt-6"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span className="font-medium">Cerrar Sesión</span>
-                </button>
-              )}
+                {/* Logout Button */}
+                {user && (
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full mt-6"
+                  >
+                    <LogOut className="w-5 h-5 flex-shrink-0" />
+                    <span className="font-medium">Cerrar Sesión</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </>
+        </div>,
+        document.body
       )}
     </header>
   );
