@@ -70,13 +70,10 @@ deploy() {
     # Backup primero (si hay DB existente)
     backup_database
     
-    # Crear directorios necesarios
-    echo -e "${YELLOW}Verificando directorios de persistencia...${NC}"
+    # Crear directorios necesarios (Permisos manejados por init-permissions en docker-compose)
+    echo -e "${YELLOW}Verificando estructura de directorios...${NC}"
     mkdir -p data/postgres
     mkdir -p uploads
-    # Intentamos dar permisos, si falla (por ser root/NAS) seguimos adelante
-    chmod 777 data/postgres || echo "Advertencia: No se pudieron cambiar permisos de data/postgres, continuando..."
-    chmod 777 uploads || echo "Advertencia: No se pudieron cambiar permisos de uploads, continuando..."
 
     # Pull de cambios más recientes
     echo -e "${YELLOW}Descargando imágenes base...${NC}"

@@ -6,11 +6,22 @@ version: '3.8'
 # ============================================
 
 services:
+  # Servicio de inicialización para corregir permisos en NAS
+  init-permissions:
+    image: alpine:latest
+    command: sh -c "mkdir -p /data/postgres && chmod -R 777 /data/postgres && chown -R 70:70 /data/postgres"
+    volumes:
+      - ./data:/data
+    networks:
+      - keikichi_network
+
   # ========== DATABASE ==========
   db:
     image: postgres:15-alpine
     container_name: keikichi_db
     restart: always
+    depends_on:
+      - init-permissions
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
