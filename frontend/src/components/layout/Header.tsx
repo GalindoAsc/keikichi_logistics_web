@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { LogOut, LayoutDashboard, CalendarDays, Map, Settings, List, Menu, X, QrCode, Sun, Moon, Globe, DollarSign, Truck } from "lucide-react";
+import { LogOut, LayoutDashboard, CalendarDays, Map, Settings, List, Menu, X, QrCode, Sun, Moon, Globe } from "lucide-react";
 import { authStore } from "../../stores/authStore";
 import NotificationBell from "./NotificationBell";
 import { useState, useEffect } from "react";
@@ -83,54 +83,43 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-4 lg:space-x-6">
             {isAdmin ? (
               <>
-                <Link to="/admin/dashboard" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <LayoutDashboard className="w-4 h-4" />
+                <Link to="/admin/dashboard" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.dashboard')}
                 </Link>
-                <Link to="/admin/reservations" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <CalendarDays className="w-4 h-4" />
+                <Link to="/admin/reservations" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.reservations')}
                 </Link>
-                <Link to="/admin/trips" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <Map className="w-4 h-4" />
+                <Link to="/admin/trips" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.trips')}
                 </Link>
-                <Link to="/admin/quotes" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <DollarSign className="w-4 h-4" />
+                <Link to="/admin/quotes" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.quotes')}
                 </Link>
-                <Link to="/admin/scanner" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <QrCode className="w-4 h-4" />
+                <Link to="/admin/scanner" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.qrScanner')}
                 </Link>
-                <Link to="/admin/settings" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <Settings className="w-4 h-4" />
+                <Link to="/admin/settings" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.settings')}
                 </Link>
               </>
             ) : user ? (
               <>
-                <Link to="/" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <Map className="w-4 h-4" />
+                <Link to="/" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.reserve')}
                 </Link>
-                <Link to="/request-trip" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <Truck className="w-4 h-4" />
+                <Link to="/request-trip" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.requestTrip')}
                 </Link>
-                <Link to="/my-quotes" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <DollarSign className="w-4 h-4" />
+                <Link to="/my-quotes" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.myQuotes')}
                 </Link>
-                <Link to="/reservations" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <List className="w-4 h-4" />
+                <Link to="/reservations" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.myReservations')}
                 </Link>
-                <Link to="/profile" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
-                  <Settings className="w-4 h-4" />
+                <Link to="/profile" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium text-sm transition-colors">
                   {t('nav.profile')}
                 </Link>
               </>
