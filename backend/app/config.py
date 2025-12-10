@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import List
 
-from pydantic import AnyHttpUrl, Field
+from pydantic import AnyHttpUrl, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,10 +26,24 @@ class Settings(BaseSettings):
 
     backend_host: str = Field("0.0.0.0", alias="BACKEND_HOST")
     backend_port: int = Field(8000, alias="BACKEND_PORT")
-    backend_cors_origins: List[AnyHttpUrl] = Field(default_factory=list, alias="BACKEND_CORS_ORIGINS")
+    backend_cors_origins: str = Field("", alias="BACKEND_CORS_ORIGINS")
 
-    vite_api_url: AnyHttpUrl | None = Field(None, alias="VITE_API_URL")
-    vite_ws_url: AnyHttpUrl | None = Field(None, alias="VITE_WS_URL")
+    @field_validator("backend_cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, list):
+            return ",".join(v)
+        return v or ""
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Return CORS origins as a list of strings."""
+        if not self.backend_cors_origins:
+            return []
+        return [origin.strip() for origin in self.backend_cors_origins.split(",")]
+
+    vite_api_url: str | None = Field(None, alias="VITE_API_URL")
+    vite_ws_url: str | None = Field(None, alias="VITE_WS_URL")
 
     max_file_size_mb: int = Field(10, alias="MAX_FILE_SIZE_MB")
     allowed_file_types: str = Field("pdf,jpg,jpeg,png,xml", alias="ALLOWED_FILE_TYPES")
