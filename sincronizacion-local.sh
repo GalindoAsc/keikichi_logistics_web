@@ -18,10 +18,11 @@ git push origin main
 
 echo -e "${BLUE}>>> [LOCAL] Conectando al NAS (${NAS_HOST})...${NC}"
 
-# Usar script expect externo
-chmod +x login.exp
-# Local usa puerto 22 por defecto si no se especifica
-./login.exp "$NAS_HOST" "$NAS_USER" "22" "$NAS_PASS" "cd $NAS_DIR && echo '>>> Pulling latest changes...' && git pull && echo '>>> Executing deploy script...' && chmod +x deploy.sh && ./deploy.sh deploy"
+# Usar sshpass para autenticación robusta
+export SSHPASS="$NAS_PASS"
+echo -e "${GREEN}>>> Ejecutando comandos en NAS...${NC}"
+sshpass -e ssh -o StrictHostKeyChecking=no "$NAS_USER@$NAS_HOST" \
+"cd $NAS_DIR && echo '>>> Pulling changes...' && git pull && chmod +x deploy.sh && ./deploy.sh deploy"
 
 
 echo -e "${GREEN}>>> ¡Despliegue LOCAL completado!${NC}"
