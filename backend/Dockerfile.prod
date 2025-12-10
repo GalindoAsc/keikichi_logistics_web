@@ -53,4 +53,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 
 # Production server with Uvicorn (can use Gunicorn for more workers if needed)
 # Using 2 workers suitable for NAS with limited resources
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# IMPORTANT: --proxy-headers and --forwarded-allow-ips='*' are required when running behind Nginx
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--proxy-headers", "--forwarded-allow-ips='*'"]

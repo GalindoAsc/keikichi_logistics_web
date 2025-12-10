@@ -76,6 +76,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Global Input Style Fix for Dark Mode */
+  input, select, textarea {
+    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white;
+  }
 }
 
 @layer utilities {

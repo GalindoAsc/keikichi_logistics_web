@@ -21,6 +21,7 @@ export const useCreateTrip = () => {
     mutationFn: (data: any) => createTrip(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-trips"] });
     },
   });
 };
@@ -31,6 +32,7 @@ export const useDeleteTrip = () => {
     mutationFn: (id: string) => deleteTrip(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-trips"] });
     },
   });
 };
@@ -42,6 +44,7 @@ export const useUpdateTrip = () => {
     mutationFn: ({ id, data }: { id: string; data: any }) => updateTrip(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-trips"] });
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
     },
   });

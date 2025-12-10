@@ -33,6 +33,7 @@ export function GlobalNotificationHandler() {
                 case 'TRIP_DELETED':
                     // Invalidate trips list
                     queryClient.invalidateQueries({ queryKey: ['trips'] });
+                    queryClient.invalidateQueries({ queryKey: ['admin-trips'] });
                     toast.info(eventData?.message || 'Viajes actualizados');
                     break;
 
