@@ -1,13 +1,18 @@
 import TripList from "../../components/trips/TripList";
+import { useTranslation } from "react-i18next";
 
-const TripsPage = () => (
-  <div className="space-y-4">
-    <div>
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Viajes disponibles</h1>
-      <p className="text-sm text-slate-600 dark:text-slate-400">Explora los viajes y elige tus espacios.</p>
+const TripsPage = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-semibold text-keikichi-forest-800 dark:text-white">{t('trips.title')}</h1>
+        <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-300">{t('trips.subtitle')}</p>
+      </div>
+      <TripList />
     </div>
-    <TripList />
-  </div>
-);
+  );
+};
 
 export default TripsPage;

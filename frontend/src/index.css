@@ -4,72 +4,93 @@
 
 @layer base {
   :root {
-    /* Premium Logistics Palette: Emerald, Orange, Yellow */
+    /* Keikichi Produce Palette - Light Mode */
+    /* Based on logo: Lime green, Forest green, White, Yellow */
+
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 150 32% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 150 32% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 150 32% 18%;
 
-    /* Primary: Vibrant Emerald Green */
-    --primary: 158 64% 52%;
-    --primary-foreground: 144 70% 5%;
+    /* Primary: Vibrant Lime Green from logo outline */
+    --primary: 78 78% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Energetic Orange */
-    --secondary: 24 94% 50%;
+    /* Secondary: Forest Green from logo background */
+    --secondary: 156 42% 20%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 80 20% 96%;
+    --muted-foreground: 150 16% 40%;
 
-    /* Accent: Golden Yellow */
-    --accent: 48 96% 53%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent: Golden Yellow from logo peppers */
+    --accent: 48 98% 60%;
+    --accent-foreground: 150 32% 18%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 158 64% 52%;
-    /* Matches Primary */
+    --border: 80 20% 88%;
+    --input: 80 20% 88%;
+    --ring: 78 78% 40%;
 
     --radius: 0.75rem;
+
+    /* Custom Keikichi colors */
+    --keikichi-lime: 78 78% 40%;
+    --keikichi-lime-light: 78 70% 55%;
+    --keikichi-forest: 156 42% 20%;
+    --keikichi-forest-dark: 156 45% 15%;
+    --keikichi-yellow: 48 98% 60%;
+    --keikichi-yellow-light: 48 100% 70%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Keikichi Produce Palette - Dark Mode */
+    /* Forest green backgrounds with lime accents */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --background: 156 45% 10%;
+    --foreground: 80 20% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --card: 156 42% 14%;
+    --card-foreground: 80 20% 98%;
 
-    /* Primary: Slightly Lighter Emerald for Dark Mode */
-    --primary: 158 64% 52%;
-    --primary-foreground: 144 70% 5%;
+    --popover: 156 42% 12%;
+    --popover-foreground: 80 20% 98%;
 
-    /* Secondary: Orange */
-    --secondary: 24 94% 50%;
+    /* Primary: Brighter Lime Green for dark mode */
+    --primary: 78 70% 50%;
+    --primary-foreground: 156 45% 10%;
+
+    /* Secondary: Lighter Forest Green */
+    --secondary: 156 35% 25%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 156 30% 18%;
+    --muted-foreground: 80 15% 65%;
 
-    --accent: 48 96% 53%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent: Bright Yellow for dark mode */
+    --accent: 48 100% 60%;
+    --accent-foreground: 156 45% 10%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 158 64% 52%;
+    --border: 156 30% 22%;
+    --input: 156 30% 22%;
+    --ring: 78 70% 50%;
+
+    /* Custom Keikichi colors - Dark Mode */
+    --keikichi-lime: 78 70% 50%;
+    --keikichi-lime-light: 78 65% 60%;
+    --keikichi-forest: 156 35% 25%;
+    --keikichi-forest-dark: 156 42% 14%;
+    --keikichi-yellow: 48 100% 60%;
+    --keikichi-yellow-light: 48 100% 72%;
   }
 }
 
@@ -86,7 +107,7 @@
   input,
   select,
   textarea {
-    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white;
+    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white;
   }
 }
 
@@ -111,5 +132,34 @@
   /* Touch-friendly tap targets (44x44px minimum) */
   .touch-target {
     @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
+  }
+
+  /* Keikichi brand utilities */
+  .bg-keikichi-lime {
+    background-color: hsl(var(--keikichi-lime));
+  }
+
+  .bg-keikichi-forest {
+    background-color: hsl(var(--keikichi-forest));
+  }
+
+  .bg-keikichi-yellow {
+    background-color: hsl(var(--keikichi-yellow));
+  }
+
+  .text-keikichi-lime {
+    color: hsl(var(--keikichi-lime));
+  }
+
+  .text-keikichi-forest {
+    color: hsl(var(--keikichi-forest));
+  }
+
+  .text-keikichi-yellow {
+    color: hsl(var(--keikichi-yellow));
+  }
+
+  .border-keikichi-lime {
+    border-color: hsl(var(--keikichi-lime));
   }
 }

@@ -1,9 +1,11 @@
 import TripCard from "./TripCard";
 import { useTrips } from "../../hooks/useTrips";
 import LoadingSpinner from "../shared/LoadingSpinner";
+import { useTranslation } from "react-i18next";
 
 const TripList = () => {
   const { data, isLoading } = useTrips(true);
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (
@@ -14,7 +16,7 @@ const TripList = () => {
   }
 
   if (!data?.length) {
-    return <p className="text-center text-slate-500">No hay viajes disponibles.</p>;
+    return <p className="text-center text-keikichi-forest-500 dark:text-keikichi-lime-300">{t('trips.noTrips')}</p>;
   }
 
   return (
