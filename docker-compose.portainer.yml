@@ -87,8 +87,8 @@ services:
     container_name: keikichi_nginx
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - keikichi_nginx_conf:/etc/nginx/conf.d:ro
       - keikichi_ssl:/etc/nginx/ssl:ro
