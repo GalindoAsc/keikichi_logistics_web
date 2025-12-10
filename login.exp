@@ -1,12 +1,14 @@
 #!/usr/bin/expect
 
 set timeout 60
-exp_internal 1
+# exp_internal 1
 set host [lindex $argv 0]
 set user [lindex $argv 1]
 set port [lindex $argv 2]
 set password [lindex $argv 3]
 set command [lindex $argv 4]
+
+puts "DEBUG: Received password: '$password'"
 
 # Disable host key checking and force TTY
 spawn ssh -o StrictHostKeyChecking=no -tt -p $port $user@$host $command
