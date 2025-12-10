@@ -70,7 +70,14 @@ deploy() {
     # Backup primero (si hay DB existente)
     backup_database
     
-    # Pull de imágenes base
+    # Crear directorios necesarios
+    echo -e "${YELLOW}Verificando directorios de persistencia...${NC}"
+    mkdir -p data/postgres
+    mkdir -p uploads
+    chmod 777 data/postgres
+    chmod 777 uploads
+
+    # Pull de cambios más recientes
     echo -e "${YELLOW}Descargando imágenes base...${NC}"
     docker-compose -f docker-compose.prod.yml pull db nginx
     
