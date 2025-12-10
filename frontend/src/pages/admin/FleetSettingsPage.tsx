@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import api from "../../api/client";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
+import { useTranslation } from "react-i18next";
 
 // Types
 interface Driver {
@@ -43,6 +44,7 @@ const FleetSettingsPage = () => {
     const [activeTab, setActiveTab] = useState<"drivers" | "vehicles">("drivers");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
+    const { t } = useTranslation();
 
     // Queries
     const { data: drivers, isLoading: loadingDrivers } = useQuery({ queryKey: ["drivers"], queryFn: fetchDrivers });
@@ -55,7 +57,7 @@ const FleetSettingsPage = () => {
             queryClient.invalidateQueries({ queryKey: ["drivers"] });
             setIsModalOpen(false);
             setEditingItem(null);
-            toast.success("Conductor guardado");
+            toast.success(t('fleet.driverSaved'));
         }
     });
 
@@ -65,7 +67,7 @@ const FleetSettingsPage = () => {
             queryClient.invalidateQueries({ queryKey: ["drivers"] });
             setIsModalOpen(false);
             setEditingItem(null);
-            toast.success("Conductor actualizado");
+            toast.success(t('fleet.driverUpdated'));
         }
     });
 
@@ -75,7 +77,7 @@ const FleetSettingsPage = () => {
             queryClient.invalidateQueries({ queryKey: ["vehicles"] });
             setIsModalOpen(false);
             setEditingItem(null);
-            toast.success("Vehículo guardado");
+            toast.success(t('fleet.vehicleSaved'));
         }
     });
 
@@ -85,7 +87,7 @@ const FleetSettingsPage = () => {
             queryClient.invalidateQueries({ queryKey: ["vehicles"] });
             setIsModalOpen(false);
             setEditingItem(null);
-            toast.success("Vehículo actualizado");
+            toast.success(t('fleet.vehicleUpdated'));
         }
     });
 
@@ -93,7 +95,7 @@ const FleetSettingsPage = () => {
         mutationFn: deleteDriver,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["drivers"] });
-            toast.success("Conductor eliminado");
+            toast.success(t('fleet.driverDeleted'));
         }
     });
 
@@ -101,7 +103,7 @@ const FleetSettingsPage = () => {
         mutationFn: deleteVehicle,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["vehicles"] });
-            toast.success("Vehículo eliminado");
+            toast.success(t('fleet.vehicleDeleted'));
         }
     });
 
@@ -131,76 +133,76 @@ const FleetSettingsPage = () => {
         <div className="max-w-5xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/admin/settings")}
-                className="flex items-center text-slate-600 hover:text-slate-900 transition-colors"
+                className="flex items-center text-keikichi-forest-600 dark:text-keikichi-lime-300 hover:text-keikichi-forest-900 dark:hover:text-keikichi-lime-100 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver a Ajustes
+                {t('settings.backToSettings')}
             </button>
 
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Flota</h1>
+                <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">{t('settings.fleetTitle')}</h1>
                 <button
                     onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center gap-2 bg-keikichi-lime-600 text-white px-4 py-2 rounded-lg hover:bg-keikichi-lime-700 transition-colors"
                 >
                     <Plus className="w-4 h-4" />
-                    Agregar {activeTab === "drivers" ? "Conductor" : "Vehículo"}
+                    {t('common.add')} {activeTab === "drivers" ? t('fleet.drivers') : t('fleet.vehicles')}
                 </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-slate-200">
+            <div className="flex border-b border-keikichi-lime-100 dark:border-keikichi-forest-600">
                 <button
                     onClick={() => setActiveTab("drivers")}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "drivers" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-slate-700"
+                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "drivers" ? "border-keikichi-lime-600 text-keikichi-lime-600 dark:text-keikichi-lime-400" : "border-transparent text-keikichi-forest-500 dark:text-keikichi-lime-300 hover:text-keikichi-forest-700 dark:hover:text-keikichi-lime-100"
                         }`}
                 >
-                    Conductores
+                    {t('fleet.drivers')}
                 </button>
                 <button
                     onClick={() => setActiveTab("vehicles")}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "vehicles" ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-slate-700"
+                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "vehicles" ? "border-keikichi-lime-600 text-keikichi-lime-600 dark:text-keikichi-lime-400" : "border-transparent text-keikichi-forest-500 dark:text-keikichi-lime-300 hover:text-keikichi-forest-700 dark:hover:text-keikichi-lime-100"
                         }`}
                 >
-                    Vehículos
+                    {t('fleet.vehicles')}
                 </button>
             </div>
 
             {/* Content */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl shadow-sm border border-keikichi-lime-100 dark:border-keikichi-forest-600 overflow-hidden transition-colors">
                 {activeTab === "drivers" ? (
                     <div className="table-responsive">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                            <thead className="bg-keikichi-lime-50 dark:bg-keikichi-forest-700 text-keikichi-forest-600 dark:text-keikichi-lime-300 font-medium border-b border-keikichi-lime-100 dark:border-keikichi-forest-600">
                                 <tr>
-                                    <th className="p-4">Nombre</th>
-                                    <th className="p-4">Teléfono</th>
-                                    <th className="p-4">Licencia</th>
-                                    <th className="p-4 text-right">Acciones</th>
+                                    <th className="p-4">{t('common.name')}</th>
+                                    <th className="p-4">{t('common.phone')}</th>
+                                    <th className="p-4">{t('common.license')}</th>
+                                    <th className="p-4 text-right">{t('common.actions')}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
                                 {drivers?.map((driver) => (
-                                    <tr key={driver.id} className="hover:bg-slate-50">
-                                        <td className="p-4 font-medium text-slate-900 flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                    <tr key={driver.id} className="hover:bg-keikichi-lime-50/50 dark:hover:bg-keikichi-forest-700/50 transition-colors">
+                                        <td className="p-4 font-medium text-keikichi-forest-800 dark:text-white flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-keikichi-lime-100 dark:bg-keikichi-forest-600 flex items-center justify-center text-keikichi-forest-500 dark:text-keikichi-lime-300">
                                                 <User className="w-4 h-4" />
                                             </div>
                                             {driver.full_name}
                                         </td>
-                                        <td className="p-4 text-slate-600">{driver.phone || "-"}</td>
-                                        <td className="p-4 text-slate-600">{driver.license_number || "-"}</td>
+                                        <td className="p-4 text-keikichi-forest-600 dark:text-keikichi-lime-300">{driver.phone || "-"}</td>
+                                        <td className="p-4 text-keikichi-forest-600 dark:text-keikichi-lime-300">{driver.license_number || "-"}</td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={() => { setEditingItem(driver); setIsModalOpen(true); }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                                    className="p-2 text-keikichi-lime-600 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => { if (confirm("¿Eliminar conductor?")) deleteDriverMutation.mutate(driver.id); }}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                                    onClick={() => { if (confirm(t('fleet.confirmDeleteDriver'))) deleteDriverMutation.mutate(driver.id); }}
+                                                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -210,7 +212,7 @@ const FleetSettingsPage = () => {
                                 ))}
                                 {drivers?.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-slate-500">No hay conductores registrados</td>
+                                        <td colSpan={4} className="p-8 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('fleet.noDrivers')}</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -219,41 +221,41 @@ const FleetSettingsPage = () => {
                 ) : (
                     <div className="table-responsive">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                            <thead className="bg-keikichi-lime-50 dark:bg-keikichi-forest-700 text-keikichi-forest-600 dark:text-keikichi-lime-300 font-medium border-b border-keikichi-lime-100 dark:border-keikichi-forest-600">
                                 <tr>
-                                    <th className="p-4">Placas</th>
-                                    <th className="p-4">Tipo</th>
-                                    <th className="p-4">Marca/Modelo</th>
-                                    <th className="p-4 text-right">Acciones</th>
+                                    <th className="p-4">{t('fleet.plate')}</th>
+                                    <th className="p-4">{t('common.type')}</th>
+                                    <th className="p-4">{t('fleet.brand')}/{t('fleet.model')}</th>
+                                    <th className="p-4 text-right">{t('common.actions')}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
                                 {vehicles?.map((vehicle) => (
-                                    <tr key={vehicle.id} className="hover:bg-slate-50">
-                                        <td className="p-4 font-medium text-slate-900 flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                    <tr key={vehicle.id} className="hover:bg-keikichi-lime-50/50 dark:hover:bg-keikichi-forest-700/50 transition-colors">
+                                        <td className="p-4 font-medium text-keikichi-forest-800 dark:text-white flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-keikichi-lime-100 dark:bg-keikichi-forest-600 flex items-center justify-center text-keikichi-forest-500 dark:text-keikichi-lime-300">
                                                 <Truck className="w-4 h-4" />
                                             </div>
                                             {vehicle.plate}
                                         </td>
-                                        <td className="p-4 text-slate-600 capitalize">
-                                            <span className={`px-2 py-1 rounded text-xs font-medium ${vehicle.type === 'truck' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
+                                        <td className="p-4 text-keikichi-forest-600 dark:text-keikichi-lime-300 capitalize">
+                                            <span className={`px-2 py-1 rounded text-xs font-medium ${vehicle.type === 'truck' ? 'bg-keikichi-lime-100 text-keikichi-lime-700 dark:bg-keikichi-lime-900/30 dark:text-keikichi-lime-400' : 'bg-keikichi-yellow-100 text-keikichi-yellow-700 dark:bg-keikichi-yellow-900/30 dark:text-keikichi-yellow-400'
                                                 }`}>
-                                                {vehicle.type === 'truck' ? 'Camión' : 'Remolque'}
+                                                {vehicle.type === 'truck' ? t('fleet.truck') : t('fleet.trailer')}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-slate-600">{vehicle.brand} {vehicle.model} ({vehicle.year})</td>
+                                        <td className="p-4 text-keikichi-forest-600 dark:text-keikichi-lime-300">{vehicle.brand} {vehicle.model} ({vehicle.year})</td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={() => { setEditingItem(vehicle); setIsModalOpen(true); }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                                    className="p-2 text-keikichi-lime-600 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => { if (confirm("¿Eliminar vehículo?")) deleteVehicleMutation.mutate(vehicle.id); }}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                                    onClick={() => { if (confirm(t('fleet.confirmDeleteVehicle'))) deleteVehicleMutation.mutate(vehicle.id); }}
+                                                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -263,7 +265,7 @@ const FleetSettingsPage = () => {
                                 ))}
                                 {vehicles?.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-slate-500">No hay vehículos registrados</td>
+                                        <td colSpan={4} className="p-8 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('fleet.noVehicles')}</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -275,12 +277,12 @@ const FleetSettingsPage = () => {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                    <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl shadow-xl max-w-md w-full p-6 border border-keikichi-lime-100 dark:border-keikichi-forest-600">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-slate-900">
-                                {editingItem ? "Editar" : "Nuevo"} {activeTab === "drivers" ? "Conductor" : "Vehículo"}
+                            <h2 className="text-xl font-bold text-keikichi-forest-800 dark:text-white">
+                                {editingItem ? t('common.edit') : t('common.new')} {activeTab === "drivers" ? t('fleet.drivers') : t('fleet.vehicles')}
                             </h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                            <button onClick={() => setIsModalOpen(false)} className="text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-forest-600 dark:hover:text-keikichi-lime-200">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -289,77 +291,77 @@ const FleetSettingsPage = () => {
                             {activeTab === "drivers" ? (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Nombre Completo</label>
+                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('fleet.fullName')}</label>
                                         <input
                                             name="full_name"
                                             defaultValue={editingItem?.full_name}
                                             required
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('common.phone')}</label>
                                         <input
                                             name="phone"
                                             defaultValue={editingItem?.phone}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Licencia</label>
+                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('common.license')}</label>
                                         <input
                                             name="license_number"
                                             defaultValue={editingItem?.license_number}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                         />
                                     </div>
                                 </>
                             ) : (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
+                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('common.type')}</label>
                                         <select
                                             name="type"
                                             defaultValue={editingItem?.type || "truck"}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                         >
-                                            <option value="truck">Camión</option>
-                                            <option value="trailer">Remolque</option>
+                                            <option value="truck">{t('fleet.truck')}</option>
+                                            <option value="trailer">{t('fleet.trailer')}</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Placas</label>
+                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('fleet.plate')}</label>
                                         <input
                                             name="plate"
                                             defaultValue={editingItem?.plate}
                                             required
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Marca</label>
+                                            <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('fleet.brand')}</label>
                                             <input
                                                 name="brand"
                                                 defaultValue={editingItem?.brand}
-                                                className="w-full border rounded-lg px-3 py-2"
+                                                className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Modelo</label>
+                                            <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('fleet.model')}</label>
                                             <input
                                                 name="model"
                                                 defaultValue={editingItem?.model}
-                                                className="w-full border rounded-lg px-3 py-2"
+                                                className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Año</label>
+                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('fleet.year')}</label>
                                         <input
                                             name="year"
                                             defaultValue={editingItem?.year}
-                                            className="w-full border rounded-lg px-3 py-2"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-keikichi-lime-500"
                                         />
                                     </div>
                                 </>
@@ -369,15 +371,15 @@ const FleetSettingsPage = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg"
+                                    className="px-4 py-2 text-keikichi-forest-700 dark:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 rounded-lg transition-colors"
                                 >
-                                    Cancelar
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                    className="px-4 py-2 bg-keikichi-lime-600 text-white rounded-lg hover:bg-keikichi-lime-700 transition-colors"
                                 >
-                                    Guardar
+                                    {t('common.save')}
                                 </button>
                             </div>
                         </form>
