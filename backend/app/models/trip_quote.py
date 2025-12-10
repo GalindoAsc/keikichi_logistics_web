@@ -2,22 +2,9 @@ import enum
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, Boolean
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, Boolean, JSON
 
-from app.models.base import Base
-
-
-class QuoteStatus(str, enum.Enum):
-    pending = "pending"             # Esperando precio de admin
-    quoted = "quoted"               # Admin envió precio
-    negotiating = "negotiating"     # Cliente pidió mejor precio
-    accepted = "accepted"           # Cliente aceptó → crea viaje
-    rejected = "rejected"           # Cliente rechazó
-    expired = "expired"             # Expiró sin respuesta
-
+# ... (imports)
 
 class TripQuote(Base):
     """
@@ -40,24 +27,36 @@ class TripQuote(Base):
     flexible_dates = Column(Boolean, nullable=False, default=False)
     preferred_currency = Column(String(3), nullable=False, default="USD")  # USD o MXN
     
-    # Internacional: tiradas (paradas en bodegas)
-    tiradas = Column(Integer, nullable=True, default=0)
+    # Paradas / Tiradas (JSON con lista de direcciones)
+    # Estructura: [{"address": "...", "date": "...", "contact": "...", "notes": "..."}]
+    stops = Column(JSON, nullable=True)
+    
+    # Opciones Internacionales
     requires_bond = Column(Boolean, nullable=False, default=False)  # Usa fianza Keikichi
     
-    # Carga con temperatura controlada
+    # Detalles de Mercancía
+    merchandise_type = Column(String(100), nullable=True)  # Ej: Perecederos, Secos, etc.
+    merchandise_weight = Column(String(50), nullable=True) # Ej: 20 toneladas
+    merchandise_description = Column(Text, nullable=True)
+    
+    # Servicios Adicionales
     requires_refrigeration = Column(Boolean, nullable=False, default=False)
-    temperature_min = Column(Numeric(5, 2), nullable=True)  # Grados Celsius
+    temperature_min = Column(Numeric(5, 2), nullable=True)
     temperature_max = Column(Numeric(5, 2), nullable=True)
     
-    # Información adicional
+    requires_labeling = Column(Boolean, nullable=False, default=False)
+    requires_pickup = Column(Boolean, nullable=False, default=False)
     pickup_address = Column(Text, nullable=True)
+    pickup_date = Column(DateTime(timezone=True), nullable=True)
+    
+    # Información adicional
     special_requirements = Column(Text, nullable=True)
     
     # Cotización del admin
     quoted_price = Column(Numeric(12, 2), nullable=True)
     quoted_currency = Column(String(3), nullable=True)
-    free_tiradas = Column(Integer, nullable=True, default=0)  # Tiradas incluidas en precio
-    price_per_extra_tirada = Column(Numeric(10, 2), nullable=True)
+    free_stops = Column(Integer, nullable=True, default=0) # Reemplaza free_tiradas
+    price_per_extra_stop = Column(Numeric(10, 2), nullable=True) # Reemplaza price_per_extra_tirada
     admin_notes = Column(Text, nullable=True)
     quoted_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     quoted_at = Column(DateTime(timezone=True), nullable=True)

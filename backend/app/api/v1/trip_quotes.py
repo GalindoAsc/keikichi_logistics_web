@@ -14,10 +14,19 @@ from app.core.permissions import require_manager_or_superadmin
 from app.models import User, UserRole, Trip, TripStatus
 from app.models.trip_quote import TripQuote, QuoteStatus
 
+# ... (imports unchanged)
+
 router = APIRouter(prefix="/trip-quotes", tags=["Trip Quotes"])
 
 
 # === Schemas ===
+
+class QuoteStop(BaseModel):
+    address: str
+    contact: Optional[str] = None
+    phone: Optional[str] = None
+    time: Optional[str] = None
+    notes: Optional[str] = None
 
 class TripQuoteCreate(BaseModel):
     origin: str
@@ -27,20 +36,35 @@ class TripQuoteCreate(BaseModel):
     preferred_date: str  # YYYY-MM-DD
     flexible_dates: bool = False
     preferred_currency: str = "USD"  # USD or MXN
-    tiradas: Optional[int] = 0
+    
+    # Paradas detalladas
+    stops: Optional[List[QuoteStop]] = []
+    
+    # Opciones Internacionales
     requires_bond: bool = False
+    
+    # Mercancía
+    merchandise_type: Optional[str] = None
+    merchandise_weight: Optional[str] = None
+    merchandise_description: Optional[str] = None
+    
+    # Servicios
     requires_refrigeration: bool = False
     temperature_min: Optional[float] = None
     temperature_max: Optional[float] = None
+    requires_labeling: bool = False
+    requires_pickup: bool = False
     pickup_address: Optional[str] = None
+    pickup_date: Optional[datetime] = None
+    
     special_requirements: Optional[str] = None
 
 
 class AdminQuotePrice(BaseModel):
     quoted_price: Decimal = Field(ge=0)
     quoted_currency: str = "USD"
-    free_tiradas: int = 0
-    price_per_extra_tirada: Optional[Decimal] = None
+    free_stops: int = 0
+    price_per_extra_stop: Optional[Decimal] = None
     admin_notes: Optional[str] = None
 
 
@@ -58,17 +82,26 @@ class TripQuoteOut(BaseModel):
     preferred_date: str
     flexible_dates: bool
     preferred_currency: str
-    tiradas: Optional[int]
+    stops: Optional[List[QuoteStop]]
     requires_bond: bool
+    
+    merchandise_type: Optional[str]
+    merchandise_weight: Optional[str]
+    merchandise_description: Optional[str]
+    
     requires_refrigeration: bool
     temperature_min: Optional[float]
     temperature_max: Optional[float]
+    requires_labeling: bool
+    requires_pickup: bool
     pickup_address: Optional[str]
+    pickup_date: Optional[datetime]
+    
     special_requirements: Optional[str]
     quoted_price: Optional[float]
     quoted_currency: Optional[str]
-    free_tiradas: Optional[int]
-    price_per_extra_tirada: Optional[float]
+    free_stops: Optional[int]
+    price_per_extra_stop: Optional[float]
     admin_notes: Optional[str]
     status: str
     client_response: Optional[str]
@@ -98,8 +131,11 @@ async def create_quote_request(
     # Expira 3 días antes de la fecha preferida
     expires_at = datetime.combine(preferred_date, datetime.min.time()) - timedelta(days=3)
     if expires_at <= datetime.now():
-        raise HTTPException(status_code=400, detail="La fecha preferida debe ser al menos 4 días en el futuro")
+        expires_at = datetime.now() + timedelta(days=7) # Fallback seguro
     
+    # Serializar stops a dicts para JSON
+    stops_data = [stop.model_dump() for stop in data.stops] if data.stops else []
+
     quote = TripQuote(
         client_id=current_user.id,
         origin=data.origin,
@@ -109,12 +145,21 @@ async def create_quote_request(
         preferred_date=preferred_date,
         flexible_dates=data.flexible_dates,
         preferred_currency=data.preferred_currency,
-        tiradas=data.tiradas if data.is_international else 0,
+        stops=stops_data,
         requires_bond=data.requires_bond,
+        
+        merchandise_type=data.merchandise_type,
+        merchandise_weight=data.merchandise_weight,
+        merchandise_description=data.merchandise_description,
+        
         requires_refrigeration=data.requires_refrigeration,
         temperature_min=data.temperature_min,
         temperature_max=data.temperature_max,
+        requires_labeling=data.requires_labeling,
+        requires_pickup=data.requires_pickup,
         pickup_address=data.pickup_address,
+        pickup_date=data.pickup_date,
+        
         special_requirements=data.special_requirements,
         status=QuoteStatus.pending,
         expires_at=expires_at
@@ -124,35 +169,7 @@ async def create_quote_request(
     await db.commit()
     await db.refresh(quote)
     
-    return TripQuoteOut(
-        **{
-            "id": quote.id,
-            "origin": quote.origin,
-            "destination": quote.destination,
-            "is_international": quote.is_international,
-            "pallet_count": quote.pallet_count,
-            "preferred_date": str(quote.preferred_date),
-            "flexible_dates": quote.flexible_dates,
-            "preferred_currency": quote.preferred_currency,
-            "tiradas": quote.tiradas,
-            "requires_bond": quote.requires_bond,
-            "requires_refrigeration": quote.requires_refrigeration,
-            "temperature_min": float(quote.temperature_min) if quote.temperature_min else None,
-            "temperature_max": float(quote.temperature_max) if quote.temperature_max else None,
-            "pickup_address": quote.pickup_address,
-            "special_requirements": quote.special_requirements,
-            "quoted_price": None,
-            "quoted_currency": None,
-            "free_tiradas": None,
-            "price_per_extra_tirada": None,
-            "admin_notes": None,
-            "status": quote.status.value,
-            "client_response": None,
-            "created_at": quote.created_at,
-            "expires_at": quote.expires_at,
-            "created_trip_id": None
-        }
-    )
+    return quote # Pydantic v2 handles from_attributes mapping gracefully
 
 
 @router.get("", response_model=List[TripQuoteOut])
@@ -175,38 +192,7 @@ async def list_quotes(
     result = await db.execute(query)
     quotes = result.scalars().all()
     
-    return [
-        TripQuoteOut(
-            id=q.id,
-            origin=q.origin,
-            destination=q.destination,
-            is_international=q.is_international,
-            pallet_count=q.pallet_count,
-            preferred_date=str(q.preferred_date),
-            flexible_dates=q.flexible_dates,
-            preferred_currency=q.preferred_currency,
-            tiradas=q.tiradas,
-            requires_bond=q.requires_bond,
-            requires_refrigeration=q.requires_refrigeration,
-            temperature_min=float(q.temperature_min) if q.temperature_min else None,
-            temperature_max=float(q.temperature_max) if q.temperature_max else None,
-            pickup_address=q.pickup_address,
-            special_requirements=q.special_requirements,
-            quoted_price=float(q.quoted_price) if q.quoted_price else None,
-            quoted_currency=q.quoted_currency,
-            free_tiradas=q.free_tiradas,
-            price_per_extra_tirada=float(q.price_per_extra_tirada) if q.price_per_extra_tirada else None,
-            admin_notes=q.admin_notes if current_user.role != UserRole.client else None,
-            status=q.status.value,
-            client_response=q.client_response,
-            client_name=q.client.full_name if q.client else None,
-            client_email=q.client.email if q.client else None,
-            created_at=q.created_at,
-            expires_at=q.expires_at,
-            created_trip_id=q.created_trip_id
-        )
-        for q in quotes
-    ]
+    return quotes
 
 
 @router.get("/{quote_id}", response_model=TripQuoteOut)
@@ -229,35 +215,7 @@ async def get_quote(
     if current_user.role == UserRole.client and quote.client_id != current_user.id:
         raise HTTPException(status_code=403, detail="No tienes acceso a esta cotización")
     
-    return TripQuoteOut(
-        id=quote.id,
-        origin=quote.origin,
-        destination=quote.destination,
-        is_international=quote.is_international,
-        pallet_count=quote.pallet_count,
-        preferred_date=str(quote.preferred_date),
-        flexible_dates=quote.flexible_dates,
-        preferred_currency=quote.preferred_currency,
-        tiradas=quote.tiradas,
-        requires_bond=quote.requires_bond,
-        requires_refrigeration=quote.requires_refrigeration,
-        temperature_min=float(quote.temperature_min) if quote.temperature_min else None,
-        temperature_max=float(quote.temperature_max) if quote.temperature_max else None,
-        pickup_address=quote.pickup_address,
-        special_requirements=quote.special_requirements,
-        quoted_price=float(quote.quoted_price) if quote.quoted_price else None,
-        quoted_currency=quote.quoted_currency,
-        free_tiradas=quote.free_tiradas,
-        price_per_extra_tirada=float(quote.price_per_extra_tirada) if quote.price_per_extra_tirada else None,
-        admin_notes=quote.admin_notes if current_user.role != UserRole.client else None,
-        status=quote.status.value,
-        client_response=quote.client_response,
-        client_name=quote.client.full_name if quote.client else None,
-        client_email=quote.client.email if quote.client else None,
-        created_at=quote.created_at,
-        expires_at=quote.expires_at,
-        created_trip_id=quote.created_trip_id
-    )
+    return quote
 
 
 @router.patch("/{quote_id}/quote")
@@ -279,8 +237,8 @@ async def admin_set_quote(
     
     quote.quoted_price = data.quoted_price
     quote.quoted_currency = data.quoted_currency
-    quote.free_tiradas = data.free_tiradas
-    quote.price_per_extra_tirada = data.price_per_extra_tirada
+    quote.free_stops = data.free_stops
+    quote.price_per_extra_stop = data.price_per_extra_stop
     quote.admin_notes = data.admin_notes
     quote.quoted_by = current_user.id
     quote.quoted_at = datetime.now()

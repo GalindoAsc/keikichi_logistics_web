@@ -21,7 +21,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = authStore.getState().refreshToken;
         if (refreshToken) {
-          const refreshResponse = await api.post("/auth/refresh", { access_token: refreshToken });
+          const refreshResponse = await api.post("/auth/refresh", { refresh_token: refreshToken });
           authStore.getState().setTokens(refreshResponse.data.access_token, refreshToken);
           error.config.headers["Authorization"] = `Bearer ${refreshResponse.data.access_token}`;
           return api.request(error.config);
