@@ -71,7 +71,7 @@ const Header = () => {
             </button>
 
             <Link to={isAdmin ? "/admin/dashboard" : "/"} className="flex items-center gap-2">
-              <img src="/keikichi_logo.jpg" alt="Keikichi Logistics" className="h-10 sm:h-12 w-auto object-contain" />
+              <img src="/keikichi_logo.png" alt="Keikichi Logistics" className="h-10 sm:h-12 w-auto object-contain" />
             </Link>
           </div>
 
@@ -204,7 +204,7 @@ const Header = () => {
           >
             {/* Drawer Header */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex-shrink-0">
-              <img src="/keikichi_logo.jpg" alt="Keikichi" className="h-8" />
+              <img src="/keikichi_logo.png" alt="Keikichi" className="h-8" />
               <button
                 onClick={closeMobileMenu}
                 className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
