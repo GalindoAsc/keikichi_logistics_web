@@ -31,6 +31,9 @@ import PendingVerificationsPage from "./pages/admin/PendingVerificationsPage";
 import DocumentSettingsPage from "./pages/admin/DocumentSettingsPage";
 import QRScannerPage from "./pages/admin/QRScannerPage";
 import MyFilesPage from "./pages/client/MyFilesPage";
+import RequestTripPage from "./pages/client/RequestTripPage";
+import MyQuotesPage from "./pages/client/MyQuotesPage";
+import TripQuotesPage from "./pages/admin/TripQuotesPage";
 import { Toaster } from "sonner";
 import { authStore } from "./stores/authStore";
 
@@ -95,6 +98,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <VerificationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/request-trip"
+              element={
+                <ProtectedRoute>
+                  <RequestTripPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-quotes"
+              element={
+                <ProtectedRoute>
+                  <MyQuotesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/quotes"
+              element={
+                <ProtectedRoute allowedRoles={["superadmin", "manager"]}>
+                  <TripQuotesPage />
                 </ProtectedRoute>
               }
             />

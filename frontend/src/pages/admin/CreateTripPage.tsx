@@ -9,8 +9,8 @@ import { useCreateTrip, useUpdateTrip, useTrip } from "../../hooks/useTrips";
 import { ArrowLeft } from "lucide-react";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
 import api from "../../api/client";
+import { useTranslation } from "react-i18next";
 
-// Fleet Interfaces
 interface Driver {
     id: string;
     full_name: string;
@@ -28,60 +28,59 @@ interface Vehicle {
 const fetchDrivers = async () => (await api.get<Driver[]>("/fleet/drivers")).data;
 const fetchVehicles = async () => (await api.get<Vehicle[]>("/fleet/vehicles")).data;
 
-const tripSchema = z.object({
-    is_international: z.preprocess(
-        (val) => val === "true" || val === true,
-        z.boolean()
-    ).default(false),
-    origin: z.string().min(1, "Origen requerido"),
-    destination: z.string().min(1, "Destino requerido"),
-    departure_date: z.string().min(1, "Fecha requerida").refine((date) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const selectedDate = new Date(date + "T00:00:00"); // Append time to avoid timezone issues
-        return selectedDate >= today;
-    }, "La fecha no puede ser anterior a hoy"),
-    departure_time: z.preprocess(
-        (val) => (val === "" ? undefined : val),
-        z.string().optional()
-    ),
-    total_spaces: z.number().min(1, "Mínimo 1 espacio"),
-    price_per_space: z.number().min(0, "Precio no puede ser negativo"),
-    pickup_cost: z.preprocess(
-        (val) => (Number.isNaN(Number(val)) ? undefined : Number(val)),
-        z.number().min(0).optional()
-    ),
-    pickup_cost_type: z.enum(["flat_rate", "per_pallet"]),
-    bond_cost: z.number().min(0).default(500),
-    currency: z.enum(["MXN", "USD"]),
-    exchange_rate: z.number().min(0.1, "Tipo de cambio requerido"),
-    individual_pricing: z.boolean().default(false),
-    tax_included: z.boolean().default(true),
-    tax_rate: z.number().default(0.16),
-    payment_deadline_hours: z.number().min(1).default(24),
-    notes_public: z.string().optional(),
-    notes_internal: z.string().optional(),
-    truck_identifier: z.string().optional(),
-    trailer_identifier: z.string().optional(),
-    truck_plate: z.string().optional(),
-    trailer_plate: z.string().optional(),
-    driver_name: z.string().optional(),
-    driver_phone: z.string().optional(),
-});
-
-type TripFormData = z.infer<typeof tripSchema>;
-
 const CreateTripPage = () => {
     const { id } = useParams();
     const isEditMode = !!id;
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<"general" | "pricing" | "fleet" | "notes">("general");
+    const { t } = useTranslation();
+
+    const tripSchema = z.object({
+        is_international: z.preprocess(
+            (val) => val === "true" || val === true,
+            z.boolean()
+        ).default(false),
+        origin: z.string().min(1, t('validation.originRequired')),
+        destination: z.string().min(1, t('validation.destinationRequired')),
+        departure_date: z.string().min(1, t('validation.dateRequired')).refine((date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(date + "T00:00:00");
+            return selectedDate >= today;
+        }, t('trips.dateCannotBePast')),
+        departure_time: z.preprocess(
+            (val) => (val === "" ? undefined : val),
+            z.string().optional()
+        ),
+        total_spaces: z.number().min(1, t('validation.minOneSpace')),
+        price_per_space: z.number().min(0, t('validation.priceNotNegative')),
+        pickup_cost: z.preprocess(
+            (val) => (Number.isNaN(Number(val)) ? undefined : Number(val)),
+            z.number().min(0).optional()
+        ),
+        pickup_cost_type: z.enum(["flat_rate", "per_pallet"]),
+        bond_cost: z.number().min(0).default(500),
+        currency: z.enum(["MXN", "USD"]),
+        exchange_rate: z.number().min(0.1, t('validation.exchangeRateRequired')),
+        individual_pricing: z.boolean().default(false),
+        tax_included: z.boolean().default(true),
+        tax_rate: z.number().default(0.16),
+        payment_deadline_hours: z.number().min(1).default(24),
+        notes_public: z.string().optional(),
+        notes_internal: z.string().optional(),
+        truck_identifier: z.string().optional(),
+        trailer_identifier: z.string().optional(),
+        truck_plate: z.string().optional(),
+        trailer_plate: z.string().optional(),
+        driver_name: z.string().optional(),
+        driver_phone: z.string().optional(),
+    });
+
+    type TripFormData = z.infer<typeof tripSchema>;
 
     const createTrip = useCreateTrip();
     const updateTrip = useUpdateTrip();
     const { data: trip, isLoading: isLoadingTrip } = useTrip(id || "");
-
-    // Fleet Data
     const { data: drivers } = useQuery({ queryKey: ["drivers"], queryFn: fetchDrivers });
     const { data: vehicles } = useQuery({ queryKey: ["vehicles"], queryFn: fetchVehicles });
 
@@ -140,14 +139,14 @@ const CreateTripPage = () => {
         try {
             if (isEditMode && id) {
                 await updateTrip.mutateAsync({ id, data });
-                toast.success("Viaje actualizado exitosamente");
+                toast.success(t('trips.tripUpdated'));
             } else {
                 await createTrip.mutateAsync(data);
-                toast.success("Viaje creado exitosamente");
+                toast.success(t('trips.tripCreated'));
             }
             navigate("/admin/trips");
         } catch (error: any) {
-            const message = error?.response?.data?.detail || (isEditMode ? "Error al actualizar el viaje" : "Error al crear el viaje");
+            const message = error?.response?.data?.detail || (isEditMode ? t('trips.tripUpdateError') : t('trips.tripCreateError'));
             toast.error(message);
             console.error(error);
         }
@@ -157,20 +156,20 @@ const CreateTripPage = () => {
         console.log("Validation errors:", errors);
         const errorFields = Object.keys(errors).map(key => {
             const labels: Record<string, string> = {
-                origin: "Origen",
-                destination: "Destino",
-                departure_date: "Fecha de Salida",
-                departure_time: "Hora de Salida",
-                total_spaces: "Total Espacios",
-                price_per_space: "Precio por Espacio",
-                pickup_cost: "Costo Recolección",
-                exchange_rate: "Tipo de Cambio",
-                payment_deadline_hours: "Plazo de Pago",
-                bond_cost: "Costo de Fianza",
+                origin: t('trips.origin'),
+                destination: t('trips.destination'),
+                departure_date: t('trips.departureDate'),
+                departure_time: t('trips.departureTime'),
+                total_spaces: t('trips.totalSpaces'),
+                price_per_space: t('trips.pricePerSpace'),
+                pickup_cost: t('trips.pickupCost'),
+                exchange_rate: t('trips.exchangeRate'),
+                payment_deadline_hours: t('trips.paymentDeadline'),
+                bond_cost: t('trips.bondCost'),
             };
             return labels[key] || key;
         }).join(", ");
-        toast.error(`Por favor corrige los errores en: ${errorFields}`);
+        toast.error(`${t('trips.fixErrors')}: ${errorFields}`);
     };
 
     const handleDriverChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -215,38 +214,38 @@ const CreateTripPage = () => {
     }
 
     const tabs = [
-        { id: "general", label: "Información General" },
-        { id: "pricing", label: "Precios y Espacios" },
-        { id: "fleet", label: "Flota y Chofer" },
-        { id: "notes", label: "Notas" },
+        { id: "general", label: t('trips.generalInfo') },
+        { id: "pricing", label: t('trips.pricingSpaces') },
+        { id: "fleet", label: t('trips.fleetDriver') },
+        { id: "notes", label: t('trips.notes') },
     ];
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/")}
-                className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+                className="flex items-center text-keikichi-forest-600 dark:text-keikichi-lime-300 hover:text-keikichi-forest-900 dark:hover:text-keikichi-lime-100 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al Dashboard
+                {t('common.backToDashboard')}
             </button>
 
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-                <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                        {isEditMode ? "Editar Viaje" : "Crear Nuevo Viaje"}
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl shadow-sm border border-keikichi-lime-100 dark:border-keikichi-forest-600 overflow-hidden transition-colors">
+                <div className="p-6 border-b border-keikichi-lime-100 dark:border-keikichi-forest-600">
+                    <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">
+                        {isEditMode ? t('trips.editTrip') : t('trips.newTrip')}
                     </h1>
                 </div>
 
                 {/* Tabs Header */}
-                <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+                <div className="flex border-b border-keikichi-lime-100 dark:border-keikichi-forest-600 overflow-x-auto">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
                             className={`px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeTab === tab.id
-                                ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-600"
+                                ? "border-keikichi-lime-600 text-keikichi-lime-600 dark:border-keikichi-lime-400 dark:text-keikichi-lime-400"
+                                : "border-transparent text-keikichi-forest-500 hover:text-keikichi-forest-700 hover:border-keikichi-lime-300 dark:text-keikichi-lime-400 dark:hover:text-keikichi-lime-200 dark:hover:border-keikichi-lime-500"
                                 }`}
                         >
                             {tab.label}
@@ -257,7 +256,7 @@ const CreateTripPage = () => {
                 {/* Error Summary */}
                 {Object.keys(errors).length > 0 && (
                     <div className="m-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                        <h3 className="text-red-800 dark:text-red-300 font-medium mb-2">Por favor corrige los siguientes errores:</h3>
+                        <h3 className="text-red-800 dark:text-red-300 font-medium mb-2">{t('errors.fixErrors')}:</h3>
                         <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400">
                             {Object.entries(errors).map(([key, error]) => (
                                 <li key={key}>
@@ -272,64 +271,64 @@ const CreateTripPage = () => {
                     {/* General Tab */}
                     {activeTab === "general" && (
                         <div className="space-y-6">
-                            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-2">Tipo de Viaje</label>
+                            <div className="bg-keikichi-lime-50 dark:bg-keikichi-forest-700 p-4 rounded-lg border border-keikichi-lime-200 dark:border-keikichi-forest-600">
+                                <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 block mb-2">{t('trips.tripType')}</label>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-2 cursor-pointer dark:text-slate-200">
+                                    <label className="flex items-center gap-2 cursor-pointer text-keikichi-forest-700 dark:text-keikichi-lime-200">
                                         <input
                                             type="radio"
                                             value="false"
                                             {...register("is_international")}
-                                            className="text-blue-600 focus:ring-blue-500 dark:bg-slate-700 dark:border-slate-600"
+                                            className="text-keikichi-lime-600 focus:ring-keikichi-lime-500 dark:bg-keikichi-forest-600 dark:border-keikichi-forest-500"
                                         />
-                                        <span>Nacional</span>
+                                        <span>{t('trips.national')}</span>
                                     </label>
-                                    <label className="flex items-center gap-2 cursor-pointer dark:text-slate-200">
+                                    <label className="flex items-center gap-2 cursor-pointer text-keikichi-forest-700 dark:text-keikichi-lime-200">
                                         <input
                                             type="radio"
                                             value="true"
                                             {...register("is_international")}
-                                            className="text-blue-600 focus:ring-blue-500 dark:bg-slate-700 dark:border-slate-600"
+                                            className="text-keikichi-lime-600 focus:ring-keikichi-lime-500 dark:bg-keikichi-forest-600 dark:border-keikichi-forest-500"
                                         />
-                                        <span>Internacional</span>
+                                        <span>{t('trips.international')}</span>
                                     </label>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Origen</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.origin')}</label>
                                     <input
                                         {...register("origin")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                         placeholder="Ej. Los Angeles, CA"
                                     />
                                     {errors.origin && <p className="text-xs text-red-500 dark:text-red-400">{errors.origin.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Destino</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.destination')}</label>
                                     <input
                                         {...register("destination")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                         placeholder="Ej. Guadalajara, JAL"
                                     />
                                     {errors.destination && <p className="text-xs text-red-500 dark:text-red-400">{errors.destination.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Fecha de Salida</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.departureDate')}</label>
                                     <input
                                         type="date"
                                         {...register("departure_date")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                     {errors.departure_date && <p className="text-xs text-red-500 dark:text-red-400">{errors.departure_date.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Hora de Salida (Opcional)</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.departureTime')} ({t('common.none')})</label>
                                     <input
                                         type="time"
                                         {...register("departure_time")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                 </div>
                             </div>
@@ -341,83 +340,83 @@ const CreateTripPage = () => {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Total Espacios</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.totalSpaces')}</label>
                                     <input
                                         type="number"
                                         {...register("total_spaces", { valueAsNumber: true })}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                     {errors.total_spaces && <p className="text-xs text-red-500 dark:text-red-400">{errors.total_spaces.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Precio por Espacio</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.pricePerSpace')}</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         {...register("price_per_space", { valueAsNumber: true })}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                     {errors.price_per_space && <p className="text-xs text-red-500 dark:text-red-400">{errors.price_per_space.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Moneda</label>
-                                    <select {...register("currency")} className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.currency')}</label>
+                                    <select {...register("currency")} className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500">
                                         <option value="USD">USD</option>
                                         <option value="MXN">MXN</option>
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Tipo de Cambio</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.exchangeRate')}</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         {...register("exchange_rate", { valueAsNumber: true })}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                     {errors.exchange_rate && <p className="text-xs text-red-500 dark:text-red-400">{errors.exchange_rate.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Plazo de Pago (Horas)</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.paymentDeadline')}</label>
                                     <input
                                         type="number"
                                         {...register("payment_deadline_hours", { valueAsNumber: true })}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                     {errors.payment_deadline_hours && <p className="text-xs text-red-500 dark:text-red-400">{errors.payment_deadline_hours.message}</p>}
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-keikichi-lime-50 dark:bg-keikichi-forest-700 p-4 rounded-lg">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Costo Recolección</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.pickupCost')}</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         {...register("pickup_cost", { valueAsNumber: true })}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-600 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Tipo de Cobro Recolección</label>
-                                    <select {...register("pickup_cost_type")} className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-                                        <option value="flat_rate">Costo Fijo (Por viaje)</option>
-                                        <option value="per_pallet">Por Tarima (Por espacio)</option>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.pickupCostType')}</label>
+                                    <select {...register("pickup_cost_type")} className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-600 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500">
+                                        <option value="flat_rate">{t('trips.flatRate')}</option>
+                                        <option value="per_pallet">{t('trips.perPallet')}</option>
                                     </select>
                                 </div>
                             </div>
 
                             {isInternational && (
-                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800/30">
-                                    <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Configuración Internacional</h4>
+                                <div className="bg-keikichi-yellow-50 dark:bg-keikichi-yellow-900/20 p-4 rounded-lg border border-keikichi-yellow-200 dark:border-keikichi-yellow-800/30">
+                                    <h4 className="text-sm font-medium text-keikichi-yellow-900 dark:text-keikichi-yellow-300 mb-2">{t('trips.internationalConfig')}</h4>
                                     <div className="space-y-1">
-                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Costo de Fianza (Keikichi)</label>
+                                        <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.bondCost')}</label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             {...register("bond_cost", { valueAsNumber: true })}
-                                            className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                            className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                         />
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">Este costo se sumará si el cliente elige usar la fianza de Keikichi.</p>
+                                        <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('trips.bondCostHelp')}</p>
                                     </div>
                                 </div>
                             )}
@@ -429,83 +428,79 @@ const CreateTripPage = () => {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Seleccionar Chofer</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.selectDriver')}</label>
                                     <select
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                         onChange={handleDriverChange}
                                         defaultValue=""
                                     >
-                                        <option value="">-- Seleccionar --</option>
+                                        <option value="">-- {t('common.select')} --</option>
                                         {drivers?.map(d => (
                                             <option key={d.id} value={d.id}>{d.full_name}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nombre del Chofer</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.driverName')}</label>
                                     <input
                                         {...register("driver_name")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
-                                        placeholder="Nombre del Chofer"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-keikichi-lime-50 dark:bg-keikichi-forest-600 text-keikichi-forest-800 dark:text-white"
                                         readOnly
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Teléfono Chofer</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.driverPhone')}</label>
                                     <input
                                         {...register("driver_phone")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
-                                        placeholder="Teléfono"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-keikichi-lime-50 dark:bg-keikichi-forest-600 text-keikichi-forest-800 dark:text-white"
                                         readOnly
                                     />
                                 </div>
                             </div>
 
-                            <div className="border-t dark:border-slate-800 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="border-t border-keikichi-lime-100 dark:border-keikichi-forest-600 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Seleccionar Camión</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.selectTruck')}</label>
                                     <select
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                         onChange={handleTruckChange}
                                         defaultValue=""
                                     >
-                                        <option value="">-- Seleccionar --</option>
+                                        <option value="">-- {t('common.select')} --</option>
                                         {trucks.map(t => (
                                             <option key={t.id} value={t.id}>{t.plate} - {t.brand} {t.model}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Placas Camión</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.truckPlate')}</label>
                                     <input
                                         {...register("truck_plate")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
-                                        placeholder="Placas del Camión"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-keikichi-lime-50 dark:bg-keikichi-forest-600 text-keikichi-forest-800 dark:text-white"
                                         readOnly
                                     />
                                 </div>
                             </div>
 
-                            <div className="border-t dark:border-slate-800 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="border-t border-keikichi-lime-100 dark:border-keikichi-forest-600 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Seleccionar Remolque</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.selectTrailer')}</label>
                                     <select
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                                         onChange={handleTrailerChange}
                                         defaultValue=""
                                     >
-                                        <option value="">-- Seleccionar --</option>
+                                        <option value="">-- {t('common.select')} --</option>
                                         {trailers.map(t => (
                                             <option key={t.id} value={t.id}>{t.plate} - {t.brand} {t.model}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Placas Remolque</label>
+                                    <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.trailerPlate')}</label>
                                     <input
                                         {...register("trailer_plate")}
-                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
-                                        placeholder="Placas del Remolque"
+                                        className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-keikichi-lime-50 dark:bg-keikichi-forest-600 text-keikichi-forest-800 dark:text-white"
                                         readOnly
                                     />
                                 </div>
@@ -517,31 +512,31 @@ const CreateTripPage = () => {
                     {activeTab === "notes" && (
                         <div className="space-y-6">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Notas Públicas (Visible para clientes)</label>
+                                <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.publicNotes')}</label>
                                 <textarea
                                     {...register("notes_public")}
-                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 h-32 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                    placeholder="Información importante para el cliente..."
+                                    className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 h-32 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
+                                    placeholder={t('trips.publicNotesPlaceholder')}
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Notas Internas</label>
+                                <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('trips.internalNotes')}</label>
                                 <textarea
                                     {...register("notes_internal")}
-                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 h-32 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                    placeholder="Notas solo para administradores..."
+                                    className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 h-32 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
+                                    placeholder={t('trips.internalNotesPlaceholder')}
                                 />
                             </div>
                         </div>
                     )}
 
-                    <div className="flex justify-end pt-6 border-t border-slate-200 dark:border-slate-800 mt-6">
+                    <div className="flex justify-end pt-6 border-t border-keikichi-lime-100 dark:border-keikichi-forest-600 mt-6">
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 font-medium shadow-sm transition-colors"
+                            className="bg-keikichi-lime-600 text-white px-6 py-2 rounded-md hover:bg-keikichi-lime-700 disabled:opacity-50 font-medium shadow-sm transition-colors"
                         >
-                            {isSubmitting ? "Procesando..." : (isEditMode ? "Actualizar Viaje" : "Crear Viaje")}
+                            {isSubmitting ? t('common.processing') : (isEditMode ? t('trips.updateTrip') : t('trips.createTrip'))}
                         </button>
                     </div>
                 </form>

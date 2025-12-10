@@ -13,6 +13,7 @@ from app.models.catalog import Product, Unit
 from app.models.load_item import LoadItem
 from app.models.label_price import LabelPrice
 from app.models.waitlist import Waitlist
+from app.models.trip_quote import TripQuote, QuoteStatus
 
 __all__ = [
     "Base",

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { LogOut, LayoutDashboard, CalendarDays, Map, Settings, List, Menu, X, QrCode, Sun, Moon, Globe } from "lucide-react";
+import { LogOut, LayoutDashboard, CalendarDays, Map, Settings, List, Menu, X, QrCode, Sun, Moon, Globe, DollarSign, Truck } from "lucide-react";
 import { authStore } from "../../stores/authStore";
 import NotificationBell from "./NotificationBell";
 import { useState, useEffect } from "react";
@@ -98,6 +98,10 @@ const Header = () => {
                   <Map className="w-4 h-4" />
                   {t('nav.trips')}
                 </Link>
+                <Link to="/admin/quotes" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
+                  <DollarSign className="w-4 h-4" />
+                  {t('nav.quotes')}
+                </Link>
                 <Link to="/admin/scanner" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
                   <QrCode className="w-4 h-4" />
                   {t('nav.qrScanner')}
@@ -112,6 +116,14 @@ const Header = () => {
                 <Link to="/" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
                   <Map className="w-4 h-4" />
                   {t('nav.reserve')}
+                </Link>
+                <Link to="/request-trip" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
+                  <Truck className="w-4 h-4" />
+                  {t('nav.requestTrip')}
+                </Link>
+                <Link to="/my-quotes" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
+                  <DollarSign className="w-4 h-4" />
+                  {t('nav.myQuotes')}
                 </Link>
                 <Link to="/reservations" className="text-keikichi-forest-600 dark:text-keikichi-lime-200 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 font-medium flex items-center gap-2 transition-colors">
                   <List className="w-4 h-4" />
