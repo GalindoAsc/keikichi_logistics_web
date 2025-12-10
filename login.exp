@@ -7,7 +7,8 @@ set port [lindex $argv 2]
 set password [lindex $argv 3]
 set command [lindex $argv 4]
 
-spawn ssh -p $port $user@$host $command
+# Disable host key checking and force TTY
+spawn ssh -o StrictHostKeyChecking=no -tt -p $port $user@$host $command
 
 expect {
     "yes/no" {
@@ -15,6 +16,7 @@ expect {
         exp_continue
     }
     "*?assword:*" {
+        puts "\n>>> Sending password..."
         sleep 1
         send "$password\r"
     }
