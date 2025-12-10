@@ -20,8 +20,12 @@ expect {
     }
     "*?assword:*" {
         puts "\n>>> Sending password (attempting)..."
-        sleep 2
-        send -- "$password\r"
+        sleep 0.5
+        send -- "$password\n"
+    }
+    "Permission denied" {
+        puts "\n>>> ERROR: Wrong password or account locked."
+        exit 1
     }
 }
 expect eof
