@@ -196,7 +196,7 @@ const PriceRow = ({
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors: _errors },
     } = useForm<LabelPriceFormData>({
         resolver: zodResolver(labelPriceSchema),
         defaultValues: {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2, Edit2, Truck, User, Save, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Truck, User, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import api from "../../api/client";
@@ -49,8 +49,8 @@ const FleetSettingsPage = () => {
     const { data: vehicles, isLoading: loadingVehicles } = useQuery({ queryKey: ["vehicles"], queryFn: fetchVehicles });
 
     // Mutations
-    const driverMutation = useMutation({
-        mutationFn: editingItem?.id ? updateDriver : createDriver,
+    const createDriverMutation = useMutation({
+        mutationFn: createDriver,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["drivers"] });
             setIsModalOpen(false);
@@ -59,13 +59,33 @@ const FleetSettingsPage = () => {
         }
     });
 
-    const vehicleMutation = useMutation({
-        mutationFn: editingItem?.id ? updateVehicle : createVehicle,
+    const updateDriverMutation = useMutation({
+        mutationFn: updateDriver,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["drivers"] });
+            setIsModalOpen(false);
+            setEditingItem(null);
+            toast.success("Conductor actualizado");
+        }
+    });
+
+    const createVehicleMutation = useMutation({
+        mutationFn: createVehicle,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["vehicles"] });
             setIsModalOpen(false);
             setEditingItem(null);
             toast.success("Vehículo guardado");
+        }
+    });
+
+    const updateVehicleMutation = useMutation({
+        mutationFn: updateVehicle,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+            setIsModalOpen(false);
+            setEditingItem(null);
+            toast.success("Vehículo actualizado");
         }
     });
 
@@ -92,15 +112,15 @@ const FleetSettingsPage = () => {
 
         if (activeTab === "drivers") {
             if (editingItem?.id) {
-                driverMutation.mutate({ id: editingItem.id, data });
+                updateDriverMutation.mutate({ id: editingItem.id, data });
             } else {
-                driverMutation.mutate(data);
+                createDriverMutation.mutate(data);
             }
         } else {
             if (editingItem?.id) {
-                vehicleMutation.mutate({ id: editingItem.id, data });
+                updateVehicleMutation.mutate({ id: editingItem.id, data });
             } else {
-                vehicleMutation.mutate(data);
+                createVehicleMutation.mutate(data);
             }
         }
     };

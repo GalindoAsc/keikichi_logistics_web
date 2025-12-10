@@ -34,6 +34,7 @@ export interface ReservationTrip {
     price_per_space: number;
     tax_rate: number;
     tax_included: boolean;
+    currency?: string;
 }
 
 export interface Reservation {

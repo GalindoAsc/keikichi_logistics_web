@@ -1,4 +1,3 @@
-import { LoadItemCreate } from '../../types/reservation';
 import { Trash2, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useProducts } from "../../hooks/useProducts";

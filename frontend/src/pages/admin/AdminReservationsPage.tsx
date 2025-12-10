@@ -18,7 +18,7 @@ interface ActionProps {
     onDelete: () => void;
 }
 
-function ReservationActions({ reservationId, status, onView, onCancel, onDelete }: ActionProps) {
+function ReservationActions({ reservationId: _reservationId, status, onView, onCancel, onDelete }: ActionProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [position, setPosition] = useState({ top: 0, left: 0 });
     const buttonRef = useRef<HTMLButtonElement>(null);

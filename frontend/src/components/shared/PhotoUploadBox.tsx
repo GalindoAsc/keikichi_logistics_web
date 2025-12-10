@@ -1,5 +1,5 @@
 import { useRef, ChangeEvent } from 'react';
-import { Upload, X, CheckCircle, Camera, Image as ImageIcon } from 'lucide-react';
+import { Upload, CheckCircle, Camera, Image as ImageIcon } from 'lucide-react';
 
 interface Props {
     label: string;
