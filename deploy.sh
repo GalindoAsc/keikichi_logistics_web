@@ -79,9 +79,10 @@ deploy() {
     echo -e "${YELLOW}Descargando imágenes base...${NC}"
     docker-compose -f docker-compose.prod.yml pull db nginx
     
-    # Build de imágenes (usando cache para velocidad)
+    # Build de imágenes (Frontend sin caché para asegurar variables de entorno)
     echo -e "${YELLOW}Construyendo imágenes...${NC}"
-    docker-compose -f docker-compose.prod.yml build
+    docker-compose -f docker-compose.prod.yml build backend
+    docker-compose -f docker-compose.prod.yml build --no-cache frontend
     
     # Detener contenedores antiguos
     echo -e "${YELLOW}Deteniendo contenedores anteriores...${NC}"

@@ -11,7 +11,7 @@ import { EmailInput } from "./EmailInput";
 import { useTranslation } from "react-i18next";
 
 const LoginForm = () => {
-  const { mutateAsync, isPending, isError } = useLogin();
+  const { mutateAsync, isPending, isError, error } = useLogin();
   const { register, handleSubmit } = useForm<LoginRequest>();
   const [method, setMethod] = useState<'email' | 'phone'>('phone');
   const [countryCode, setCountryCode] = useState('+52');
@@ -104,7 +104,15 @@ const LoginForm = () => {
         />
       </div>
 
-      {isError && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-800">{t('auth.loginError')}</p>}
+      {isError && (
+        <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-800">
+          <p>{t('auth.loginError')}</p>
+          <p className="text-xs mt-1 font-mono opacity-80">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            Details: {(error as any)?.response?.data?.detail || (error as any)?.message || "Unknown error"}
+          </p>
+        </div>
+      )}
 
       <button
         type="submit"
