@@ -72,13 +72,13 @@ function ReservationActions({ reservationId: _reservationId, status, onView, onC
 
             {isOpen && createPortal(
                 <div
-                    className="fixed bg-white rounded-lg shadow-lg border border-slate-100 py-1 z-50 w-48"
+                    className="fixed bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-100 dark:border-slate-700 py-1 z-50 w-48"
                     style={{ top: position.top, left: position.left }}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button
                         onClick={() => { setIsOpen(false); onView(); }}
-                        className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                        className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
                     >
                         <Eye className="w-4 h-4 text-indigo-500" /> Ver Detalle
                     </button>
@@ -86,7 +86,7 @@ function ReservationActions({ reservationId: _reservationId, status, onView, onC
                     {status !== ReservationStatus.CANCELLED && (
                         <button
                             onClick={() => { setIsOpen(false); onCancel(); }}
-                            className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                            className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
                         >
                             <Ban className="w-4 h-4 text-orange-500" /> Cancelar
                         </button>
@@ -94,7 +94,7 @@ function ReservationActions({ reservationId: _reservationId, status, onView, onC
 
                     <button
                         onClick={() => { setIsOpen(false); onDelete(); }}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2"
                     >
                         <Trash2 className="w-4 h-4" /> Eliminar
                     </button>
@@ -210,11 +210,11 @@ export default function AdminReservationsPage() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Reservaciones</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Reservaciones</h1>
 
                 <div className="flex gap-2">
                     <select
-                        className="border rounded-lg px-3 py-2 text-sm bg-white"
+                        className="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                         value={paymentFilter}
                         onChange={(e) => setPaymentFilter(e.target.value)}
                     >
@@ -225,7 +225,7 @@ export default function AdminReservationsPage() {
                     </select>
 
                     <select
-                        className="border rounded-lg px-3 py-2 text-sm bg-white"
+                        className="border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -239,18 +239,18 @@ export default function AdminReservationsPage() {
 
             {/* Bulk Action Bar */}
             {selectedIds.length > 0 && (
-                <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
                     <div className="flex items-center gap-2">
                         <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                             {selectedIds.length}
                         </span>
-                        <span className="text-sm font-medium text-indigo-900">
+                        <span className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
                             seleccionados
                         </span>
                     </div>
                     <button
                         onClick={handleBulkDelete}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                     >
                         <Trash2 className="w-4 h-4" />
                         Eliminar Selección
@@ -259,17 +259,17 @@ export default function AdminReservationsPage() {
             )}
 
             {isLoading ? (
-                <div className="text-center py-12">Cargando reservaciones...</div>
+                <div className="text-center py-12 text-slate-500 dark:text-slate-400">Cargando reservaciones...</div>
             ) : (
-                <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
                     <div className="table-responsive">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                            <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium border-b border-slate-200 dark:border-slate-700">
                                 <tr>
                                     <th className="px-4 py-3 w-10">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            className="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-indigo-600 focus:ring-indigo-500"
                                             checked={data?.items.length === selectedIds.length && (data?.items.length ?? 0) > 0}
                                             onChange={handleSelectAll}
                                         />
@@ -284,52 +284,52 @@ export default function AdminReservationsPage() {
                                     <th className="px-4 py-3 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {data?.items.map((res) => (
-                                    <tr key={res.id} className={`hover:bg-slate-50 transition-colors ${selectedIds.includes(res.id) ? 'bg-indigo-50/50' : ''}`}>
+                                    <tr key={res.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${selectedIds.includes(res.id) ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''}`}>
                                         <td className="px-4 py-3">
                                             <input
                                                 type="checkbox"
-                                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                                className="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-indigo-600 focus:ring-indigo-500"
                                                 checked={selectedIds.includes(res.id)}
                                                 onChange={() => handleSelectRow(res.id)}
                                             />
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="font-mono text-xs text-slate-500">#{res.id.slice(0, 8)}</div>
-                                            <div className="text-slate-900">
+                                            <div className="font-mono text-xs text-slate-500 dark:text-slate-400">#{res.id.slice(0, 8)}</div>
+                                            <div className="text-slate-900 dark:text-white">
                                                 {format(new Date(res.created_at), "d MMM yyyy", { locale: es })}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="font-medium text-slate-900">
+                                            <div className="font-medium text-slate-900 dark:text-white">
                                                 {res.client_name || "Desconocido"}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="font-medium text-slate-900">
+                                            <div className="font-medium text-slate-900 dark:text-white">
                                                 {res.trip_origin} → {res.trip_destination}
                                             </div>
-                                            <div className="text-xs text-slate-500">
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">
                                                 {res.trip_departure_date && format(new Date(res.trip_departure_date), "d MMM", { locale: es })}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-center">
-                                            <span className="bg-slate-100 px-2 py-1 rounded text-xs font-medium">
+                                            <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-medium text-slate-900 dark:text-slate-200">
                                                 {res.spaces_count}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 font-medium text-slate-900">
+                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
                                             <div className="flex flex-col">
                                                 <span>${res.total_amount.toLocaleString()}</span>
-                                                <span className="text-[10px] text-slate-500 font-normal">{res.currency || 'USD'}</span>
+                                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">{res.currency || 'USD'}</span>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium
-                                                ${res.status === ReservationStatus.CONFIRMED ? 'bg-green-100 text-green-800' :
-                                                    res.status === ReservationStatus.CANCELLED ? 'bg-red-100 text-red-800' :
-                                                        'bg-yellow-100 text-yellow-800'}`}>
+                                                ${res.status === ReservationStatus.CONFIRMED ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                                    res.status === ReservationStatus.CANCELLED ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
                                                 {res.status === 'pending' ? 'Pendiente' :
                                                     res.status === 'confirmed' ? 'Confirmada' :
                                                         res.status === 'cancelled' ? 'Cancelada' : res.status}
@@ -337,9 +337,9 @@ export default function AdminReservationsPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`flex items-center gap-1 w-fit px-2 py-1 rounded-full text-xs font-medium
-                                                ${res.payment_status === PaymentStatus.PAID ? 'bg-green-100 text-green-800' :
-                                                    res.payment_status === PaymentStatus.PENDING_REVIEW ? 'bg-blue-100 text-blue-800' :
-                                                        'bg-slate-100 text-slate-600'}`}>
+                                                ${res.payment_status === PaymentStatus.PAID ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                                    res.payment_status === PaymentStatus.PENDING_REVIEW ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                        'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
                                                 {res.payment_status === PaymentStatus.PENDING_REVIEW && <Clock className="w-3 h-3" />}
                                                 {res.payment_status === PaymentStatus.PAID ? 'Pagado' :
                                                     res.payment_status === PaymentStatus.PENDING_REVIEW ? 'Revisión' : 'Pendiente'}
@@ -361,20 +361,20 @@ export default function AdminReservationsPage() {
                     </div>
 
                     {/* Pagination */}
-                    <div className="px-4 py-3 border-t border-slate-200 flex justify-between items-center text-sm text-slate-500">
+                    <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
                         <span>Página {page} de {data?.pages || 1}</span>
                         <div className="flex gap-2">
                             <button
                                 disabled={page === 1}
                                 onClick={() => setPage(p => p - 1)}
-                                className="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50"
+                                className="px-3 py-1 border border-slate-300 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
                             >
                                 Anterior
                             </button>
                             <button
                                 disabled={page === (data?.pages || 1)}
                                 onClick={() => setPage(p => p + 1)}
-                                className="px-3 py-1 border rounded hover:bg-slate-50 disabled:opacity-50"
+                                className="px-3 py-1 border border-slate-300 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
                             >
                                 Siguiente
                             </button>

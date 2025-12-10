@@ -92,20 +92,20 @@ const BankDetailsPage = () => {
         <div className="max-w-5xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/admin/settings")}
-                className="flex items-center text-slate-600 hover:text-slate-900 transition-colors"
+                className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver a Ajustes
             </button>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 transition-colors">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                        <CreditCard className="w-6 h-6 text-purple-600" />
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <CreditCard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Datos Bancarios</h1>
-                        <p className="text-slate-500">Información para realizar transferencias bancarias.</p>
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Datos Bancarios</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Información para realizar transferencias bancarias.</p>
                     </div>
                 </div>
 
@@ -125,11 +125,11 @@ const BankDetailsPage = () => {
                 </div>
 
                 {isAdmin && (
-                    <div className="mt-8 flex justify-end border-t pt-6">
+                    <div className="mt-8 flex justify-end border-t border-slate-200 dark:border-slate-800 pt-6">
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
                         >
                             <Save className="w-4 h-4" />
                             {saving ? "Guardando..." : "Guardar Cambios"}
@@ -170,56 +170,56 @@ Concepto: ${details.concept}
 
     if (isAdmin) {
         return (
-            <div className="space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-200">
-                <h3 className="font-semibold text-slate-900 text-lg border-b pb-2">{title}</h3>
+            <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-lg border-b border-slate-200 dark:border-slate-700 pb-2">{title}</h3>
                 <div className="space-y-3">
                     <div>
-                        <label className="text-sm font-medium text-slate-700">Nombre del Beneficiario</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nombre del Beneficiario</label>
                         <input
                             value={details.beneficiary}
                             onChange={(e) => onChange({ ...details, beneficiary: e.target.value })}
-                            className="w-full border rounded-md px-3 py-2 mt-1"
+                            className="w-full border dark:border-slate-600 rounded-md px-3 py-2 mt-1 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                             placeholder="Ej. Keikichi Logistics SA de CV"
                         />
                     </div>
                     <div>
-                        <label className="text-sm font-medium text-slate-700">Banco</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Banco</label>
                         <input
                             value={details.bank}
                             onChange={(e) => onChange({ ...details, bank: e.target.value })}
-                            className="w-full border rounded-md px-3 py-2 mt-1"
+                            className="w-full border dark:border-slate-600 rounded-md px-3 py-2 mt-1 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                             placeholder="Ej. BBVA"
                         />
                     </div>
                     <div>
-                        <label className="text-sm font-medium text-slate-700">CLABE Interbancaria (18 dígitos)</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">CLABE Interbancaria (18 dígitos)</label>
                         <input
                             value={details.clabe}
                             onChange={(e) => onChange({ ...details, clabe: e.target.value })}
-                            className="w-full border rounded-md px-3 py-2 mt-1 font-mono"
+                            className="w-full border dark:border-slate-600 rounded-md px-3 py-2 mt-1 font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                             placeholder="000000000000000000"
                             maxLength={18}
                         />
                     </div>
                     <div>
-                        <label className="text-sm font-medium text-slate-700">Tarjeta de Débito (16 dígitos) - Opcional</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Tarjeta de Débito (16 dígitos) - Opcional</label>
                         <input
                             value={details.cardNumber}
                             onChange={(e) => onChange({ ...details, cardNumber: e.target.value })}
-                            className="w-full border rounded-md px-3 py-2 mt-1 font-mono"
+                            className="w-full border dark:border-slate-600 rounded-md px-3 py-2 mt-1 font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                             placeholder="0000000000000000"
                             maxLength={16}
                         />
                     </div>
                     <div>
-                        <label className="text-sm font-medium text-slate-700">Concepto de Pago</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Concepto de Pago</label>
                         <input
                             value={details.concept}
                             onChange={(e) => onChange({ ...details, concept: e.target.value })}
-                            className="w-full border rounded-md px-3 py-2 mt-1"
+                            className="w-full border dark:border-slate-600 rounded-md px-3 py-2 mt-1 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                             placeholder="Ej. Renta, Servicios"
                         />
-                        <p className="text-xs text-slate-500 mt-1">Visible para el SAT. Usar descripción breve y clara.</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Visible para el SAT. Usar descripción breve y clara.</p>
                     </div>
                 </div>
             </div>
@@ -227,12 +227,12 @@ Concepto: ${details.concept}
     }
 
     return (
-        <div className="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="font-semibold text-slate-900 text-lg">{title}</h3>
+        <div className="space-y-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-lg">{title}</h3>
                 <button
                     onClick={handleCopy}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 font-medium"
                 >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     {copied ? "Copiado" : "Copiar todo"}
@@ -240,27 +240,27 @@ Concepto: ${details.concept}
             </div>
             <div className="space-y-4 text-sm">
                 <div>
-                    <span className="block text-slate-500 text-xs uppercase tracking-wider font-semibold">Beneficiario</span>
-                    <p className="font-medium text-slate-900 text-base">{details.beneficiary || "-"}</p>
+                    <span className="block text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">Beneficiario</span>
+                    <p className="font-medium text-slate-900 dark:text-white text-base">{details.beneficiary || "-"}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <span className="block text-slate-500 text-xs uppercase tracking-wider font-semibold">Banco</span>
-                        <p className="font-medium text-slate-900">{details.bank || "-"}</p>
+                        <span className="block text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">Banco</span>
+                        <p className="font-medium text-slate-900 dark:text-white">{details.bank || "-"}</p>
                     </div>
                     <div>
-                        <span className="block text-slate-500 text-xs uppercase tracking-wider font-semibold">Concepto</span>
-                        <p className="font-medium text-slate-900">{details.concept || "-"}</p>
+                        <span className="block text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">Concepto</span>
+                        <p className="font-medium text-slate-900 dark:text-white">{details.concept || "-"}</p>
                     </div>
                 </div>
                 <div>
-                    <span className="block text-slate-500 text-xs uppercase tracking-wider font-semibold">CLABE</span>
+                    <span className="block text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">CLABE</span>
                     <div className="flex items-center gap-2">
-                        <p className="font-mono text-slate-900 text-lg tracking-wide">{details.clabe || "-"}</p>
+                        <p className="font-mono text-slate-900 dark:text-white text-lg tracking-wide">{details.clabe || "-"}</p>
                         {details.clabe && (
                             <button
                                 onClick={() => { navigator.clipboard.writeText(details.clabe); toast.success("CLABE copiada"); }}
-                                className="text-slate-400 hover:text-blue-600"
+                                className="text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
                                 title="Copiar CLABE"
                             >
                                 <Copy className="w-3 h-3" />
@@ -270,12 +270,12 @@ Concepto: ${details.concept}
                 </div>
                 {details.cardNumber && (
                     <div>
-                        <span className="block text-slate-500 text-xs uppercase tracking-wider font-semibold">Tarjeta</span>
+                        <span className="block text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">Tarjeta</span>
                         <div className="flex items-center gap-2">
-                            <p className="font-mono text-slate-900 text-lg tracking-wide">{details.cardNumber}</p>
+                            <p className="font-mono text-slate-900 dark:text-white text-lg tracking-wide">{details.cardNumber}</p>
                             <button
                                 onClick={() => { navigator.clipboard.writeText(details.cardNumber); toast.success("Tarjeta copiada"); }}
-                                className="text-slate-400 hover:text-blue-600"
+                                className="text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
                                 title="Copiar Tarjeta"
                             >
                                 <Copy className="w-3 h-3" />

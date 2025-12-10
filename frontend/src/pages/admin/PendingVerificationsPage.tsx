@@ -34,8 +34,8 @@ export default function PendingVerificationsPage() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-900">Verificaciones Pendientes</h1>
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Verificaciones Pendientes</h1>
+                <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
                     {pendingUsers?.length || 0} pendientes
                 </span>
             </div>
@@ -44,7 +44,7 @@ export default function PendingVerificationsPage() {
                 {/* List */}
                 <div className="lg:col-span-1 space-y-3">
                     {pendingUsers?.length === 0 && (
-                        <div className="text-center py-12 bg-white rounded-lg border border-slate-200 text-slate-500">
+                        <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
                             No hay verificaciones pendientes
                         </div>
                     )}
@@ -54,21 +54,21 @@ export default function PendingVerificationsPage() {
                             key={user.id}
                             onClick={() => setSelectedUser(user)}
                             className={`w-full text-left p-4 rounded-lg border transition-all ${selectedUser?.id === user.id
-                                ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
-                                : 'bg-white border-slate-200 hover:border-blue-300'
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 ring-1 ring-blue-500'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-600'
                                 }`}
                         >
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                                        <UserIcon className="w-5 h-5 text-slate-500" />
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                        <UserIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                                     </div>
                                     <div>
-                                        <div className="font-medium text-slate-900">{user.full_name}</div>
-                                        <div className="text-xs text-slate-500">{user.email || user.phone}</div>
+                                        <div className="font-medium text-slate-900 dark:text-white">{user.full_name}</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">{user.email || user.phone}</div>
                                     </div>
                                 </div>
-                                <ChevronRight className={`w-4 h-4 text-slate-400 ${selectedUser?.id === user.id ? 'text-blue-500' : ''}`} />
+                                <ChevronRight className={`w-4 h-4 text-slate-400 dark:text-slate-500 ${selectedUser?.id === user.id ? 'text-blue-500 dark:text-blue-400' : ''}`} />
                             </div>
                         </button>
                     ))}
@@ -82,7 +82,7 @@ export default function PendingVerificationsPage() {
                             onClose={() => setSelectedUser(null)}
                         />
                     ) : (
-                        <div className="h-full min-h-[400px] flex items-center justify-center bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-400">
+                        <div className="h-full min-h-[400px] flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500">
                             Selecciona un usuario para revisar sus documentos
                         </div>
                     )}

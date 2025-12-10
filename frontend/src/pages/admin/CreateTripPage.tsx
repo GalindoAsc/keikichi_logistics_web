@@ -225,28 +225,28 @@ const CreateTripPage = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/")}
-                className="flex items-center text-slate-600 hover:text-slate-900 transition-colors"
+                className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver al Dashboard
             </button>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-6 border-b border-slate-200">
-                    <h1 className="text-2xl font-bold text-slate-900">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                         {isEditMode ? "Editar Viaje" : "Crear Nuevo Viaje"}
                     </h1>
                 </div>
 
                 {/* Tabs Header */}
-                <div className="flex border-b border-slate-200 overflow-x-auto">
+                <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
                             className={`px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeTab === tab.id
-                                ? "border-blue-600 text-blue-600"
-                                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                                ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+                                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:border-slate-600"
                                 }`}
                         >
                             {tab.label}
@@ -256,9 +256,9 @@ const CreateTripPage = () => {
 
                 {/* Error Summary */}
                 {Object.keys(errors).length > 0 && (
-                    <div className="m-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <h3 className="text-red-800 font-medium mb-2">Por favor corrige los siguientes errores:</h3>
-                        <ul className="list-disc list-inside text-sm text-red-600">
+                    <div className="m-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <h3 className="text-red-800 dark:text-red-300 font-medium mb-2">Por favor corrige los siguientes errores:</h3>
+                        <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400">
                             {Object.entries(errors).map(([key, error]) => (
                                 <li key={key}>
                                     <span className="font-medium capitalize">{key.replace(/_/g, " ")}:</span> {(error as any)?.message}
@@ -272,24 +272,24 @@ const CreateTripPage = () => {
                     {/* General Tab */}
                     {activeTab === "general" && (
                         <div className="space-y-6">
-                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                                <label className="text-sm font-medium text-slate-700 block mb-2">Tipo de Viaje</label>
+                            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 block mb-2">Tipo de Viaje</label>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-2 cursor-pointer">
+                                    <label className="flex items-center gap-2 cursor-pointer dark:text-slate-200">
                                         <input
                                             type="radio"
                                             value="false"
                                             {...register("is_international")}
-                                            className="text-blue-600 focus:ring-blue-500"
+                                            className="text-blue-600 focus:ring-blue-500 dark:bg-slate-700 dark:border-slate-600"
                                         />
                                         <span>Nacional</span>
                                     </label>
-                                    <label className="flex items-center gap-2 cursor-pointer">
+                                    <label className="flex items-center gap-2 cursor-pointer dark:text-slate-200">
                                         <input
                                             type="radio"
                                             value="true"
                                             {...register("is_international")}
-                                            className="text-blue-600 focus:ring-blue-500"
+                                            className="text-blue-600 focus:ring-blue-500 dark:bg-slate-700 dark:border-slate-600"
                                         />
                                         <span>Internacional</span>
                                     </label>
@@ -298,38 +298,38 @@ const CreateTripPage = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Origen</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Origen</label>
                                     <input
                                         {...register("origin")}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                         placeholder="Ej. Los Angeles, CA"
                                     />
-                                    {errors.origin && <p className="text-xs text-red-500">{errors.origin.message}</p>}
+                                    {errors.origin && <p className="text-xs text-red-500 dark:text-red-400">{errors.origin.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Destino</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Destino</label>
                                     <input
                                         {...register("destination")}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                         placeholder="Ej. Guadalajara, JAL"
                                     />
-                                    {errors.destination && <p className="text-xs text-red-500">{errors.destination.message}</p>}
+                                    {errors.destination && <p className="text-xs text-red-500 dark:text-red-400">{errors.destination.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Fecha de Salida</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Fecha de Salida</label>
                                     <input
                                         type="date"
                                         {...register("departure_date")}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
-                                    {errors.departure_date && <p className="text-xs text-red-500">{errors.departure_date.message}</p>}
+                                    {errors.departure_date && <p className="text-xs text-red-500 dark:text-red-400">{errors.departure_date.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Hora de Salida (Opcional)</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Hora de Salida (Opcional)</label>
                                     <input
                                         type="time"
                                         {...register("departure_time")}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -341,65 +341,65 @@ const CreateTripPage = () => {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Total Espacios</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Total Espacios</label>
                                     <input
                                         type="number"
                                         {...register("total_spaces", { valueAsNumber: true })}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
-                                    {errors.total_spaces && <p className="text-xs text-red-500">{errors.total_spaces.message}</p>}
+                                    {errors.total_spaces && <p className="text-xs text-red-500 dark:text-red-400">{errors.total_spaces.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Precio por Espacio</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Precio por Espacio</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         {...register("price_per_space", { valueAsNumber: true })}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
-                                    {errors.price_per_space && <p className="text-xs text-red-500">{errors.price_per_space.message}</p>}
+                                    {errors.price_per_space && <p className="text-xs text-red-500 dark:text-red-400">{errors.price_per_space.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Moneda</label>
-                                    <select {...register("currency")} className="w-full border rounded-md px-3 py-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Moneda</label>
+                                    <select {...register("currency")} className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
                                         <option value="USD">USD</option>
                                         <option value="MXN">MXN</option>
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Tipo de Cambio</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Tipo de Cambio</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         {...register("exchange_rate", { valueAsNumber: true })}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
-                                    {errors.exchange_rate && <p className="text-xs text-red-500">{errors.exchange_rate.message}</p>}
+                                    {errors.exchange_rate && <p className="text-xs text-red-500 dark:text-red-400">{errors.exchange_rate.message}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Plazo de Pago (Horas)</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Plazo de Pago (Horas)</label>
                                     <input
                                         type="number"
                                         {...register("payment_deadline_hours", { valueAsNumber: true })}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
-                                    {errors.payment_deadline_hours && <p className="text-xs text-red-500">{errors.payment_deadline_hours.message}</p>}
+                                    {errors.payment_deadline_hours && <p className="text-xs text-red-500 dark:text-red-400">{errors.payment_deadline_hours.message}</p>}
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Costo Recolección</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Costo Recolección</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         {...register("pickup_cost", { valueAsNumber: true })}
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Tipo de Cobro Recolección</label>
-                                    <select {...register("pickup_cost_type")} className="w-full border rounded-md px-3 py-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Tipo de Cobro Recolección</label>
+                                    <select {...register("pickup_cost_type")} className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
                                         <option value="flat_rate">Costo Fijo (Por viaje)</option>
                                         <option value="per_pallet">Por Tarima (Por espacio)</option>
                                     </select>
@@ -407,17 +407,17 @@ const CreateTripPage = () => {
                             </div>
 
                             {isInternational && (
-                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                                    <h4 className="text-sm font-medium text-blue-900 mb-2">Configuración Internacional</h4>
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800/30">
+                                    <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Configuración Internacional</h4>
                                     <div className="space-y-1">
-                                        <label className="text-sm font-medium text-slate-700">Costo de Fianza (Keikichi)</label>
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Costo de Fianza (Keikichi)</label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             {...register("bond_cost", { valueAsNumber: true })}
-                                            className="w-full border rounded-md px-3 py-2"
+                                            className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                         />
-                                        <p className="text-xs text-slate-500">Este costo se sumará si el cliente elige usar la fianza de Keikichi.</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">Este costo se sumará si el cliente elige usar la fianza de Keikichi.</p>
                                     </div>
                                 </div>
                             )}
@@ -429,9 +429,9 @@ const CreateTripPage = () => {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Seleccionar Chofer</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Seleccionar Chofer</label>
                                     <select
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                         onChange={handleDriverChange}
                                         defaultValue=""
                                     >
@@ -442,30 +442,30 @@ const CreateTripPage = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Nombre del Chofer</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nombre del Chofer</label>
                                     <input
                                         {...register("driver_name")}
-                                        className="w-full border rounded-md px-3 py-2 bg-slate-50"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
                                         placeholder="Nombre del Chofer"
                                         readOnly
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Teléfono Chofer</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Teléfono Chofer</label>
                                     <input
                                         {...register("driver_phone")}
-                                        className="w-full border rounded-md px-3 py-2 bg-slate-50"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
                                         placeholder="Teléfono"
                                         readOnly
                                     />
                                 </div>
                             </div>
 
-                            <div className="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="border-t dark:border-slate-800 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Seleccionar Camión</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Seleccionar Camión</label>
                                     <select
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                         onChange={handleTruckChange}
                                         defaultValue=""
                                     >
@@ -476,21 +476,21 @@ const CreateTripPage = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Placas Camión</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Placas Camión</label>
                                     <input
                                         {...register("truck_plate")}
-                                        className="w-full border rounded-md px-3 py-2 bg-slate-50"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
                                         placeholder="Placas del Camión"
                                         readOnly
                                     />
                                 </div>
                             </div>
 
-                            <div className="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="border-t dark:border-slate-800 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Seleccionar Remolque</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Seleccionar Remolque</label>
                                     <select
-                                        className="w-full border rounded-md px-3 py-2"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                         onChange={handleTrailerChange}
                                         defaultValue=""
                                     >
@@ -501,10 +501,10 @@ const CreateTripPage = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-700">Placas Remolque</label>
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Placas Remolque</label>
                                     <input
                                         {...register("trailer_plate")}
-                                        className="w-full border rounded-md px-3 py-2 bg-slate-50"
+                                        className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
                                         placeholder="Placas del Remolque"
                                         readOnly
                                     />
@@ -517,29 +517,29 @@ const CreateTripPage = () => {
                     {activeTab === "notes" && (
                         <div className="space-y-6">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-700">Notas Públicas (Visible para clientes)</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Notas Públicas (Visible para clientes)</label>
                                 <textarea
                                     {...register("notes_public")}
-                                    className="w-full border rounded-md px-3 py-2 h-32"
+                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 h-32 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     placeholder="Información importante para el cliente..."
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-700">Notas Internas</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Notas Internas</label>
                                 <textarea
                                     {...register("notes_internal")}
-                                    className="w-full border rounded-md px-3 py-2 h-32"
+                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 h-32 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                                     placeholder="Notas solo para administradores..."
                                 />
                             </div>
                         </div>
                     )}
 
-                    <div className="flex justify-end pt-6 border-t border-slate-200 mt-6">
+                    <div className="flex justify-end pt-6 border-t border-slate-200 dark:border-slate-800 mt-6">
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium shadow-sm"
+                            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 font-medium shadow-sm transition-colors"
                         >
                             {isSubmitting ? "Procesando..." : (isEditMode ? "Actualizar Viaje" : "Crear Viaje")}
                         </button>

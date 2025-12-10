@@ -79,21 +79,21 @@ export default function QRScannerPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 py-8 transition-colors">
             <div className="max-w-2xl mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
                         <QrCode className="w-8 h-8 text-white" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">Escáner de Reservaciones</h1>
-                    <p className="text-gray-600 mt-2">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Escáner de Reservaciones</h1>
+                    <p className="text-gray-600 dark:text-slate-400 mt-2">
                         Escanea el código QR del resumen de pre-reservación para ver los detalles
                     </p>
                 </div>
 
                 {/* Scanner Card */}
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden transition-colors">
                     {/* Scanner Container */}
                     <div className="relative bg-gray-900 aspect-square max-h-[400px]">
                         <div
@@ -127,18 +127,18 @@ export default function QRScannerPage() {
                     {/* Controls */}
                     <div className="p-6">
                         {error && (
-                            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
+                            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
                                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                <p className="text-red-700 text-sm">{error}</p>
+                                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
                             </div>
                         )}
 
                         {lastResult && (
-                            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+                            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg mb-4">
                                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                                 <div>
-                                    <p className="text-green-700 text-sm font-medium">Último escaneo:</p>
-                                    <p className="text-green-600 text-xs break-all">{lastResult}</p>
+                                    <p className="text-green-700 dark:text-green-300 text-sm font-medium">Último escaneo:</p>
+                                    <p className="text-green-600 dark:text-green-400 text-xs break-all">{lastResult}</p>
                                 </div>
                             </div>
                         )}
@@ -146,8 +146,8 @@ export default function QRScannerPage() {
                         <button
                             onClick={isScanning ? stopScanning : startScanning}
                             className={`w-full py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 transition-all ${isScanning
-                                    ? "bg-red-500 hover:bg-red-600 text-white"
-                                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                                ? "bg-red-500 hover:bg-red-600 text-white"
+                                : "bg-blue-600 hover:bg-blue-700 text-white"
                                 }`}
                         >
                             {isScanning ? (
@@ -163,16 +163,16 @@ export default function QRScannerPage() {
                             )}
                         </button>
 
-                        <p className="text-center text-gray-500 text-sm mt-4">
+                        <p className="text-center text-gray-500 dark:text-slate-500 text-sm mt-4">
                             Apunta la cámara hacia el código QR del resumen de reservación
                         </p>
                     </div>
                 </div>
 
                 {/* Instructions */}
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
-                    <h3 className="font-semibold text-blue-900 mb-3">¿Cómo funciona?</h3>
-                    <ol className="space-y-2 text-blue-800 text-sm">
+                <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-3">¿Cómo funciona?</h3>
+                    <ol className="space-y-2 text-blue-800 dark:text-blue-200 text-sm">
                         <li className="flex gap-2">
                             <span className="font-bold">1.</span>
                             <span>Haz clic en "Iniciar Escaneo" para activar la cámara</span>
