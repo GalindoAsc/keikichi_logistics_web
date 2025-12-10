@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRegister } from "../../hooks/useAuth";
 import { RegisterRequest } from "../../types/auth";
 import LoadingSpinner from "../shared/LoadingSpinner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CountryCodeSelector } from "./CountryCodeSelector";
 import { EmailInput } from "./EmailInput";
 import { Phone, Mail } from "lucide-react";
@@ -12,6 +12,20 @@ const RegisterForm = () => {
   const { mutateAsync, isPending, isError, isSuccess } = useRegister();
   const [method, setMethod] = useState<'email' | 'phone'>('phone');
   const [countryCode, setCountryCode] = useState('+52');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        // Redirect to login (since they need to verify) or dashboard if auto-logged in
+        // Usually registration requires login afterwards unless we auto-login
+        // Given the message "Necesitarás verificar tu identidad", let's redirect to login or a "verify email" page if it existed
+        // For now, redirect to login
+        navigate("/auth/login");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, navigate]);
 
   // We manage these manually to handle the complex validation/formatting
   const [phone, setPhone] = useState('');
@@ -38,13 +52,13 @@ const RegisterForm = () => {
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
 
       {/* Method Toggle */}
-      <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg">
+      <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
         <button
           type="button"
           onClick={() => setMethod('phone')}
           className={`flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${method === 'phone'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
         >
           <Phone className="w-4 h-4" />
@@ -54,8 +68,8 @@ const RegisterForm = () => {
           type="button"
           onClick={() => setMethod('email')}
           className={`flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${method === 'email'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
         >
           <Mail className="w-4 h-4" />
@@ -65,7 +79,7 @@ const RegisterForm = () => {
 
       {/* Contact Input */}
       <div className="space-y-1">
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {method === 'phone' ? 'Número de celular' : 'Correo electrónico'}
         </label>
 
@@ -81,7 +95,7 @@ const RegisterForm = () => {
               maxLength={10}
               value={phone}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-              className="flex-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="flex-1 w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               required
             />
           </div>
@@ -95,16 +109,16 @@ const RegisterForm = () => {
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-slate-700">Nombre completo</label>
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nombre completo</label>
         <input
-          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+          className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
           {...register("full_name", { required: "El nombre es requerido" })}
         />
         {errors.full_name && <p className="text-xs text-red-500">{errors.full_name.message}</p>}
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-slate-700">Contraseña</label>
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Contraseña</label>
         <input
           className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
           type="password"

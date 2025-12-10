@@ -94,12 +94,46 @@ async def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Track previous state
+    was_verified = user.is_verified
+    was_active = user.is_active
+
     # Update fields
     for field, value in user_update.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
     
     await db.commit()
     await db.refresh(user)
+
+    # Notifications
+    try:
+        from app.services.notification_service import notification_service
+        
+        # Check for verification approval
+        if not was_verified and user.is_verified:
+            await notification_service.send_in_app(
+                user_id=str(user.id),
+                title="Cuenta Verificada",
+                message="Tu cuenta ha sido verificada. Ya puedes realizar reservaciones.",
+                link="/",
+                type="success"
+            )
+            await notification_service.send_data_update(str(user.id), "ACCOUNT_VERIFIED", {})
+            
+        # Check for activation (if distinct from verification)
+        elif not was_active and user.is_active and not (not was_verified and user.is_verified): 
+            # Only notify if it wasn't just verified (to avoid double notif if both happen)
+            await notification_service.send_in_app(
+                user_id=str(user.id),
+                title="Cuenta Activada",
+                message="Tu cuenta ha sido reactivada.",
+                link="/",
+                type="success"
+            )
+            
+    except Exception as e:
+        print(f"Error sending update notifications: {e}")
+
     return user
 
 

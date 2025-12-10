@@ -68,19 +68,31 @@ async def cancel_unpaid_reservations():
                         spaces_result = await db.execute(spaces_stmt)
                         spaces = list(spaces_result.scalars().all())
                        
-                        for space in spaces:
+                    for space in spaces:
                             space.status = SpaceStatus.available
                    
                     cancelled_count += 1
                    
-                    # TODO: Send notification to client
-                    # Could use email service or message system
+                    # Send notification to client
+                    from app.services.notification_service import notification_service
+                    from app.models.user import User
+                    
+                    # Fetch client info
+                    client_stmt = select(User).where(User.id == reservation.client_id)
+                    client_result = await db.execute(client_stmt)
+                    client = client_result.scalars().first()
+                    
+                    if client:
+                        try:
+                            await notification_service.notify_payment_deadline_expired(reservation, client)
+                        except Exception as ne:
+                            print.error(f"[Payment Deadline Task] Failed to notify client {client.id}: {ne}")
            
             if cancelled_count > 0:
                 await db.commit()
                 print(f"[Payment Deadline Task] Cancelled {cancelled_count} unpaid reservations")
             else:
-                print("[Payment Deadline Task] No unpaid reservations to cancel")
+                pass # Silent logs
                
         except Exception as e:
             print(f"[Payment Deadline Task] Error: {str(e)}")

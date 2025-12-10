@@ -146,6 +146,27 @@ async def change_status(trip_id: str, status: TripStatus, db: AsyncSession = Dep
         print(f"DEBUG: Trip found: {trip.id}, current status: {trip.status}")
         trip = await service.change_status(trip, status)
         print(f"DEBUG: Status changed successfully to {trip.status}")
+        
+        # Notify affected users (passengers with active reservations)
+        try:
+            # 1. Get users with active reservations (Confirmed/PendingPayment)
+            from app.models.reservation import Reservation, ReservationStatus
+            from sqlalchemy import select
+            
+            # Assuming 'active' means not cancelled or rejected, so they care about the trip status
+            stmt = select(Reservation.client_id).where(
+                Reservation.trip_id == trip.id,
+                Reservation.status.in_([ReservationStatus.confirmed, ReservationStatus.pending]) 
+            )
+            result = await db.execute(stmt)
+            affected_user_ids = [str(row[0]) for row in result.all()]
+            
+            await notification_service.notify_trip_status_changed(trip, status, affected_user_ids)
+            
+        except Exception as ne:
+            print(f"Error sending status notifications: {ne}")
+            # Don't fail request
+        
         return TripOut.model_validate(trip)
     except Exception as e:
         print(f"ERROR in change_status: {e}")

@@ -35,8 +35,20 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         }
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        // Use the backend host (port 8000), not the frontend host (port 5173)
-        const wsUrl = `${protocol}//localhost:8000/api/v1/notifications/ws/${user.id}?token=${accessToken}`;
+        const host = window.location.host; // includes port if any
+
+        // Dynamic URL construction for both dev and prod
+        // In local dev, window.location.host is localhost:5173, so we might need fallback or VITE_WS_URL
+        // But for production via Nginx (port 80/443), window.location.host is correct (keikichi.com)
+
+        let wsUrl = '';
+        if (import.meta.env.DEV) {
+            // In dev (vite), we usually connect to localhost:8000 explicitly
+            wsUrl = `ws://localhost:8000/api/v1/notifications/ws/${user.id}?token=${accessToken}`;
+        } else {
+            // In prod (nginx), we connect through the same origin
+            wsUrl = `${protocol}//${host}/api/v1/notifications/ws/${user.id}?token=${accessToken}`;
+        }
 
         console.log('[SocketStore] Attempting to connect to:', wsUrl);
 

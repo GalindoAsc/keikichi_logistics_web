@@ -38,13 +38,13 @@ const LoginForm = () => {
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
 
       {/* Method Toggle */}
-      <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg">
+      <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
         <button
           type="button"
           onClick={() => setMethod('phone')}
           className={`flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${method === 'phone'
-            ? 'bg-white text-blue-600 shadow-sm'
-            : 'text-slate-500 hover:text-slate-700'
+            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
         >
           <Phone className="w-4 h-4" />
@@ -54,8 +54,8 @@ const LoginForm = () => {
           type="button"
           onClick={() => setMethod('email')}
           className={`flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${method === 'email'
-            ? 'bg-white text-blue-600 shadow-sm'
-            : 'text-slate-500 hover:text-slate-700'
+            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
         >
           <Mail className="w-4 h-4" />
@@ -64,7 +64,7 @@ const LoginForm = () => {
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {method === 'phone' ? 'Número de celular' : 'Correo electrónico'}
         </label>
 
@@ -80,7 +80,7 @@ const LoginForm = () => {
               maxLength={10}
               value={phone}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-              className="flex-1 w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="flex-1 w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               required
             />
           </div>
@@ -96,7 +96,7 @@ const LoginForm = () => {
       <div className="space-y-1">
         <label className="text-sm font-medium text-slate-700">Contraseña</label>
         <input
-          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+          className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
           type="password"
           {...register("password", { required: true })}
         />

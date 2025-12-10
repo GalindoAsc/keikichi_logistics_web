@@ -51,6 +51,35 @@ async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db_s
         full_name=payload.full_name, 
         phone=payload.phone
     )
+    
+    # Notify Admins about new user
+    try:
+        from app.services.notification_service import notification_service
+        from sqlalchemy import select, or_
+        
+        # Find admins (managers and superadmins)
+        stmt = select(User).where(or_(User.role == UserRole.superadmin, User.role == UserRole.manager))
+        result = await db.execute(stmt)
+        admins = result.scalars().all()
+        
+        for admin in admins:
+            await notification_service.send_in_app(
+                user_id=str(admin.id),
+                title="Nuevo Usuario Registrado",
+                message=f"El usuario {user.full_name} ({user.email or user.phone}) se ha registrado y espera verificación.",
+                link="/admin/users",
+                type="info"
+            )
+            # Also send real-time update to refresh admin user list
+            await notification_service.send_data_update(
+                str(admin.id),
+                "USER_REGISTERED",
+                {"user_id": str(user.id)}
+            )
+    except Exception as e:
+        print(f"Error sending registration notifications: {e}")
+        # Don't fail the request
+        
     return user
 
 

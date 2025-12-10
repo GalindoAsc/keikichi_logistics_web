@@ -343,24 +343,46 @@ class NotificationService:
         """
         from app.database import AsyncSessionLocal
         from app.models.user import User, UserRole
+        from app.models.waitlist import Waitlist
         from sqlalchemy import select
         
         title = "Espacios Disponibles"
         message = f"Nuevos espacios en {trip.origin} → {trip.destination} - {trip.departure_date.strftime('%d/%m/%Y')}"
         
         async with AsyncSessionLocal() as db:
-            query = select(User).where(User.role == UserRole.client, User.is_active == True)
-            result = await db.execute(query)
-            clients = result.scalars().all()
+            # 1. Check Waitlist first
+            waitlist_stmt = select(Waitlist).where(Waitlist.trip_id == trip.id).order_by(Waitlist.created_at)
+            waitlist_result = await db.execute(waitlist_stmt)
+            waitlist_entries = waitlist_result.scalars().all()
             
-            for client in clients:
-                await self.send_in_app(
-                    str(client.id),
-                    title,
-                    message,
-                    f"/trips/{trip.id}",
-                    "success"
-                )
+            if waitlist_entries:
+                # Notify only waitlisted users
+                print(f"Notifying {len(waitlist_entries)} users on waitlist for trip {trip.id}")
+                for entry in waitlist_entries:
+                    await self.send_in_app(
+                        str(entry.user_id),
+                        title,
+                        f"¡Buenas noticias! Se han liberado espacios en el viaje que esperabas: {trip.origin} → {trip.destination}. ¡Reserva ahora!",
+                        f"/trips/{trip.id}",
+                        "success"
+                    )
+                    # We could verify if they have email/phone here too
+            else:
+                # 2. No waitlist? Notify everyone (Broadcast)
+                # Only if it makes sense to spam everyone. Maybe limit this?
+                # For now, keeping original logic: Notify all active clients
+                query = select(User).where(User.role == UserRole.client, User.is_active == True)
+                result = await db.execute(query)
+                clients = result.scalars().all()
+                
+                for client in clients:
+                    await self.send_in_app(
+                        str(client.id),
+                        title,
+                        message,
+                        f"/trips/{trip.id}",
+                        "success"
+                    )
 
     async def notify_account_verified(self, user):
         """
@@ -414,5 +436,73 @@ class NotificationService:
         link = "/admin/users"
         
         await self.notify_admins(title, message, link, "info")
+
+    async def notify_payment_deadline_expired(self, reservation, client):
+        """
+        Notify client that their reservation was cancelled due to non-payment
+        """
+        title = "Reservación Cancelada (Plazo Vencido)"
+        message = f"El plazo de pago para tu reservación #{str(reservation.id)[:8]} ha vencido. Los espacios han sido liberados."
+        
+        await self.send_in_app(
+            str(client.id),
+            title,
+            message,
+            "/reservations",
+            "error"
+        )
+        
+        # Email
+        subject = f"Reservación Cancelada - Plazo de Pago Vencido #{str(reservation.id)[:8]}"
+        body = f"""
+        <h1>Plazo de Pago Vencido</h1>
+        <p>Hola {client.full_name},</p>
+        <p>Lamentamos informarte que el plazo para realizar el pago de tu reservación <strong>{str(reservation.id)[:8]}</strong> ha vencido.</p>
+        <p>Tu reservación ha sido cancelada automáticamente y los espacios han sido liberados.</p>
+        <p>Si deseas viajar, por favor realiza una nueva reservación.</p>
+        <br>
+        <p>Atentamente,<br>Equipo Keikichi Logistics</p>
+        """
+        await self.send_email(subject, [client.email], body)
+
+    async def notify_trip_status_changed(self, trip, status, affected_user_ids: list = None):
+        """
+        Notify users about trip status changes (e.g. Departed, Arrived)
+        """
+        # Map status to friendly message
+        status_messages = {
+            "scheduled": "El viaje ha sido programado.",
+            "boarding": "¡El abordaje ha comenzado! Por favor preséntate en el punto de encuentro.",
+            "in_transit": "El viaje ha comenzado y está en tránsito.",
+            "arrived": "El viaje ha llegado a su destino.",
+            "completed": "El viaje ha sido completado. ¡Gracias por viajar con nosotros!",
+            "cancelled": "El viaje ha sido cancelado."
+        }
+        
+        # Determine status string (handle enum or string)
+        status_val = status.value if hasattr(status, 'value') else str(status)
+        status_msg = status_messages.get(status_val, f"El estado del viaje ha cambiado a: {status_val}")
+        
+        title = f"Actualización de Viaje: {trip.origin} → {trip.destination}"
+        
+        # 1. Notify affected passengers (priority)
+        if affected_user_ids:
+            for user_id in affected_user_ids:
+                await self.send_in_app(
+                    str(user_id),
+                    title,
+                    status_msg,
+                    f"/reservations", # Direct them to reservations to see details
+                    "info"
+                )
+        
+        # 2. Notify admins
+        await self.notify_admins(
+            "Estado de Viaje Actualizado",
+            f"Viaje {trip.origin} → {trip.destination} cambió a: {status_val}",
+            f"/admin/trips/{trip.id}",
+            "info"
+        )
+
 
 notification_service = NotificationService()
