@@ -53,7 +53,7 @@ const NotificationsPage = () => {
 
     const clearAllMutation = useMutation({
         mutationFn: async () => {
-            await api.delete("/notifications/");
+            await api.delete("/notifications");
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notifications"] });

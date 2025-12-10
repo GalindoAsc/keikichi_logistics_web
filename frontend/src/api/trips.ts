@@ -19,7 +19,7 @@ export const fetchTripSpaces = async (id: string): Promise<TripSpacesResponse> =
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createTrip = async (data: any): Promise<Trip> => {
-  const { data: response } = await api.post<Trip>("/trips/", data);
+  const { data: response } = await api.post<Trip>("/trips", data);
   return response;
 };
 

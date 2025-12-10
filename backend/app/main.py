@@ -219,6 +219,7 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
     openapi_tags=OPENAPI_TAGS,
+    redirect_slashes=False,  # CRITICAL: Prevent 307 redirects that break frontend API calls
 )
 
 # Custom OpenAPI schema
