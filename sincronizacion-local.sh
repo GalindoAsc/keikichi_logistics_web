@@ -21,7 +21,7 @@ echo -e "${BLUE}>>> [LOCAL] Conectando al NAS (${NAS_HOST})...${NC}"
 # Usar expect para manejar la contraseña automáticamente
 /usr/bin/expect <<EOF
 set timeout -1
-spawn ssh -t $NAS_USER@$NAS_HOST "cd $NAS_DIR && echo -e '${GREEN}>>> Pulling latest changes...${NC}' && git pull && echo -e '${GREEN}>>> Executing deploy script...${NC}' && chmod +x deploy.sh && ./deploy.sh deploy"
+spawn ssh -t $NAS_USER@$NAS_HOST "cd $NAS_DIR && echo '>>> Pulling latest changes...' && git pull && echo '>>> Executing deploy script...' && chmod +x deploy.sh && ./deploy.sh deploy"
 expect {
   "yes/no" { send "yes\r"; exp_continue }
   "assword:" { send "$NAS_PASS\r" }
