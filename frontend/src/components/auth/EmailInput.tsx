@@ -83,11 +83,11 @@ export function EmailInput({ value, onChange, placeholder = "tu@email.com", requ
                 }}
                 placeholder={placeholder}
                 required={required}
-                className={`w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${className}`}
+                className={`w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${className}`}
             />
 
             {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                     {filteredSuggestions.map(domain => {
                         const username = value.split('@')[0];
                         return (
@@ -95,9 +95,9 @@ export function EmailInput({ value, onChange, placeholder = "tu@email.com", requ
                                 key={domain}
                                 type="button"
                                 onClick={() => handleSelectSuggestion(domain)}
-                                className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-1 group transition-colors"
+                                className="w-full px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1 group transition-colors"
                             >
-                                <span className="text-slate-900 font-medium">{username}</span>
+                                <span className="text-slate-900 dark:text-white font-medium">{username}</span>
                                 <span className="text-slate-400 group-hover:text-blue-500">@{domain}</span>
                             </button>
                         );

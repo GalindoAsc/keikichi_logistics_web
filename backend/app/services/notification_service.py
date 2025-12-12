@@ -224,7 +224,7 @@ class NotificationService:
         
         title = "Nuevo Viaje Disponible"
         message = f"Viaje {trip.origin} → {trip.destination} - Salida: {trip.departure_date.strftime('%d/%m/%Y')}"
-        link = f"/admin/trips/{trip.id}"
+        link = f"/admin/trips" # Go to list, as details page might not exist or be edit page
         
         # Notify admins
         await self.notify_admins(title, message, link, "info")
@@ -264,7 +264,7 @@ class NotificationService:
                 )
         
         # Always notify admins
-        await self.notify_admins(title, message, f"/admin/trips/{trip.id}", "info")
+        await self.notify_admins(title, message, f"/admin/trips", "info")
 
     async def notify_trip_cancelled(self, trip, affected_user_ids: list = None):
         """
@@ -304,7 +304,7 @@ class NotificationService:
                     )
         
         # Notify admins
-        await self.notify_admins(title, message, f"/admin/trips/{trip.id}", "warning")
+        await self.notify_admins(title, message, f"/admin/trips", "warning")
 
     async def notify_payment_pending(self, reservation, client):
         """
@@ -407,7 +407,7 @@ class NotificationService:
             str(user.id),
             title,
             message,
-            "/",
+            "/profile", # Redirect to profile or dashboard instead of root
             "success"
         )
 
@@ -445,7 +445,7 @@ class NotificationService:
         """
         title = "Nuevo Usuario Registrado"
         message = f"El usuario {user.full_name} ({user.email or user.phone}) se ha registrado."
-        link = "/admin/users"
+        link = "/admin/accounts"
         
         await self.notify_admins(title, message, link, "info")
 
@@ -512,7 +512,7 @@ class NotificationService:
         await self.notify_admins(
             "Estado de Viaje Actualizado",
             f"Viaje {trip.origin} → {trip.destination} cambió a: {status_val}",
-            f"/admin/trips/{trip.id}",
+            f"/admin/trips",
             "info"
         )
 

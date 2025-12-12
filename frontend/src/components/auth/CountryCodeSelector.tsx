@@ -45,10 +45,10 @@ export function CountryCodeSelector({ value, onChange }: Props) {
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 px-3 py-2.5 border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="flex items-center gap-2 px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             >
                 <span className="text-xl leading-none">{selected.flag}</span>
-                <span className="font-medium text-slate-700">{value}</span>
+                <span className="font-medium text-slate-700 dark:text-white">{value}</span>
                 <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
             </button>
 
@@ -58,8 +58,8 @@ export function CountryCodeSelector({ value, onChange }: Props) {
                         className="fixed inset-0 z-10"
                         onClick={() => setOpen(false)}
                     />
-                    <div className="absolute z-20 mt-1 w-72 bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                        <div className="p-2 border-b border-slate-100 sticky top-0 bg-white">
+                    <div className="absolute z-20 mt-1 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                        <div className="p-2 border-b border-slate-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800">
                             <div className="relative">
                                 <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
                                 <input
@@ -67,7 +67,7 @@ export function CountryCodeSelector({ value, onChange }: Props) {
                                     placeholder="Buscar país..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                                     autoFocus
                                 />
                             </div>
@@ -83,13 +83,13 @@ export function CountryCodeSelector({ value, onChange }: Props) {
                                         setOpen(false);
                                         setSearch('');
                                     }}
-                                    className={`w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-3 transition-colors ${country.code === value ? 'bg-blue-50 text-blue-700' : 'text-slate-700'
+                                    className={`w-full px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors ${country.code === value ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200' : 'text-slate-700 dark:text-slate-200'
                                         }`}
                                 >
                                     <span className="text-2xl leading-none">{country.flag}</span>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-medium truncate">{country.name}</div>
-                                        <div className="text-xs text-slate-500">{country.code}</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">{country.code}</div>
                                     </div>
                                     {country.code === value && (
                                         <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
@@ -97,7 +97,7 @@ export function CountryCodeSelector({ value, onChange }: Props) {
                                 </button>
                             ))}
                             {filtered.length === 0 && (
-                                <div className="px-4 py-8 text-center text-sm text-slate-500">
+                                <div className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
                                     No se encontraron resultados
                                 </div>
                             )}

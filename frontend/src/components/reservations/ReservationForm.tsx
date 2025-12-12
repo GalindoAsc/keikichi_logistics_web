@@ -191,13 +191,13 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Wizard Progress */}
             <div className="flex items-center justify-center mb-8">
-                <div className={`flex items-center ${currentStep >= 0 ? "text-blue-600" : "text-slate-400"}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 0 ? "border-blue-600 bg-blue-50" : "border-slate-300"}`}>1</div>
+                <div className={`flex items-center ${currentStep >= 0 ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 0 ? "border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/30" : "border-slate-300 dark:border-slate-600"}`}>1</div>
                     <span className="ml-2 font-medium">Espacios</span>
                 </div>
-                <div className="w-16 h-0.5 bg-slate-300 mx-4" />
-                <div className={`flex items-center ${currentStep >= 1 ? "text-blue-600" : "text-slate-400"}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 1 ? "border-blue-600 bg-blue-50" : "border-slate-300"}`}>2</div>
+                <div className="w-16 h-0.5 bg-slate-300 dark:bg-slate-600 mx-4" />
+                <div className={`flex items-center ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep >= 1 ? "border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/30" : "border-slate-300 dark:border-slate-600"}`}>2</div>
                     <span className="ml-2 font-medium">Pago</span>
                 </div>
             </div>
@@ -206,7 +206,7 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
             {currentStep === 0 && (
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-slate-900">Configuración de Espacios</h3>
+                        <h3 className="text-lg font-medium text-slate-900 dark:text-white">Configuración de Espacios</h3>
                         {fields.length > 1 && (
                             <button
                                 type="button"
@@ -223,13 +223,13 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                         {fields.map((field: Record<string, any>, index: number) => {
                             const space = selectedSpaces.find(s => s.id === field.space_id);
                             return (
-                                <div key={field.id} className="bg-white border rounded-lg p-6 shadow-sm space-y-6">
-                                    <div className="flex items-center gap-2 border-b pb-2 justify-between">
+                                <div key={field.id} className="bg-white dark:bg-keikichi-forest-800 border dark:border-keikichi-forest-600 rounded-lg p-6 shadow-sm space-y-6 transition-colors">
+                                    <div className="flex items-center gap-2 border-b dark:border-keikichi-forest-700 pb-2 justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">
+                                            <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs font-bold px-2 py-1 rounded">
                                                 Espacio {space?.space_number || index + 1}
                                             </div>
-                                            <span className="text-sm text-slate-500">Configura la carga para este espacio</span>
+                                            <span className="text-sm text-slate-500 dark:text-keikichi-lime-300">Configura la carga para este espacio</span>
                                         </div>
                                         {index > 0 && (
                                             <button
@@ -285,14 +285,14 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
             {/* STEP 2: Additional Services and Payment */}
             {currentStep === 1 && (
                 <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-slate-900">Servicios Adicionales y Pago</h3>
+                    <h3 className="text-lg font-medium text-slate-900 dark:text-white">Servicios Adicionales y Pago</h3>
 
                     {/* International Trip Section */}
                     {trip.is_international && (
-                        <div className="bg-white border rounded-lg p-4 shadow-sm space-y-4">
+                        <div className="bg-white dark:bg-keikichi-forest-800 border dark:border-keikichi-forest-600 rounded-lg p-4 shadow-sm space-y-4 transition-colors">
                             <div className="flex items-center gap-2 mb-2">
-                                <Globe className="w-5 h-5 text-blue-600" />
-                                <h3 className="font-medium text-slate-800">Viaje Internacional</h3>
+                                <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <h3 className="font-medium text-slate-800 dark:text-white">Viaje Internacional</h3>
                             </div>
 
                             <div className="pl-7 space-y-4 border-l-2 border-blue-100 ml-2">
@@ -347,8 +347,8 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                                     checked={watch("request_pickup")}
                                     onChange={(e) => setValue("request_pickup", e.target.checked)}
                                 />
-                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                <span className="ml-3 text-sm font-medium text-slate-700">
+                                <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span className="ml-3 text-sm font-medium text-slate-700 dark:text-keikichi-lime-200">
                                     {watch("request_pickup")
                                         ? `Sí, requiero recolección (+${trip.pickup_cost_type === 'per_pallet'
                                             ? `${trip.pickup_cost || 0} ${trip.currency} x espacio`
@@ -478,9 +478,9 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                     </div>
 
                     {/* Payment Method */}
-                    <div className="bg-white border rounded-lg p-4 shadow-sm space-y-4">
-                        <h3 className="font-medium text-slate-800 flex items-center gap-2">
-                            <CreditCard className="w-5 h-5 text-blue-600" />
+                    <div className="bg-white dark:bg-keikichi-forest-800 border dark:border-keikichi-forest-600 rounded-lg p-4 shadow-sm space-y-4 transition-colors">
+                        <h3 className="font-medium text-slate-800 dark:text-white flex items-center gap-2">
+                            <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             Método de Pago
                         </h3>
                         <select
@@ -494,8 +494,8 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                     </div>
 
                     {/* Summary Card with Dual Currency */}
-                    <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 space-y-4">
-                        <h3 className="font-semibold text-slate-900">Resumen de Costos</h3>
+                    <div className="bg-slate-50 dark:bg-keikichi-forest-900 border border-slate-200 dark:border-keikichi-forest-600 rounded-lg p-6 space-y-4 transition-colors">
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Resumen de Costos</h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-600">Espacios ({selectedSpaces.length})</span>
@@ -573,7 +573,7 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                         <button
                             type="button"
                             onClick={prevStep}
-                            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 px-4 py-2"
+                            className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-4 py-2"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             Atrás

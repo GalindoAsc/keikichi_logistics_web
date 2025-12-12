@@ -127,45 +127,46 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Profile Details */}
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                {/* Profile Details */}
+                <div className="bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-slate-200 dark:border-keikichi-forest-600 shadow-sm transition-colors">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
                             <User className="w-6 h-6" />
                         </div>
-                        <h2 className="text-lg font-semibold text-slate-900">Datos Personales</h2>
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Datos Personales</h2>
                     </div>
 
                     <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Nombre Completo</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-keikichi-lime-200 mb-1">Nombre Completo</label>
                             <input
                                 {...registerProfile("full_name", { required: "El nombre es requerido" })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             />
                             {profileErrors.full_name && <p className="text-red-500 text-xs mt-1">{profileErrors.full_name.message}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-keikichi-lime-200 mb-1">Teléfono</label>
                             <input
                                 {...registerProfile("phone")}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-keikichi-lime-200 mb-1">Email</label>
                             <input
                                 value={user?.email}
                                 disabled
-                                className="w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-lg text-slate-500 cursor-not-allowed"
+                                className="w-full px-3 py-2 border border-slate-200 dark:border-keikichi-forest-600 bg-slate-50 dark:bg-keikichi-forest-700/50 text-slate-500 dark:text-slate-400 rounded-lg cursor-not-allowed"
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={isProfileSubmitting}
-                            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50"
                         >
                             <Save className="w-4 h-4" />
                             {isProfileSubmitting ? "Guardando..." : "Guardar Cambios"}
@@ -174,51 +175,52 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Password Change */}
-                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                {/* Password Change */}
+                <div className="bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-slate-200 dark:border-keikichi-forest-600 shadow-sm transition-colors">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
                             <Lock className="w-6 h-6" />
                         </div>
-                        <h2 className="text-lg font-semibold text-slate-900">Cambiar Contraseña</h2>
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Cambiar Contraseña</h2>
                     </div>
 
                     <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña Actual</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-keikichi-lime-200 mb-1">Contraseña Actual</label>
                             <input
                                 type="password"
                                 {...registerPassword("old_password", { required: "Requerido" })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             />
                             {passwordErrors.old_password && <p className="text-red-500 text-xs mt-1">{passwordErrors.old_password.message}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Nueva Contraseña</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-keikichi-lime-200 mb-1">Nueva Contraseña</label>
                             <input
                                 type="password"
                                 {...registerPassword("new_password", {
                                     required: "Requerido",
                                     minLength: { value: 6, message: "Mínimo 6 caracteres" }
                                 })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             />
                             {passwordErrors.new_password && <p className="text-red-500 text-xs mt-1">{passwordErrors.new_password.message}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Confirmar Contraseña</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-keikichi-lime-200 mb-1">Confirmar Contraseña</label>
                             <input
                                 type="password"
                                 {...registerPassword("confirm_password", { required: "Requerido" })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-keikichi-forest-600 bg-white dark:bg-keikichi-forest-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={isPasswordSubmitting}
-                            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
+                            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-slate-900 dark:bg-keikichi-lime-600 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-keikichi-lime-700 transition-colors disabled:opacity-50"
                         >
                             <Lock className="w-4 h-4" />
                             {isPasswordSubmitting ? "Actualizando..." : "Actualizar Contraseña"}
@@ -228,30 +230,31 @@ export default function ProfilePage() {
             </div>
 
             {/* My Files Section */}
-            <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            {/* My Files Section */}
+            <div className="mt-8 bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-slate-200 dark:border-keikichi-forest-600 shadow-sm transition-colors">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-900">Mis Archivos</h2>
-                            <p className="text-sm text-slate-500">Gestiona tus documentos (INE, Constancia, Contratos)</p>
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Mis Archivos</h2>
+                            <p className="text-sm text-slate-500 dark:text-keikichi-lime-300">Gestiona tus documentos (INE, Constancia, Contratos)</p>
                         </div>
                     </div>
                     <button
                         onClick={() => navigate("/my-files")}
-                        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                        className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                     >
                         Ver todos
                         <ArrowRight className="w-4 h-4" />
                     </button>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-6 border border-dashed border-slate-300 text-center">
-                    <p className="text-slate-600 mb-4">Accede a todos tus documentos cargados y contratos firmados.</p>
+                <div className="bg-slate-50 dark:bg-keikichi-forest-900/30 rounded-lg p-6 border border-dashed border-slate-300 dark:border-keikichi-forest-600 text-center">
+                    <p className="text-slate-600 dark:text-keikichi-lime-200 mb-4">Accede a todos tus documentos cargados y contratos firmados.</p>
                     <button
                         onClick={() => navigate("/my-files")}
-                        className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-colors shadow-sm"
+                        className="px-4 py-2 bg-white dark:bg-keikichi-forest-800 border border-slate-300 dark:border-keikichi-forest-600 rounded-lg text-slate-700 dark:text-keikichi-lime-200 font-medium hover:bg-slate-50 dark:hover:bg-keikichi-forest-700 transition-colors shadow-sm"
                     >
                         Gestionar Documentos
                     </button>
@@ -259,19 +262,20 @@ export default function ProfilePage() {
             </div>
 
             {/* Bank Details Section */}
-            <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            {/* Bank Details Section */}
+            <div className="mt-8 bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-slate-200 dark:border-keikichi-forest-600 shadow-sm transition-colors">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                    <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
                         <CreditCard className="w-6 h-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-slate-900">Datos Bancarios</h2>
-                        <p className="text-sm text-slate-500">Información para realizar pagos</p>
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Datos Bancarios</h2>
+                        <p className="text-sm text-slate-500 dark:text-keikichi-lime-300">Información para realizar pagos</p>
                     </div>
                 </div>
 
                 {loadingBankDetails ? (
-                    <div className="text-center py-8 text-slate-500">Cargando datos bancarios...</div>
+                    <div className="text-center py-8 text-slate-500 dark:text-keikichi-lime-400">Cargando datos bancarios...</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <BankDetailsView title="Con Factura (Fiscal)" details={invoiceDetails} />
@@ -301,12 +305,12 @@ Concepto: ${details.concept}
     };
 
     return (
-        <div className="space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <h3 className="font-semibold text-slate-900">{title}</h3>
+        <div className="space-y-4 bg-slate-50 dark:bg-keikichi-forest-900/30 p-6 rounded-xl border border-slate-200 dark:border-keikichi-forest-600 transition-colors">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-keikichi-forest-600 pb-3">
+                <h3 className="font-semibold text-slate-900 dark:text-white">{title}</h3>
                 <button
                     onClick={handleCopy}
-                    className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-xs flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                     {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     {copied ? "Copiado" : "Copiar"}
@@ -314,27 +318,27 @@ Concepto: ${details.concept}
             </div>
             <div className="space-y-3 text-sm">
                 <div>
-                    <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Beneficiario</span>
-                    <p className="font-medium text-slate-900">{details.beneficiary || "-"}</p>
+                    <span className="block text-xs font-semibold text-slate-500 dark:text-keikichi-lime-400 uppercase tracking-wider">Beneficiario</span>
+                    <p className="font-medium text-slate-900 dark:text-white">{details.beneficiary || "-"}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Banco</span>
-                        <p className="font-medium text-slate-900">{details.bank || "-"}</p>
+                        <span className="block text-xs font-semibold text-slate-500 dark:text-keikichi-lime-400 uppercase tracking-wider">Banco</span>
+                        <p className="font-medium text-slate-900 dark:text-white">{details.bank || "-"}</p>
                     </div>
                     <div>
-                        <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Concepto</span>
-                        <p className="font-medium text-slate-900">{details.concept || "-"}</p>
+                        <span className="block text-xs font-semibold text-slate-500 dark:text-keikichi-lime-400 uppercase tracking-wider">Concepto</span>
+                        <p className="font-medium text-slate-900 dark:text-white">{details.concept || "-"}</p>
                     </div>
                 </div>
                 <div>
-                    <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">CLABE</span>
+                    <span className="block text-xs font-semibold text-slate-500 dark:text-keikichi-lime-400 uppercase tracking-wider">CLABE</span>
                     <div className="flex items-center gap-2">
-                        <p className="font-mono text-slate-900 tracking-wide">{details.clabe || "-"}</p>
+                        <p className="font-mono text-slate-900 dark:text-white tracking-wide">{details.clabe || "-"}</p>
                         {details.clabe && (
                             <button
                                 onClick={() => { navigator.clipboard.writeText(details.clabe); toast.success("CLABE copiada"); }}
-                                className="text-slate-400 hover:text-blue-600"
+                                className="text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
                             >
                                 <Copy className="w-3 h-3" />
                             </button>
@@ -343,12 +347,12 @@ Concepto: ${details.concept}
                 </div>
                 {details.cardNumber && (
                     <div>
-                        <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Tarjeta</span>
+                        <span className="block text-xs font-semibold text-slate-500 dark:text-keikichi-lime-400 uppercase tracking-wider">Tarjeta</span>
                         <div className="flex items-center gap-2">
-                            <p className="font-mono text-slate-900 tracking-wide">{details.cardNumber}</p>
+                            <p className="font-mono text-slate-900 dark:text-white tracking-wide">{details.cardNumber}</p>
                             <button
                                 onClick={() => { navigator.clipboard.writeText(details.cardNumber); toast.success("Tarjeta copiada"); }}
-                                className="text-slate-400 hover:text-blue-600"
+                                className="text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
                             >
                                 <Copy className="w-3 h-3" />
                             </button>

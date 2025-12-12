@@ -119,11 +119,11 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
     if (error || !reservation) {
         return (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl p-6 max-w-md w-full text-center">
+                <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl p-6 max-w-md w-full text-center">
                     <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">Error al cargar</h3>
-                    <p className="text-slate-500 mb-6">No se pudo cargar la información de la reservación.</p>
-                    <button onClick={onClose} className="px-4 py-2 bg-slate-100 rounded-lg font-medium hover:bg-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Error al cargar</h3>
+                    <p className="text-slate-500 dark:text-slate-400 mb-6">No se pudo cargar la información de la reservación.</p>
+                    <button onClick={onClose} className="px-4 py-2 bg-slate-100 dark:bg-slate-700 dark:text-white rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600">
                         Cerrar
                     </button>
                 </div>
@@ -149,12 +149,12 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-keikichi-forest-900 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transition-colors">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <div className="p-6 border-b border-slate-200 dark:border-keikichi-forest-600 flex justify-between items-center sticky top-0 bg-white dark:bg-keikichi-forest-900 z-10">
                     <div>
                         <div className="flex items-center gap-3">
-                            <h2 className="text-xl font-bold text-slate-900">Detalle de Reservación</h2>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Detalle de Reservación</h2>
                             <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase
                                 ${reservation.status === ReservationStatus.CONFIRMED ? 'bg-green-100 text-green-700' :
                                     reservation.status === ReservationStatus.CANCELLED ? 'bg-red-100 text-red-700' :
@@ -162,7 +162,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                 {statusMap[reservation.status] || reservation.status}
                             </span>
                         </div>
-                        <p className="text-sm text-slate-500">ID: {reservation.id}</p>
+                        <p className="text-sm text-slate-500 dark:text-keikichi-lime-300">ID: {reservation.id}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {canCancel && (
@@ -189,8 +189,8 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                         >
                             <Trash2 className="w-5 h-5" />
                         </button>
-                        <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
-                            <X className="w-5 h-5 text-slate-500" />
+                        <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
+                            <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                         </button>
                     </div>
                 </div>
@@ -200,9 +200,9 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                     <div className="space-y-6">
                         {/* Status Banner */}
                         <div className={`p-4 rounded-lg flex items-center gap-3
-                            ${reservation.payment_status === PaymentStatus.PAID ? 'bg-green-50 text-green-800' :
-                                reservation.payment_status === PaymentStatus.PENDING_REVIEW ? 'bg-blue-50 text-blue-800' :
-                                    'bg-slate-50 text-slate-800'}`}>
+                            ${reservation.payment_status === PaymentStatus.PAID ? 'bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
+                                reservation.payment_status === PaymentStatus.PENDING_REVIEW ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
+                                    'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-300'}`}>
                             <div className="font-medium flex items-center gap-2">
                                 {reservation.payment_status === PaymentStatus.PENDING_REVIEW && <AlertTriangle className="w-4 h-4" />}
                                 {reservation.payment_status === PaymentStatus.PAID && <Check className="w-4 h-4" />}
@@ -214,14 +214,14 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
 
                         {/* Client Info */}
                         <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                                 <User className="w-4 h-4" /> Cliente
                             </h3>
-                            <div className="bg-slate-50 p-4 rounded-lg text-sm space-y-1">
-                                <p><span className="font-medium">Nombre:</span> {reservation.client_name || "Desconocido"}</p>
-                                <p><span className="font-medium">Email:</span> {reservation.client_email || "No disponible"}</p>
-                                <p><span className="font-medium">Teléfono:</span> {reservation.client_phone || "No disponible"}</p>
-                                <p className="text-xs text-slate-500 mt-2">ID: {reservation.client_id}</p>
+                            <div className="bg-slate-50 dark:bg-keikichi-forest-800 p-4 rounded-lg text-sm space-y-1 dark:text-slate-300">
+                                <p><span className="font-medium dark:text-white">Nombre:</span> {reservation.client_name || "Desconocido"}</p>
+                                <p><span className="font-medium dark:text-white">Email:</span> {reservation.client_email || "No disponible"}</p>
+                                <p><span className="font-medium dark:text-white">Teléfono:</span> {reservation.client_phone || "No disponible"}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">ID: {reservation.client_id}</p>
 
                                 {/* Contact Actions Grid */}
                                 <div className="mt-4 grid grid-cols-2 gap-3">
@@ -272,7 +272,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                             Email
                                         </a>
                                     ) : (
-                                        <button disabled className="col-span-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 text-slate-400 text-xs font-medium rounded-lg cursor-not-allowed border border-slate-200">
+                                        <button disabled className="col-span-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 text-xs font-medium rounded-lg cursor-not-allowed border border-slate-200 dark:border-slate-700">
                                             <FileText className="w-4 h-4" />
                                             Sin Email
                                         </button>
@@ -283,14 +283,14 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
 
                         {/* Trip Info */}
                         <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                                 <Truck className="w-4 h-4" /> Viaje
                             </h3>
-                            <div className="bg-slate-50 p-4 rounded-lg text-sm space-y-1">
+                            <div className="bg-slate-50 dark:bg-keikichi-forest-800 p-4 rounded-lg text-sm space-y-1 dark:text-slate-300">
                                 {reservation.trip && (
                                     <>
-                                        <p className="font-medium text-base">{reservation.trip.origin} → {reservation.trip.destination}</p>
-                                        <p className="text-slate-600">
+                                        <p className="font-medium text-base dark:text-white">{reservation.trip.origin} → {reservation.trip.destination}</p>
+                                        <p className="text-slate-600 dark:text-slate-400">
                                             Salida: {format(new Date(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es })}
                                         </p>
                                     </>
@@ -300,35 +300,35 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
 
                         {/* Financials */}
                         <div className="space-y-2">
-                            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                                 <DollarSign className="w-4 h-4" /> Desglose
                             </h3>
-                            <div className="bg-slate-50 p-4 rounded-lg text-sm space-y-2">
+                            <div className="bg-slate-50 dark:bg-keikichi-forest-800 p-4 rounded-lg text-sm space-y-2 dark:text-slate-300">
                                 <div className="flex justify-between">
                                     <span>Subtotal</span>
                                     <span>${reservation.subtotal.toLocaleString()}</span>
                                 </div>
-                                <div className="flex justify-between text-slate-500">
+                                <div className="flex justify-between text-slate-500 dark:text-slate-400">
                                     <span>Impuestos</span>
                                     <span>${reservation.tax_amount.toLocaleString()}</span>
                                 </div>
-                                <div className="flex justify-between font-bold text-lg pt-2 border-t border-slate-200">
+                                <div className="flex justify-between font-bold text-lg pt-2 border-t border-slate-200 dark:border-slate-700 dark:text-white">
                                     <span>Total</span>
-                                    <span>${reservation.total_amount.toLocaleString()} <span className="text-xs font-normal text-slate-500 uppercase">{reservation.trip?.currency || 'USD'}</span></span>
+                                    <span>${reservation.total_amount.toLocaleString()} <span className="text-xs font-normal text-slate-500 dark:text-slate-400 uppercase">{reservation.trip?.currency || 'USD'}</span></span>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">Método: {paymentMethodMap[reservation.payment_method] || reservation.payment_method}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Método: {paymentMethodMap[reservation.payment_method] || reservation.payment_method}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Column: Payment Proof & Actions */}
                     <div className="space-y-6">
-                        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                             <FileText className="w-4 h-4" /> Comprobante de Pago
                         </h3>
 
                         {reservation.payment_proof_path ? (
-                            <div className="border rounded-lg overflow-hidden bg-slate-100">
+                            <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
                                 {reservation.payment_proof_path.endsWith('.pdf') ? (
                                     <div className="p-8 text-center">
                                         <FileText className="w-16 h-16 mx-auto text-slate-400 mb-2" />
@@ -351,7 +351,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                 )}
                             </div>
                         ) : (
-                            <div className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center text-slate-400">
+                            <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg p-8 text-center text-slate-400 dark:text-slate-500">
                                 <AlertTriangle className="w-12 h-12 mx-auto mb-2" />
                                 <p>No se ha subido comprobante</p>
                             </div>
@@ -387,10 +387,10 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                         {/* Audit History */}
                         {auditData?.audit_history && auditData.audit_history.length > 0 && (
                             <div className="mt-6 space-y-2">
-                                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                                     <History className="w-4 h-4" /> Historial de Cambios
                                 </h3>
-                                <div className="bg-slate-50 rounded-lg divide-y divide-slate-200 max-h-48 overflow-y-auto">
+                                <div className="bg-slate-50 dark:bg-keikichi-forest-800 rounded-lg divide-y divide-slate-200 dark:divide-slate-700 max-h-48 overflow-y-auto">
                                     {auditData.audit_history.map((log) => (
                                         <div key={log.id} className="p-3 text-xs">
                                             <div className="flex justify-between items-start">
@@ -406,7 +406,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                                     {log.created_at && format(new Date(log.created_at), "d MMM HH:mm", { locale: es })}
                                                 </span>
                                             </div>
-                                            <p className="text-slate-500 mt-1">Por: {log.performed_by}</p>
+                                            <p className="text-slate-500 dark:text-slate-400 mt-1">Por: {log.performed_by}</p>
                                         </div>
                                     ))}
                                 </div>

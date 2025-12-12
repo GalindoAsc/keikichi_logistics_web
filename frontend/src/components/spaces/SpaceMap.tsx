@@ -56,31 +56,31 @@ const SpaceMap = ({ spaces, isLoading, selectedSpaces = [], onSpaceSelect, isSel
             const isMine = space.is_mine;
 
             // Determine styles based on status
-            let baseStyles = "bg-white border-slate-200 text-slate-500 hover:border-blue-400 hover:shadow-md";
+            let baseStyles = "bg-white dark:bg-keikichi-forest-800 border-slate-200 dark:border-keikichi-forest-600 text-slate-500 dark:text-keikichi-lime-300 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md";
             let icon = <Package className="w-5 h-5 opacity-30" />;
 
             if (space.status === 'reserved') {
-              baseStyles = "bg-rose-50 border-rose-200 text-rose-700 cursor-not-allowed";
+              baseStyles = "bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 cursor-not-allowed";
               icon = <Lock className="w-5 h-5" />;
             } else if (space.status === 'blocked') {
-              baseStyles = "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed";
+              baseStyles = "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed";
               icon = <Ban className="w-5 h-5" />;
             } else if (space.status === 'internal') {
-              baseStyles = "bg-slate-800 border-slate-900 text-slate-400 cursor-not-allowed";
+              baseStyles = "bg-slate-800 dark:bg-black border-slate-900 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed";
               icon = <Ban className="w-5 h-5" />;
             } else if (space.status === 'on_hold') {
               if (isMine) {
-                baseStyles = "bg-amber-50 border-amber-300 text-amber-700 cursor-pointer ring-2 ring-amber-200 ring-offset-2";
+                baseStyles = "bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 cursor-pointer ring-2 ring-amber-200 dark:ring-amber-900 ring-offset-2 dark:ring-offset-slate-900";
                 icon = <Clock className="w-5 h-5 animate-pulse" />;
               } else {
-                baseStyles = "bg-amber-50/50 border-amber-200 text-amber-400 cursor-not-allowed opacity-75";
+                baseStyles = "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50 text-amber-400 dark:text-amber-600 cursor-not-allowed opacity-75";
                 icon = <Clock className="w-5 h-5" />;
               }
             }
 
             // Selection Override
             if (isSelected) {
-              baseStyles = "bg-blue-600 border-blue-700 text-white shadow-lg scale-105 ring-4 ring-blue-100 z-20";
+              baseStyles = "bg-blue-600 border-blue-700 text-white shadow-lg scale-105 ring-4 ring-blue-100 dark:ring-blue-900 z-20";
               icon = <CheckCircle2 className="w-5 h-5 text-white" />;
             }
 
@@ -129,18 +129,18 @@ const SpaceMap = ({ spaces, isLoading, selectedSpaces = [], onSpaceSelect, isSel
       </div>
 
       {/* Legend */}
-      <div className="mt-6 flex flex-wrap justify-center gap-3 text-xs text-slate-600 max-w-sm">
+      <div className="mt-6 flex flex-wrap justify-center gap-3 text-xs text-slate-600 dark:text-slate-400 max-w-sm">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-white border border-slate-300"></div> Disponible
+          <div className="w-3 h-3 rounded bg-white dark:bg-keikichi-forest-800 border border-slate-300 dark:border-slate-600"></div> Disponible
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-blue-600"></div> Seleccionado
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-rose-50 border border-rose-200"></div> Ocupado
+          <div className="w-3 h-3 rounded bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-900"></div> Ocupado
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-amber-50 border border-amber-300"></div> En espera
+          <div className="w-3 h-3 rounded bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700"></div> En espera
         </div>
       </div>
     </div>

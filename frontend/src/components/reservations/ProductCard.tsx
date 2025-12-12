@@ -60,10 +60,10 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
     ) : [];
 
     return (
-        <div className="bg-white border rounded-lg p-4 shadow-sm space-y-4 relative">
+        <div className="bg-white dark:bg-keikichi-forest-800 border dark:border-keikichi-forest-600 rounded-lg p-4 shadow-sm space-y-4 relative transition-colors">
             <div className="flex justify-between items-start">
-                <h4 className="font-medium text-slate-800 flex items-center gap-2">
-                    <Package className="w-4 h-4 text-blue-600" />
+                <h4 className="font-medium text-slate-800 dark:text-white flex items-center gap-2">
+                    <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     Producto #{index + 1}
                 </h4>
                 <button
@@ -79,7 +79,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Product Selection with Autocomplete */}
                 <div className="space-y-1 relative">
-                    <label className="text-sm text-slate-600">Producto</label>
+                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Producto</label>
                     <input
                         type="text"
                         className="w-full border rounded px-3 py-2 text-sm"
@@ -94,11 +94,11 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                         placeholder="Escribe para buscar..."
                     />
                     {showProductSuggestions && filteredProducts.length > 0 && (
-                        <ul className="absolute z-10 w-full bg-white border rounded-md shadow-lg max-h-40 overflow-auto mt-1">
+                        <ul className="absolute z-10 w-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-md shadow-lg max-h-40 overflow-auto mt-1">
                             {filteredProducts.map((opt: string) => (
                                 <li
                                     key={opt}
-                                    className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                                    className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm dark:text-slate-200"
                                     onClick={() => {
                                         handleItemChange(index, "product_name", opt);
                                         setProductSearch(opt);
@@ -115,7 +115,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
 
                 {/* Packaging Unit with History */}
                 <div className="space-y-1 relative">
-                    <label className="text-sm text-slate-600">Unidad (Empaque)</label>
+                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Unidad (Empaque)</label>
                     <input
                         type="text"
                         className="w-full border rounded px-3 py-2 text-sm"
@@ -130,11 +130,11 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                         placeholder="Ej. Caja estándar"
                     />
                     {showPackagingSuggestions && filteredPackaging.length > 0 && (
-                        <ul className="absolute z-10 w-full bg-white border rounded-md shadow-lg max-h-40 overflow-auto mt-1">
+                        <ul className="absolute z-10 w-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-md shadow-lg max-h-40 overflow-auto mt-1">
                             {filteredPackaging.map((opt: string) => (
                                 <li
                                     key={opt}
-                                    className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm"
+                                    className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm dark:text-slate-200"
                                     onClick={() => {
                                         handleItemChange(index, "packaging_type", opt);
                                         setPackagingSearch(opt);
@@ -150,7 +150,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
 
                 {/* Quantity */}
                 <div className="space-y-1">
-                    <label className="text-sm text-slate-600">Cantidad</label>
+                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Cantidad</label>
                     <input
                         type="number"
                         min="1"
@@ -171,7 +171,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
 
                 {/* Weight per Unit */}
                 <div className="space-y-1">
-                    <label className="text-sm text-slate-600">Peso por Unidad</label>
+                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Peso por Unidad</label>
                     <div className="relative flex gap-2">
                         <div className="relative flex-1">
                             <input
@@ -187,7 +187,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                             />
                         </div>
                         <select
-                            className="border rounded px-2 py-2 text-sm bg-white w-24"
+                            className="border rounded px-2 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white w-24"
                             value={field.weight_unit || "kg"}
                             onChange={(e) => handleItemChange(index, "weight_unit", e.target.value)}
                         >
@@ -209,7 +209,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                         id={`labeling-${index}`}
                         className="rounded text-blue-600 focus:ring-blue-500"
                     />
-                    <label htmlFor={`labeling-${index}`} className="text-sm font-medium text-slate-700 cursor-pointer">
+                    <label htmlFor={`labeling-${index}`} className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
                         Requiere Etiquetado
                     </label>
                 </div>
@@ -218,7 +218,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                     <div className="pl-6 space-y-3 border-l-2 border-slate-200 ml-1">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-xs text-slate-500">Cantidad</label>
+                                <label className="text-xs text-slate-500 dark:text-keikichi-lime-300">Cantidad</label>
                                 <input
                                     type="number"
                                     value={field.labeling_quantity || ""}
@@ -227,7 +227,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs text-slate-500">Medidas</label>
+                                <label className="text-xs text-slate-500 dark:text-keikichi-lime-300">Medidas</label>
                                 <select
                                     value={field.labeling_dimensions || ""}
                                     onChange={(e) => handleItemChange(index, "labeling_dimensions", e.target.value)}
@@ -245,7 +245,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                         </div>
                         {field.labeling_dimensions === "custom" && (
                             <div className="space-y-1">
-                                <label className="text-xs text-slate-500">Especificar Medidas</label>
+                                <label className="text-xs text-slate-500 dark:text-keikichi-lime-300">Especificar Medidas</label>
                                 <input
                                     type="text"
                                     value={field.labeling_dimensions === "custom" ? "" : field.labeling_dimensions}
