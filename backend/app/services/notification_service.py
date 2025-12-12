@@ -68,28 +68,40 @@ class NotificationService:
         from app.api.v1.endpoints.notifications import manager
         
         # Save to DB
-        async with AsyncSessionLocal() as db:
-            notification = Notification(
-                user_id=user_id,
-                title=title,
-                message=message,
-                link=link,
-                type=type
-            )
-            db.add(notification)
-            await db.commit()
-            
+        try:
+            print(f"[NOTIFICATION] Attempting to save notification for user {user_id}: {title}")
+            async with AsyncSessionLocal() as db:
+                notification = Notification(
+                    user_id=user_id,
+                    title=title,
+                    message=message,
+                    link=link,
+                    type=type
+                )
+                db.add(notification)
+                await db.commit()
+                print(f"[NOTIFICATION] Successfully saved to DB with ID: {notification.id}")
+                
+        except Exception as e:
+            print(f"[NOTIFICATION] CRITICAL ERROR saving to DB: {e}")
+            import traceback
+            traceback.print_exc()
+
         # Send via WebSocket
-        payload = {
-            "type": "NOTIFICATION",
-            "payload": {
-                "title": title,
-                "message": message,
-                "link": link,
-                "type": type
+        try:
+            payload = {
+                "type": "NOTIFICATION",
+                "payload": {
+                    "title": title,
+                    "message": message,
+                    "link": link,
+                    "type": type
+                }
             }
-        }
-        await manager.send_personal_message(payload, str(user_id))
+            await manager.send_personal_message(payload, str(user_id))
+            print(f"[NOTIFICATION] WebSocket message sent to {user_id}")
+        except Exception as e:
+            print(f"[NOTIFICATION] WebSocket error: {e}")
 
     async def send_data_update(self, user_id: str, event: str, data: Dict[str, Any] = None):
         """
