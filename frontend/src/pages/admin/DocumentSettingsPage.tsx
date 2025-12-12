@@ -160,7 +160,7 @@ const DocumentSettingsPage = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/admin/settings")}
-                className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+                className="flex items-center text-keikichi-forest-600 dark:text-keikichi-lime-300 hover:text-keikichi-forest-900 dark:hover:text-keikichi-lime-100 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver a Ajustes
@@ -168,26 +168,26 @@ const DocumentSettingsPage = () => {
 
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Configuración de Documentos</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">Personaliza la información que aparece en PDFs, tickets y resúmenes.</p>
+                    <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">Configuración de Documentos</h1>
+                    <p className="text-keikichi-forest-500 dark:text-keikichi-lime-300 mt-1">Personaliza la información que aparece en PDFs, tickets y resúmenes.</p>
                 </div>
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-2 bg-keikichi-lime-600 text-white px-4 py-2 rounded-lg hover:bg-keikichi-lime-700 disabled:opacity-50 transition-colors"
                 >
                     <Save className="w-4 h-4" />
                     {saving ? "Guardando..." : "Guardar Cambios"}
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-                <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl shadow-sm border border-keikichi-lime-100 dark:border-keikichi-forest-600 overflow-hidden transition-colors">
+                <div className="flex border-b border-keikichi-lime-100 dark:border-keikichi-forest-600 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab("company")}
                         className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "company"
-                            ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400"
-                            : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                            ? "border-keikichi-lime-600 text-keikichi-lime-600 dark:text-keikichi-lime-400 dark:border-keikichi-lime-400"
+                            : "border-transparent text-keikichi-forest-500 dark:text-keikichi-lime-300 hover:text-keikichi-forest-700 dark:hover:text-keikichi-lime-100"
                             }`}
                     >
                         <Building2 className="w-4 h-4" />
@@ -196,8 +196,8 @@ const DocumentSettingsPage = () => {
                     <button
                         onClick={() => setActiveTab("documents")}
                         className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "documents"
-                            ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400"
-                            : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                            ? "border-keikichi-lime-600 text-keikichi-lime-600 dark:text-keikichi-lime-400 dark:border-keikichi-lime-400"
+                            : "border-transparent text-keikichi-forest-500 dark:text-keikichi-lime-300 hover:text-keikichi-forest-700 dark:hover:text-keikichi-lime-100"
                             }`}
                     >
                         <FileText className="w-4 h-4" />
@@ -206,8 +206,8 @@ const DocumentSettingsPage = () => {
                     <button
                         onClick={() => setActiveTab("instructions")}
                         className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "instructions"
-                            ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400"
-                            : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                            ? "border-keikichi-lime-600 text-keikichi-lime-600 dark:text-keikichi-lime-400 dark:border-keikichi-lime-400"
+                            : "border-transparent text-keikichi-forest-500 dark:text-keikichi-lime-300 hover:text-keikichi-forest-700 dark:hover:text-keikichi-lime-100"
                             }`}
                     >
                         <Mail className="w-4 h-4" />
@@ -225,7 +225,7 @@ const DocumentSettingsPage = () => {
                                 </div>
                                 <button
                                     onClick={handleSyncFromGeneral}
-                                    className="text-sm bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 px-3 py-1.5 rounded-md hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 shadow-sm dark:text-blue-300"
+                                    className="text-sm bg-white dark:bg-keikichi-forest-700 border border-blue-200 dark:border-blue-700 px-3 py-1.5 rounded-md hover:bg-blue-50 dark:hover:bg-keikichi-forest-600 transition-colors flex items-center gap-2 shadow-sm dark:text-blue-300"
                                 >
                                     <RefreshCw className="w-3.5 h-3.5" />
                                     Traer de Ajustes Generales
@@ -234,7 +234,7 @@ const DocumentSettingsPage = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">
                                         <Building2 className="w-4 h-4 inline mr-1" />
                                         Nombre de la Empresa
                                     </label>
@@ -242,7 +242,7 @@ const DocumentSettingsPage = () => {
                                         type="text"
                                         value={settings.company_name}
                                         onChange={(e) => handleChange("company_name", e.target.value)}
-                                        className="w-full border dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                                        className="w-full border dark:border-keikichi-forest-600 rounded-lg px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500 focus:border-keikichi-lime-500"
                                         placeholder="Keikichi Logistics"
                                     />
                                 </div>

@@ -57,40 +57,40 @@ const ExchangeRatePage = () => {
         <div className="max-w-3xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/admin/settings")}
-                className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+                className="flex items-center text-keikichi-forest-600 dark:text-keikichi-lime-300 hover:text-keikichi-forest-900 dark:hover:text-keikichi-lime-100 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver a Ajustes
             </button>
 
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 transition-colors">
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl shadow-sm border border-keikichi-lime-100 dark:border-keikichi-forest-600 p-6 transition-colors">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tipo de Cambio Diario</h1>
-                        <p className="text-slate-500 dark:text-slate-400">Define el valor del dólar para las operaciones del sistema.</p>
+                        <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">Tipo de Cambio Diario</h1>
+                        <p className="text-keikichi-forest-500 dark:text-keikichi-lime-300">Define el valor del dólar para las operaciones del sistema.</p>
                     </div>
                 </div>
 
                 <div className="max-w-md space-y-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        <label className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">
                             Tipo de Cambio (MXN por USD)
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400">$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-keikichi-forest-500 dark:text-keikichi-lime-300">$</span>
                             <input
                                 type="number"
                                 step="0.01"
                                 value={exchangeRate}
                                 onChange={(e) => setExchangeRate(e.target.value)}
-                                className="w-full pl-8 pr-4 py-2 border dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full pl-8 pr-4 py-2 border dark:border-keikichi-forest-600 rounded-md bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500 focus:border-keikichi-lime-500 outline-none transition-all"
                                 placeholder="0.00"
                             />
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">
                             Este valor se utilizará como referencia predeterminada al crear nuevos viajes y para conversiones en tiempo real donde aplique.
                         </p>
                     </div>
@@ -98,7 +98,7 @@ const ExchangeRatePage = () => {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                        className="flex items-center justify-center gap-2 w-full bg-keikichi-lime-600 text-white px-4 py-2 rounded-md hover:bg-keikichi-lime-700 dark:bg-keikichi-lime-600 dark:hover:bg-keikichi-lime-500 disabled:opacity-50 transition-colors"
                     >
                         <Save className="w-4 h-4" />
                         {saving ? "Guardando..." : "Guardar Cambios"}

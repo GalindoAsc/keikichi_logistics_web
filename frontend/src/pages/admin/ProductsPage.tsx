@@ -69,7 +69,7 @@ const ProductsPage = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <button
                 onClick={() => navigate("/admin/settings")}
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 flex items-center gap-2 transition-colors"
+                className="text-keikichi-forest-600 dark:text-keikichi-lime-300 hover:text-keikichi-forest-900 dark:hover:text-keikichi-lime-200 flex items-center gap-2 transition-colors"
             >
                 <ArrowLeft className="w-4 h-4" />
                 Volver a Ajustes
@@ -77,15 +77,15 @@ const ProductsPage = () => {
 
             <div className="flex items-center gap-2 mb-6">
                 <Tag className="w-6 h-6 text-orange-600 dark:text-orange-500" />
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Productos y Unidades</h1>
+                <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">Productos y Unidades</h1>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b dark:border-slate-700">
+            <div className="flex border-b dark:border-keikichi-forest-600">
                 <button
                     className={`px-6 py-3 font-medium flex items-center gap-2 transition-colors ${activeTab === "products"
                         ? "border-b-2 border-orange-600 text-orange-600 dark:border-orange-500 dark:text-orange-500"
-                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        : "text-keikichi-forest-500 hover:text-keikichi-forest-700 dark:text-keikichi-lime-300 dark:hover:text-keikichi-lime-100"
                         }`}
                     onClick={() => setActiveTab("products")}
                 >
@@ -95,7 +95,7 @@ const ProductsPage = () => {
                 <button
                     className={`px-6 py-3 font-medium flex items-center gap-2 transition-colors ${activeTab === "units"
                         ? "border-b-2 border-orange-600 text-orange-600 dark:border-orange-500 dark:text-orange-500"
-                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        : "text-keikichi-forest-500 hover:text-keikichi-forest-700 dark:text-keikichi-lime-300 dark:hover:text-keikichi-lime-100"
                         }`}
                     onClick={() => setActiveTab("units")}
                 >
@@ -104,27 +104,27 @@ const ProductsPage = () => {
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-lg border dark:border-slate-700 p-6 shadow-sm space-y-6 transition-colors">
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 p-6 shadow-sm space-y-6 transition-colors">
                 {activeTab === "products" ? (
                     <>
                         <div className="flex gap-4 items-end">
                             <div className="flex-1 space-y-1">
-                                <label className="text-sm text-slate-600 dark:text-slate-300">Nombre (Español)</label>
+                                <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">Nombre (Español)</label>
                                 <input
                                     type="text"
                                     value={prodNameEs}
                                     onChange={(e) => setProdNameEs(e.target.value)}
-                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                                    className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-orange-500"
                                     placeholder="Ej. Zanahoria"
                                 />
                             </div>
                             <div className="flex-1 space-y-1">
-                                <label className="text-sm text-slate-600 dark:text-slate-300">Nombre (Inglés) - Opcional</label>
+                                <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">Nombre (Inglés) - Opcional</label>
                                 <input
                                     type="text"
                                     value={prodNameEn}
                                     onChange={(e) => setProdNameEn(e.target.value)}
-                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                                    className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-orange-500"
                                     placeholder="Ej. Carrot"
                                 />
                             </div>
@@ -138,16 +138,16 @@ const ProductsPage = () => {
                             </button>
                         </div>
 
-                        <div className="border dark:border-slate-700 rounded-md divide-y dark:divide-slate-700">
+                        <div className="border dark:border-keikichi-forest-600 rounded-md divide-y dark:divide-keikichi-forest-600">
                             {products.map((product: Product) => (
-                                <div key={product.id} className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <div key={product.id} className="p-4 flex justify-between items-center hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 transition-colors">
                                     <div>
-                                        <span className="font-medium text-slate-800 dark:text-slate-200">{product.name_es}</span>
-                                        {product.name_en && <span className="text-slate-500 dark:text-slate-400 ml-2">/ {product.name_en}</span>}
+                                        <span className="font-medium text-keikichi-forest-800 dark:text-white">{product.name_es}</span>
+                                        {product.name_en && <span className="text-keikichi-forest-500 dark:text-keikichi-lime-300 ml-2">/ {product.name_en}</span>}
                                     </div>
                                     <button
                                         onClick={() => handleRemoveProduct(product.id, product.name_es)}
-                                        className="text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                                        className="text-keikichi-forest-400 dark:text-keikichi-lime-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                                         title="Eliminar"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -155,7 +155,7 @@ const ProductsPage = () => {
                                 </div>
                             ))}
                             {products.length === 0 && (
-                                <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                                <div className="p-8 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">
                                     No hay productos registrados.
                                 </div>
                             )}
@@ -165,22 +165,22 @@ const ProductsPage = () => {
                     <>
                         <div className="flex gap-4 items-end">
                             <div className="flex-1 space-y-1">
-                                <label className="text-sm text-slate-600 dark:text-slate-300">Nombre Unidad</label>
+                                <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">Nombre Unidad</label>
                                 <input
                                     type="text"
                                     value={unitName}
                                     onChange={(e) => setUnitName(e.target.value)}
-                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                                    className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-orange-500"
                                     placeholder="Ej. Caja Estándar"
                                 />
                             </div>
                             <div className="flex-1 space-y-1">
-                                <label className="text-sm text-slate-600 dark:text-slate-300">Abreviación</label>
+                                <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">Abreviación</label>
                                 <input
                                     type="text"
                                     value={unitAbbr}
                                     onChange={(e) => setUnitAbbr(e.target.value)}
-                                    className="w-full border dark:border-slate-700 rounded-md px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                                    className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-orange-500"
                                     placeholder="Ej. cja"
                                 />
                             </div>
@@ -194,16 +194,16 @@ const ProductsPage = () => {
                             </button>
                         </div>
 
-                        <div className="border dark:border-slate-700 rounded-md divide-y dark:divide-slate-700">
+                        <div className="border dark:border-keikichi-forest-600 rounded-md divide-y dark:divide-keikichi-forest-600">
                             {units.map((unit: Unit) => (
-                                <div key={unit.id} className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <div key={unit.id} className="p-4 flex justify-between items-center hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 transition-colors">
                                     <div>
-                                        <span className="font-medium text-slate-800 dark:text-slate-200">{unit.name}</span>
-                                        {unit.abbreviation && <span className="text-slate-500 dark:text-slate-400 ml-2">({unit.abbreviation})</span>}
+                                        <span className="font-medium text-keikichi-forest-800 dark:text-white">{unit.name}</span>
+                                        {unit.abbreviation && <span className="text-keikichi-forest-500 dark:text-keikichi-lime-300 ml-2">({unit.abbreviation})</span>}
                                     </div>
                                     <button
                                         onClick={() => handleRemoveUnit(unit.id, unit.name)}
-                                        className="text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                                        className="text-keikichi-forest-400 dark:text-keikichi-lime-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                                         title="Eliminar"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -211,7 +211,7 @@ const ProductsPage = () => {
                                 </div>
                             ))}
                             {units.length === 0 && (
-                                <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                                <div className="p-8 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">
                                     No hay unidades registradas.
                                 </div>
                             )}
