@@ -52,7 +52,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-@router.get("/", response_model=List[NotificationResponse])
+@router.get("", response_model=List[NotificationResponse])
 async def list_notifications(
     skip: int = 0,
     limit: int = 50,
@@ -163,7 +163,7 @@ async def delete_notification(
     return {"message": "Notification deleted"}
 
 
-@router.delete("/")
+@router.delete("")
 async def clear_all_notifications(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
