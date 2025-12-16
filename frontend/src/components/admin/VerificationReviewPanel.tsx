@@ -89,7 +89,7 @@ export function VerificationReviewPanel({ user, onClose }: Props) {
                                             <a
                                                 href={getFileUrl(item.fileId)}
                                                 download
-                                                className="p-2 bg-white text-slate-700 rounded-full hover:bg-slate-100 transition-colors shadow-sm flex items-center justify-center"
+                                                className="p-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors shadow-sm flex items-center justify-center"
                                                 title="Descargar imagen"
                                             >
                                                 <Download className="w-5 h-5" />

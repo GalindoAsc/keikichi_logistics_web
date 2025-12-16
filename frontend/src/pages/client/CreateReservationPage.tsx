@@ -85,21 +85,20 @@ const CreateReservationPage = () => {
         <div className="max-w-2xl mx-auto space-y-6">
             <button
                 onClick={() => navigate(`/trips/${trip.id}`)}
-
-                className="text-slate-600 hover:text-slate-900 flex items-center gap-2"
+                className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-2"
             >
                 ← Volver al viaje
             </button>
-            <div className="bg-white rounded-lg border p-6 shadow-sm">
-                <h1 className="text-2xl font-bold text-slate-900 mb-4">Confirmar Reservación</h1>
+            <div className="bg-white dark:!bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 p-6 shadow-sm transition-colors">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Confirmar Reservación</h1>
 
-                <div className="bg-slate-50 rounded-md p-4 mb-6 space-y-2">
-                    <h3 className="font-semibold text-slate-800">Resumen del Viaje</h3>
-                    <p className="text-sm text-slate-600">{trip.origin} → {trip.destination}</p>
-                    <p className="text-sm text-slate-600">
+                <div className="bg-slate-50 dark:!bg-keikichi-forest-900 rounded-md p-4 mb-6 space-y-2 transition-colors">
+                    <h3 className="font-semibold text-slate-800 dark:text-keikichi-lime-100">Resumen del Viaje</h3>
+                    <p className="text-sm text-slate-600 dark:text-keikichi-lime-300">{trip.origin} → {trip.destination}</p>
+                    <p className="text-sm text-slate-600 dark:text-keikichi-lime-300">
                         Espacios: {selectedSpaces.map(s => s.space_number).join(", ")}
                     </p>
-                    <p className="text-sm font-medium text-blue-600">
+                    <p className="text-sm font-medium text-blue-600 dark:text-keikichi-yellow">
                         Total a pagar: ${(selectedSpaces.length * trip.price_per_space).toFixed(2)}
                     </p>
                 </div>

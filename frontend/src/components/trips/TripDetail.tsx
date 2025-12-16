@@ -149,22 +149,22 @@ const TripDetail = () => {
       >
         ← Volver
       </button>
-      <div className="bg-white rounded-lg border p-4 shadow-sm space-y-2">
-        <h2 className="text-xl font-semibold text-slate-800">
+      <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 p-4 shadow-sm space-y-2">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
           {trip.origin} → {trip.destination}
         </h2>
-        <p className="text-sm text-slate-600">Salida: {trip.departure_date} {trip.departure_time}</p>
-        <p className="text-sm text-slate-600">
-          Precio por espacio: <span className="font-semibold">${trip.price_per_space} <span className="text-xs text-slate-500">{trip.currency || 'USD'}</span></span>
+        <p className="text-sm text-slate-600 dark:text-keikichi-lime-300">Salida: {trip.departure_date} {trip.departure_time}</p>
+        <p className="text-sm text-slate-600 dark:text-keikichi-lime-300">
+          Precio por espacio: <span className="font-semibold">${trip.price_per_space} <span className="text-xs text-slate-500 dark:text-keikichi-lime-400">{trip.currency || 'USD'}</span></span>
         </p>
-        {trip.notes_public && <p className="text-sm text-slate-600">Notas: {trip.notes_public}</p>}
+        {trip.notes_public && <p className="text-sm text-slate-600 dark:text-keikichi-lime-300">Notas: {trip.notes_public}</p>}
       </div>
 
-      <div className="bg-white rounded-lg border p-4 shadow-sm space-y-3">
+      <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 p-4 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-800">Mapa de espacios</h3>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Mapa de espacios</h3>
           {spaces && (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-keikichi-lime-300">
               Disponible: {spaces.summary.available} / {spaces.total_spaces}
             </p>
           )}
@@ -178,13 +178,13 @@ const TripDetail = () => {
         />
 
         {selectedSpaces.length > 0 && (
-          <div className="mt-4 pt-4 border-t flex items-center justify-between">
+          <div className="mt-4 pt-4 border-t dark:border-keikichi-forest-700 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-sm font-medium text-slate-900 dark:text-white">
                 Seleccionados: {selectedSpaces.length}
               </p>
-              <p className="text-lg font-bold text-blue-600">
-                Total: ${subtotal.toFixed(2)} <span className="text-sm text-blue-400 font-normal">{trip.currency || 'USD'}</span>
+              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                Total: ${subtotal.toFixed(2)} <span className="text-sm text-blue-400 dark:text-blue-300 font-normal">{trip.currency || 'USD'}</span>
               </p>
             </div>
             <button

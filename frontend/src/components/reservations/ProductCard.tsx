@@ -82,7 +82,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                     <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Producto</label>
                     <input
                         type="text"
-                        className="w-full border rounded px-3 py-2 text-sm"
+                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         value={productSearch}
                         onChange={(e) => {
                             setProductSearch(e.target.value);
@@ -98,7 +98,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                             {filteredProducts.map((opt: string) => (
                                 <li
                                     key={opt}
-                                    className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm dark:text-slate-200"
+                                    className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-slate-900 dark:text-slate-200"
                                     onClick={() => {
                                         handleItemChange(index, "product_name", opt);
                                         setProductSearch(opt);
@@ -118,7 +118,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                     <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Unidad (Empaque)</label>
                     <input
                         type="text"
-                        className="w-full border rounded px-3 py-2 text-sm"
+                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         value={packagingSearch}
                         onChange={(e) => {
                             setPackagingSearch(e.target.value);
@@ -134,7 +134,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                             {filteredPackaging.map((opt: string) => (
                                 <li
                                     key={opt}
-                                    className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm dark:text-slate-200"
+                                    className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-slate-900 dark:text-slate-200"
                                     onClick={() => {
                                         handleItemChange(index, "packaging_type", opt);
                                         setPackagingSearch(opt);
@@ -154,7 +154,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                     <input
                         type="number"
                         min="1"
-                        className="w-full border rounded px-3 py-2 text-sm"
+                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         value={field.box_count || ""}
                         onChange={(e) => {
                             const val = e.target.valueAsNumber;
@@ -177,7 +177,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                             <input
                                 type="number"
                                 step="0.01"
-                                className="w-full border rounded px-3 py-2 text-sm"
+                                className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-indigo-500"
                                 value={field.weight_per_unit || ""}
                                 onChange={(e) => {
                                     const val = parseFloat(e.target.value);
@@ -215,7 +215,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                 </div>
 
                 {field.needs_labeling && (
-                    <div className="pl-6 space-y-3 border-l-2 border-slate-200 ml-1">
+                    <div className="pl-6 space-y-3 border-l-2 border-slate-200 dark:border-keikichi-forest-600 ml-1">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label className="text-xs text-slate-500 dark:text-keikichi-lime-300">Cantidad</label>
@@ -223,7 +223,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                                     type="number"
                                     value={field.labeling_quantity || ""}
                                     onChange={(e) => handleItemChange(index, "labeling_quantity", parseInt(e.target.value))}
-                                    className="w-full border rounded px-2 py-1 text-sm"
+                                    className="w-full border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                 />
                             </div>
                             <div className="space-y-1">
@@ -231,7 +231,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                                 <select
                                     value={field.labeling_dimensions || ""}
                                     onChange={(e) => handleItemChange(index, "labeling_dimensions", e.target.value)}
-                                    className="w-full border rounded px-2 py-1 text-sm"
+                                    className="w-full border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                 >
                                     <option value="">Seleccionar...</option>
                                     {labelPrices?.map((p: any) => (
@@ -250,7 +250,7 @@ const ProductCard = ({ index, field, handleItemChange, onRemove, errors, labelPr
                                     type="text"
                                     value={field.labeling_dimensions === "custom" ? "" : field.labeling_dimensions}
                                     onChange={(e) => handleItemChange(index, "labeling_dimensions", e.target.value)}
-                                    className="w-full border rounded px-2 py-1 text-sm"
+                                    className="w-full border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                     placeholder="Ej. 15x15 cm"
                                 />
                             </div>

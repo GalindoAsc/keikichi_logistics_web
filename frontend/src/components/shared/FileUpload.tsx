@@ -45,13 +45,11 @@ export const FileUpload = ({ label, docType, onUploadComplete, accept = ".pdf,.j
 
     const clearFile = () => {
         setFileName(null);
-        // Note: We don't delete from server here, just clear UI. 
-        // Ideally we might want a callback to clear the ID in parent form too.
     };
 
     return (
-        <div className={`border border - dashed border - slate - 300 rounded - lg p - 4 bg - slate - 50 ${className} `}>
-            <p className="text-sm font-medium text-slate-700 mb-2">{label}</p>
+        <div className={`border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 bg-slate-50 dark:bg-slate-800/50 ${className}`}>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{label}</p>
 
             {!fileName ? (
                 <div className="relative">
@@ -62,7 +60,7 @@ export const FileUpload = ({ label, docType, onUploadComplete, accept = ".pdf,.j
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         disabled={isUploading}
                     />
-                    <div className="flex flex-col items-center justify-center py-4 text-slate-500">
+                    <div className="flex flex-col items-center justify-center py-4 text-slate-500 dark:text-slate-400">
                         {isUploading ? (
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></div>
                         ) : (
@@ -72,10 +70,10 @@ export const FileUpload = ({ label, docType, onUploadComplete, accept = ".pdf,.j
                     </div>
                 </div>
             ) : (
-                <div className="flex items-center justify-between bg-white p-2 rounded border border-slate-200">
+                <div className="flex items-center justify-between bg-white dark:bg-slate-700 p-2 rounded border border-slate-200 dark:border-slate-600">
                     <div className="flex items-center gap-2 overflow-hidden">
                         <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-slate-600 truncate">{fileName}</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-200 truncate">{fileName}</span>
                     </div>
                     <button
                         onClick={clearFile}

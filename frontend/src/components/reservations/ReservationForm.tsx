@@ -334,11 +334,11 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                     )}
 
                     {/* Pickup Service Section */}
-                    <div className="bg-white border rounded-lg p-4 shadow-sm space-y-4">
+                    <div className="bg-white dark:bg-keikichi-forest-800 border dark:border-keikichi-forest-600 rounded-lg p-4 shadow-sm space-y-4 transition-colors">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <Truck className="w-5 h-5 text-blue-600" />
-                                <h3 className="font-medium text-slate-800">Servicio de Recolección</h3>
+                                <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <h3 className="font-medium text-slate-800 dark:text-white">Servicio de Recolección</h3>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input
@@ -361,47 +361,47 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                         </div>
 
                         {watch("request_pickup") && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7 border-l-2 border-blue-100 ml-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7 border-l-2 border-blue-100 dark:border-blue-900 ml-2">
                                 <div className="space-y-1">
-                                    <label className="text-sm text-slate-600">Dirección de Recolección</label>
+                                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Dirección de Recolección</label>
                                     <input
                                         type="text"
-                                        className="w-full border rounded px-3 py-2 text-sm"
+                                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                         placeholder="Calle, número, colonia, ciudad"
                                         onChange={(e) => setValue("pickup_details.address", e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-slate-600">Nombre de Contacto</label>
+                                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Nombre de Contacto</label>
                                     <input
                                         type="text"
-                                        className="w-full border rounded px-3 py-2 text-sm"
+                                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                         placeholder="Nombre completo"
                                         onChange={(e) => setValue("pickup_details.contact_name", e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-slate-600">Teléfono de Contacto</label>
+                                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Teléfono de Contacto</label>
                                     <input
                                         type="text"
-                                        className="w-full border rounded px-3 py-2 text-sm"
+                                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                         placeholder="Teléfono"
                                         onChange={(e) => setValue("pickup_details.contact_phone", e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-slate-600">Fecha y Hora Preferida</label>
+                                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Fecha y Hora Preferida</label>
                                     <input
                                         type="datetime-local"
-                                        className="w-full border rounded px-3 py-2 text-sm"
+                                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                         onChange={(e) => setValue("pickup_details.time", e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-1 md:col-span-2">
-                                    <label className="text-sm text-slate-600">Instrucciones Especiales</label>
+                                    <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Instrucciones Especiales</label>
                                     <input
                                         type="text"
-                                        className="w-full border rounded px-3 py-2 text-sm"
+                                        className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                         placeholder="Referencia, portón, etc."
                                         onChange={(e) => setValue("pickup_details.notes", e.target.value)}
                                     />
@@ -411,10 +411,10 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                     </div>
 
                     {/* Invoice Section */}
-                    <div className="bg-white border rounded-lg p-4 shadow-sm space-y-4">
+                    <div className="bg-white dark:bg-keikichi-forest-800 border dark:border-keikichi-forest-600 rounded-lg p-4 shadow-sm space-y-4 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
-                            <FileText className="w-5 h-5 text-blue-600" />
-                            <h3 className="font-medium text-slate-800">Facturación</h3>
+                            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            <h3 className="font-medium text-slate-800 dark:text-white">Facturación</h3>
                         </div>
 
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -427,30 +427,30 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                         </label>
 
                         {watch("requires_invoice") && (
-                            <div className="space-y-4 pl-7 border-l-2 border-blue-100 ml-2 pt-2">
+                            <div className="space-y-4 pl-7 border-l-2 border-blue-100 dark:border-blue-900 ml-2 pt-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-sm text-slate-600">Razón Social</label>
+                                        <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Razón Social</label>
                                         <input
                                             type="text"
-                                            className="w-full border rounded px-3 py-2 text-sm"
+                                            className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                             placeholder="Nombre o Razón Social"
                                             {...register("billing_company_name")}
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-sm text-slate-600">RFC</label>
+                                        <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">RFC</label>
                                         <input
                                             type="text"
-                                            className="w-full border rounded px-3 py-2 text-sm"
+                                            className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                             placeholder="RFC"
                                             {...register("billing_rfc")}
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-sm text-slate-600">Uso de CFDI</label>
+                                        <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Uso de CFDI</label>
                                         <select
-                                            className="w-full border rounded px-3 py-2 text-sm"
+                                            className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                             {...register("cfdi_use")}
                                         >
                                             <option value="">Seleccionar...</option>
@@ -459,10 +459,10 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                                         </select>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-sm text-slate-600">Medios de Contacto</label>
+                                        <label className="text-sm text-slate-600 dark:text-keikichi-lime-300">Medios de Contacto</label>
                                         <input
                                             type="text"
-                                            className="w-full border rounded px-3 py-2 text-sm"
+                                            className="w-full border rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                                             placeholder="Email, Teléfono"
                                             {...register("billing_contact_methods")}
                                         />
@@ -485,7 +485,7 @@ const ReservationForm = ({ onSubmit, isSubmitting, trip, selectedSpaces }: Props
                         </h3>
                         <select
                             {...register("payment_method")}
-                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
                         >
                             <option value="bank_transfer">Transferencia Bancaria</option>
                             <option value="cash">Efectivo</option>

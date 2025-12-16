@@ -9,13 +9,13 @@ export default function VerificationPage() {
     if (user?.verification_status === 'verified') {
         return (
             <div className="max-w-2xl mx-auto py-12 px-4 text-center">
-                <div className="bg-green-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
                     <span className="text-4xl">✓</span>
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900 mb-4">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
                     ¡Ya estás verificado!
                 </h1>
-                <p className="text-slate-600 mb-8">
+                <p className="text-slate-600 dark:text-slate-400 mb-8">
                     Tu identidad ha sido confirmada. Puedes realizar reservaciones sin restricciones.
                 </p>
                 <button
@@ -31,20 +31,20 @@ export default function VerificationPage() {
     if (user?.verification_status === 'pending_review') {
         return (
             <div className="max-w-2xl mx-auto py-12 px-4 text-center">
-                <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
                     <span className="text-4xl">⏳</span>
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900 mb-4">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
                     Verificación en Proceso
                 </h1>
-                <p className="text-slate-600 mb-8">
+                <p className="text-slate-600 dark:text-slate-400 mb-8">
                     Estamos revisando tus documentos. Te notificaremos cuando tu cuenta esté activa.
                     <br />
                     Esto usualmente toma menos de 24 horas.
                 </p>
                 <button
                     onClick={() => navigate('/')}
-                    className="text-blue-600 font-medium hover:underline"
+                    className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
                 >
                     Volver a Inicio
                 </button>
@@ -54,7 +54,7 @@ export default function VerificationPage() {
 
     return (
         <div className="max-w-4xl mx-auto py-8 px-4">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-2xl shadow-sm border border-slate-200 dark:border-keikichi-forest-600 p-6 md:p-8">
                 <INEUploadForm onComplete={() => window.location.reload()} />
             </div>
         </div>

@@ -96,21 +96,21 @@ export default function ReservationsPage() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-900">Mis Reservaciones</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Mis Reservaciones</h1>
             </div>
 
             {data?.items.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg border border-slate-200">
+                <div className="text-center py-12 bg-white dark:bg-keikichi-forest-800 rounded-lg border border-slate-200 dark:border-keikichi-forest-600">
                     <Package className="mx-auto h-12 w-12 text-slate-400" />
-                    <h3 className="mt-2 text-sm font-semibold text-slate-900">No tienes reservaciones</h3>
-                    <p className="mt-1 text-sm text-slate-500">Comienza reservando un espacio en nuestros viajes.</p>
+                    <h3 className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">No tienes reservaciones</h3>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-keikichi-lime-300">Comienza reservando un espacio en nuestros viajes.</p>
                 </div>
             ) : (
                 <div className="grid gap-6">
                     {data?.items.map((reservation) => (
                         <div
                             key={reservation.id}
-                            className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden"
+                            className="bg-white dark:bg-keikichi-forest-800 rounded-lg border border-slate-200 dark:border-keikichi-forest-600 shadow-sm overflow-hidden transition-colors"
                         >
                             <div className="p-6">
                                 <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -145,7 +145,7 @@ export default function ReservationsPage() {
                                                 {PAYMENT_STATUS_LABELS[reservation.payment_status]}
                                             </span>
                                         </div>
-                                        <div className="text-2xl font-bold text-slate-900">
+                                        <div className="text-2xl font-bold text-slate-900 dark:text-white">
                                             ${Number(reservation.total_amount).toLocaleString()}
                                             <span className="text-sm text-slate-500 ml-1 font-normal uppercase">{reservation.currency || 'USD'}</span>
                                         </div>
@@ -157,7 +157,7 @@ export default function ReservationsPage() {
                                                     value={reservation.payment_method}
                                                     onChange={(e) => handlePaymentMethodChange(reservation.id, e.target.value as PaymentMethod)}
                                                     disabled={changingPaymentId === reservation.id}
-                                                    className="text-xs border border-slate-200 rounded px-2 py-1 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
+                                                    className="text-xs border border-slate-200 dark:border-slate-600 rounded px-2 py-1 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
                                                 >
                                                     <option value={PaymentMethod.CASH}>{PAYMENT_METHOD_LABELS[PaymentMethod.CASH]}</option>
                                                     <option value={PaymentMethod.BANK_TRANSFER}>{PAYMENT_METHOD_LABELS[PaymentMethod.BANK_TRANSFER]}</option>
@@ -173,7 +173,7 @@ export default function ReservationsPage() {
                                 </div>
 
                                 {/* Actions Footer */}
-                                <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end gap-3">
+                                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-keikichi-forest-700 flex justify-end gap-3">
                                     {reservation.payment_status === PaymentStatus.UNPAID && (
                                         <>
                                             <button

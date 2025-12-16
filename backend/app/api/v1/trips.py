@@ -216,7 +216,7 @@ async def delete_trip(trip_id: str, db: AsyncSession = Depends(get_db_session), 
             
         # Catch unexpected
         logger = logging.getLogger(__name__)
-        logger.error(f\"Error deleting trip: {e}\", exc_info=True)
+        logger.error(f"Error deleting trip: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error interno eliminando viaje: {str(e)}"

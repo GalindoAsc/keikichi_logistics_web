@@ -44,7 +44,7 @@ const SpaceMap = ({ spaces, isLoading, selectedSpaces = [], onSpaceSelect, isSel
       </div>
 
       {/* Trailer Body */}
-      <div className="w-full max-w-[280px] bg-slate-100 border-x-4 border-slate-300 p-4 min-h-[400px] shadow-inner relative">
+      <div className="w-full max-w-[280px] bg-slate-100 dark:bg-keikichi-forest-900 border-x-4 border-slate-300 dark:border-slate-700 p-4 min-h-[400px] shadow-inner relative transition-colors">
         {/* Floor Pattern Background */}
         <div className="absolute inset-0 opacity-5 pointer-events-none"
           style={{ backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
@@ -105,10 +105,6 @@ const SpaceMap = ({ spaces, isLoading, selectedSpaces = [], onSpaceSelect, isSel
                 <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide opacity-90">
                   {icon}
                 </div>
-                {/* Tooltip-ish label on hover */}
-                {/* <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-30">
-                  {statusLabel}
-                </div> */}
               </div>
             );
           })}

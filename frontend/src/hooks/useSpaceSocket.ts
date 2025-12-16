@@ -32,7 +32,10 @@ export function useSpaceSocket({ tripId, onSpaceUpdate, enabled = true }: UseSpa
         }
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//localhost:8000/api/v1/spaces/ws/trip/${tripId}?token=${accessToken}`;
+        // In production, connect through nginx proxy (same host as frontend)
+        // In development, connect directly to backend on localhost:8000
+        const host = import.meta.env.DEV ? 'localhost:8000' : window.location.host;
+        const wsUrl = `${protocol}//${host}/api/v1/spaces/ws/trip/${tripId}?token=${accessToken}`;
 
         console.log('[SpaceSocket] Connecting to:', wsUrl);
 
