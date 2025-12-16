@@ -136,7 +136,7 @@ const LabelPricesPage = () => {
                                     setIsCreating(false);
                                     reset();
                                 }}
-                                className="bg-gray-100 dark:bg-keikichi-forest-700 text-gray-600 dark:text-keikichi-lime-300 p-2 rounded hover:bg-gray-200 dark:hover:bg-keikichi-forest-600 transition-colors"
+                                className="bg-keikichi-lime-50 dark:bg-keikichi-forest-700 text-keikichi-forest-600 dark:text-keikichi-lime-300 p-2 rounded hover:bg-keikichi-lime-100 dark:hover:bg-keikichi-forest-600 transition-colors"
                                 title="Cancelar"
                             >
                                 <X className="w-4 h-4" />

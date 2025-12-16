@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import List
 
-from pydantic import AnyHttpUrl, Field, field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -57,7 +57,6 @@ class Settings(BaseSettings):
     space_hold_minutes: int = Field(10, alias="SPACE_HOLD_MINUTES")
     reservation_cancel_hours: int = Field(24, alias="RESERVATION_CANCEL_HOURS")
     default_currency: str = Field("MXN", alias="DEFAULT_CURRENCY")
-    default_currency: str = Field("MXN", alias="DEFAULT_CURRENCY")
     default_tax_rate: float = Field(0.16, alias="DEFAULT_TAX_RATE")
 
     # Email Settings
@@ -87,7 +86,6 @@ class Settings(BaseSettings):
 
 
 @lru_cache
-
 def get_settings() -> Settings:
     return Settings()  # type: ignore[arg-type]
 

@@ -1,9 +1,12 @@
+import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
 from app.config import settings
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
 
 @router.get("/payments/{filename}")
 async def get_payment_proof(filename: str):
@@ -17,6 +20,7 @@ async def get_payment_proof(filename: str):
         
     return FileResponse(file_path)
 
+
 @router.get("/{file_id}/content")
 async def get_file_content(file_id: str):
     """
@@ -25,9 +29,7 @@ async def get_file_content(file_id: str):
     # Determine the correct upload directory
     upload_path = Path(settings.upload_dir)
     
-    print(f"DEBUG: Requesting file_id: {file_id}")
-    print(f"DEBUG: upload_path: {upload_path}")
-    print(f"DEBUG: upload_path exists: {upload_path.exists()}")
+    logger.debug(f"Requesting file_id: {file_id}, upload_path: {upload_path}")
 
     # Fallback for local development if /app/uploads doesn't exist
     if not upload_path.exists():
@@ -42,17 +44,16 @@ async def get_file_content(file_id: str):
         for path in potential_paths:
             if path.exists():
                 upload_path = path
+                logger.debug(f"Using fallback upload_path: {upload_path}")
                 break
-    
-    print(f"DEBUG: Final upload_path: {upload_path}")
 
     # Search recursively for the file with this ID
     # We assume files are named {file_id}.{ext} or similar
     for file_path in upload_path.rglob(f"{file_id}.*"):
         if file_path.is_file():
-            print(f"DEBUG: Found file: {file_path}")
+            logger.debug(f"Found file: {file_path}")
             return FileResponse(file_path)
             
-    print(f"DEBUG: File not found for ID: {file_id}")
+    logger.warning(f"File not found for ID: {file_id}")
             
     raise HTTPException(status_code=404, detail="File not found")

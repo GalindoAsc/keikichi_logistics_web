@@ -190,7 +190,7 @@ export default function AdminTripsPage() {
                                             className={`px-2 py-1 rounded-full text-xs font-bold uppercase border-none focus:ring-2 focus:ring-keikichi-lime-500 cursor-pointer
                                                 ${trip.status === 'scheduled' ? 'bg-keikichi-lime-100 text-keikichi-lime-800 dark:bg-keikichi-lime-900/30 dark:text-keikichi-lime-400' :
                                                     trip.status === 'in_transit' ? 'bg-keikichi-yellow-100 text-keikichi-yellow-800 dark:bg-keikichi-yellow-900/30 dark:text-keikichi-yellow-400' :
-                                                        trip.status === 'completed' ? 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' :
+                                                        trip.status === 'completed' ? 'bg-keikichi-forest-100 text-keikichi-forest-800 dark:bg-keikichi-forest-700 dark:text-keikichi-lime-300' :
                                                             'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}
                                             onClick={(e) => e.stopPropagation()}
                                         >

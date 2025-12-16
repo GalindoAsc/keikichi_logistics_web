@@ -1,5 +1,6 @@
 import shutil
 import os
+import logging
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime, date
@@ -8,6 +9,8 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, s
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
+
+logger = logging.getLogger(__name__)
 
 from app.api.deps import get_db_session, get_current_user
 from app.core.permissions import require_manager_or_superadmin
@@ -73,10 +76,9 @@ async def upload_document(
     await db.commit()
     await db.refresh(db_doc)
     
-    print(f"[UPLOAD] Document saved: {db_doc.id} at {datetime.now()}")
+    logger.info(f"Document uploaded: {db_doc.id} by user {current_user.id}")
     
     # Schedule notifications in background
-    print(f"[UPLOAD] Scheduling background task at {datetime.now()}")
     background_tasks.add_task(
         handle_upload_notifications,
         is_admin=is_admin,
@@ -86,7 +88,6 @@ async def upload_document(
         doc_type=doc_type
     )
     
-    print(f"[UPLOAD] Returning response at {datetime.now()}")
     return db_doc
 
 async def handle_upload_notifications(is_admin, current_user_id, current_user_name, target_user_id, doc_type):
@@ -94,13 +95,12 @@ async def handle_upload_notifications(is_admin, current_user_id, current_user_na
     from app.models.user import User, UserRole
     from sqlalchemy import select, or_
     
-    print(f"[BG_TASK] handle_upload_notifications started at {datetime.now()}, is_admin={is_admin}")
+    logger.debug(f"Starting upload notifications, is_admin={is_admin}")
     
     if not is_admin:
         try:
             doc_type_display = doc_type.replace("_", " ").title()
             
-            print(f"[BG_TASK] Fetching admins at {datetime.now()}")
             async with AsyncSessionLocal() as session:
                 query = select(User).where(
                     or_(
@@ -111,11 +111,9 @@ async def handle_upload_notifications(is_admin, current_user_id, current_user_na
                 result = await session.execute(query)
                 admins = result.scalars().all()
                 
-                print(f"[BG_TASK] Found {len(admins)} admins at {datetime.now()}")
+                logger.info(f"Notifying {len(admins)} admins about document upload")
                 
-                for i, admin in enumerate(admins):
-                    print(f"[BG_TASK] Sending to admin {i+1}/{len(admins)}: {admin.id} at {datetime.now()}")
-                    
+                for admin in admins:
                     # Send persistent notification (Bell)
                     await notification_service.send_in_app(
                         user_id=str(admin.id),
@@ -124,7 +122,6 @@ async def handle_upload_notifications(is_admin, current_user_id, current_user_na
                         link=f"/admin/accounts/{target_user_id}/files",
                         type="info"
                     )
-                    print(f"[BG_TASK] Sent in-app notification at {datetime.now()}")
                     
                     # Send real-time data update (List refresh)
                     await notification_service.send_data_update(
@@ -132,11 +129,10 @@ async def handle_upload_notifications(is_admin, current_user_id, current_user_na
                         "DOCUMENT_UPLOADED", 
                         {"client_id": str(target_user_id)}
                     )
-                    print(f"[BG_TASK] Sent data update at {datetime.now()}")
                 
-            print(f"[BG_TASK] Completed successfully at {datetime.now()}")
+            logger.info("Upload notifications completed successfully")
         except Exception as e:
-            print(f"[BG_TASK] Error at {datetime.now()}: {e}")
+            logger.error(f"Error sending upload notifications: {e}", exc_info=True)
             import traceback
             traceback.print_exc()
 

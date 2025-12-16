@@ -21,7 +21,9 @@ export function GlobalNotificationHandler() {
 
     useEffect(() => {
         const handleDataUpdate = (data: any) => {
-            console.log('[GlobalNotificationHandler] DATA_UPDATE:', data);
+            if (import.meta.env.DEV) {
+                console.log('[GlobalNotificationHandler] DATA_UPDATE:', data);
+            }
 
             const { event, data: eventData } = data;
 
@@ -68,7 +70,9 @@ export function GlobalNotificationHandler() {
                     break;
 
                 default:
-                    console.log('[GlobalNotificationHandler] Unknown event:', event);
+                    if (import.meta.env.DEV) {
+                        console.log('[GlobalNotificationHandler] Unknown event:', event);
+                    }
             }
         };
 

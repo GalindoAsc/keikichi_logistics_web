@@ -20,17 +20,22 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         const { socket, isConnected } = get();
         const { user, accessToken } = authStore.getState();
 
-        console.log('[SocketStore] Connect called', {
-            hasSocket: !!socket,
-            isConnected,
-            hasUser: !!user,
-            hasToken: !!accessToken
-        });
+        // Only log in development
+        if (import.meta.env.DEV) {
+            console.log('[SocketStore] Connect called', {
+                hasSocket: !!socket,
+                isConnected,
+                hasUser: !!user,
+                hasToken: !!accessToken
+            });
+        }
 
         if (socket || isConnected || !user || !accessToken) {
-            console.log('[SocketStore] Connect aborted:', {
-                reason: socket ? 'already has socket' : isConnected ? 'already connected' : !user ? 'no user' : 'no token'
-            });
+            if (import.meta.env.DEV) {
+                console.log('[SocketStore] Connect aborted:', {
+                    reason: socket ? 'already has socket' : isConnected ? 'already connected' : !user ? 'no user' : 'no token'
+                });
+            }
             return;
         }
 
@@ -50,30 +55,40 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             wsUrl = `${protocol}//${host}/api/v1/notifications/ws/${user.id}?token=${accessToken}`;
         }
 
-        console.log('[SocketStore] Attempting to connect to:', wsUrl);
+        if (import.meta.env.DEV) {
+            console.log('[SocketStore] Attempting to connect to:', wsUrl);
+        }
 
         const newSocket = new WebSocket(wsUrl);
 
         newSocket.onopen = () => {
-            console.log('WS Connected');
+            if (import.meta.env.DEV) {
+                console.log('WS Connected');
+            }
             set({ isConnected: true });
         };
 
         newSocket.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
-                console.log('[SocketStore] Received message:', message);
+                if (import.meta.env.DEV) {
+                    console.log('[SocketStore] Received message:', message);
+                }
                 const { listeners } = get();
 
                 // Handle specific events
                 if (message.event && listeners.has(message.event)) {
-                    console.log(`[SocketStore] Dispatching event '${message.event}' to ${listeners.get(message.event)?.size} listeners`);
+                    if (import.meta.env.DEV) {
+                        console.log(`[SocketStore] Dispatching event '${message.event}' to ${listeners.get(message.event)?.size} listeners`);
+                    }
                     listeners.get(message.event)?.forEach(cb => cb(message.data, message.event));
                 }
 
                 // Handle generic types (like NOTIFICATION)
                 if (message.type && listeners.has(message.type)) {
-                    console.log(`[SocketStore] Dispatching type '${message.type}' to ${listeners.get(message.type)?.size} listeners`);
+                    if (import.meta.env.DEV) {
+                        console.log(`[SocketStore] Dispatching type '${message.type}' to ${listeners.get(message.type)?.size} listeners`);
+                    }
                     listeners.get(message.type)?.forEach(cb => cb(message, message.type));
                 }
 
@@ -83,7 +98,9 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         };
 
         newSocket.onclose = () => {
-            console.log('WS Disconnected');
+            if (import.meta.env.DEV) {
+                console.log('WS Disconnected');
+            }
             set({ isConnected: false, socket: null });
             // Simple reconnect logic could go here
             setTimeout(() => {

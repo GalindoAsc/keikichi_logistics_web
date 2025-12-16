@@ -78,3 +78,14 @@ Thumbs.db
 # ----- Tests -----
 *.log
 test_results*.log
+
+# ----- Backend Debug & Maintenance Scripts -----
+backend/reproduce_bug.py
+backend/fix_enums.py
+backend/find_user.py
+backend/cleanup_duplicate_spaces.py
+backend/cleanup_orphaned_files.py
+backend/verify_login.py
+backend/debug_user_files.py
+backend/app.log
+backend/cleanup_spaces.sql

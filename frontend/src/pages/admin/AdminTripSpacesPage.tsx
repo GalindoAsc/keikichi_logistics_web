@@ -116,21 +116,21 @@ export default function AdminTripSpacesPage() {
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => navigate("/admin/trips")}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                    className="p-2 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700/50 rounded-full transition-colors"
                 >
-                    <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+                    <ArrowLeft className="w-6 h-6 text-keikichi-forest-600 dark:text-keikichi-lime-300" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Espacios</h1>
-                    <p className="text-slate-500 dark:text-slate-400">{trip.origin} → {trip.destination}</p>
+                    <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">Gestión de Espacios</h1>
+                    <p className="text-keikichi-forest-500 dark:text-keikichi-lime-300">{trip.origin} → {trip.destination}</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Map Column */}
-                <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+                <div className="lg:col-span-2 bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-keikichi-lime-100 dark:border-keikichi-forest-600 shadow-sm transition-colors">
                     {isLoadingSpaces ? (
-                        <div className="h-64 flex items-center justify-center text-slate-500 dark:text-slate-400">Cargando mapa...</div>
+                        <div className="h-64 flex items-center justify-center text-keikichi-forest-400 dark:text-keikichi-lime-400">Cargando mapa...</div>
                     ) : (
                         <SpaceMap
                             totalSpaces={trip.total_spaces}
@@ -141,9 +141,9 @@ export default function AdminTripSpacesPage() {
                         />
                     )}
 
-                    <div className="mt-6 flex gap-4 justify-center text-sm text-slate-600 dark:text-slate-400 flex-wrap">
+                    <div className="mt-6 flex gap-4 justify-center text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300 flex-wrap">
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded"></div>
+                            <div className="w-4 h-4 bg-white dark:bg-keikichi-forest-700 border border-keikichi-lime-200 dark:border-keikichi-forest-500 rounded"></div>
                             <span>Disponible</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ export default function AdminTripSpacesPage() {
                             <span>Reservado</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-slate-800 dark:bg-slate-950 border dark:border-slate-700 rounded"></div>
+                            <div className="w-4 h-4 bg-keikichi-forest-800 dark:bg-keikichi-forest-950 border dark:border-keikichi-forest-600 rounded"></div>
                             <span>Interno/Bloqueado</span>
                         </div>
                     </div>
@@ -163,15 +163,15 @@ export default function AdminTripSpacesPage() {
 
                 {/* Controls Column */}
                 <div className="space-y-6">
-                    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Acciones del Espacio</h2>
+                    <div className="bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-keikichi-lime-100 dark:border-keikichi-forest-600 shadow-sm transition-colors">
+                        <h2 className="text-lg font-bold text-keikichi-forest-800 dark:text-white mb-4">Acciones del Espacio</h2>
 
                         {selectedSpace ? (
                             <div className="space-y-4">
-                                <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg relative transition-colors">
+                                <div className="p-4 bg-keikichi-lime-50 dark:bg-keikichi-forest-700/50 rounded-lg relative transition-colors">
                                     <button
                                         onClick={() => setSelectedSpaceId(null)}
-                                        className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"
+                                        className="absolute top-2 right-2 p-1.5 text-keikichi-forest-400 hover:text-keikichi-forest-600 dark:hover:text-keikichi-lime-200 hover:bg-keikichi-lime-200 dark:hover:bg-keikichi-forest-600 rounded-full transition-colors"
                                         title="Deseleccionar espacio"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -179,15 +179,15 @@ export default function AdminTripSpacesPage() {
                                             <line x1="6" y1="6" x2="18" y2="18"></line>
                                         </svg>
                                     </button>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">Espacio Seleccionado</p>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white">#{selectedSpace.space_number}</p>
-                                    <p className="text-sm font-medium uppercase mt-1 text-indigo-600 dark:text-indigo-400">
+                                    <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-300">Espacio Seleccionado</p>
+                                    <p className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">#{selectedSpace.space_number}</p>
+                                    <p className="text-sm font-medium uppercase mt-1 text-keikichi-lime-600 dark:text-keikichi-lime-400">
                                         Estado Actual: {selectedSpace.status}
                                     </p>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Cambiar Estado:</p>
+                                    <p className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-200">Cambiar Estado:</p>
 
                                     <button
                                         onClick={() => handleStatusChange('available')}
@@ -210,7 +210,7 @@ export default function AdminTripSpacesPage() {
                                     <button
                                         onClick={() => handleStatusChange('internal')}
                                         disabled={selectedSpace.status === 'internal'}
-                                        className="w-full p-3 flex items-center gap-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-800 dark:bg-slate-700 text-white hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full p-3 flex items-center gap-3 rounded-lg border border-keikichi-forest-300 dark:border-keikichi-forest-600 bg-keikichi-forest-700 dark:bg-keikichi-forest-700/50 text-white hover:bg-keikichi-forest-600 dark:hover:bg-keikichi-forest-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Lock className="w-5 h-5" />
                                         <span>Marcar como Interno (No visible)</span>
@@ -234,35 +234,35 @@ export default function AdminTripSpacesPage() {
                                 )}
                             </div>
                         ) : (
-                            <div className="text-center py-8 text-slate-400 dark:text-slate-500">
+                            <div className="text-center py-8 text-keikichi-forest-400 dark:text-keikichi-lime-500">
                                 <p>Selecciona un espacio en el mapa para ver opciones</p>
                             </div>
                         )}
                     </div>
 
                     {/* Stats Summary */}
-                    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Resumen</h3>
+                    <div className="bg-white dark:bg-keikichi-forest-800 p-6 rounded-xl border border-keikichi-lime-100 dark:border-keikichi-forest-600 shadow-sm transition-colors">
+                        <h3 className="text-sm font-bold text-keikichi-forest-800 dark:text-white uppercase tracking-wider mb-4">Resumen</h3>
                         <div className="space-y-3">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-600 dark:text-slate-400">Total Espacios</span>
-                                <span className="font-medium text-slate-900 dark:text-white">{trip.total_spaces}</span>
+                                <span className="text-keikichi-forest-600 dark:text-keikichi-lime-400">Total Espacios</span>
+                                <span className="font-medium text-keikichi-forest-900 dark:text-white">{trip.total_spaces}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-green-600 dark:text-green-400">Disponibles</span>
-                                <span className="font-medium text-slate-900 dark:text-white">{spacesData?.summary.available || 0}</span>
+                                <span className="font-medium text-keikichi-forest-900 dark:text-white">{spacesData?.summary.available || 0}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-amber-600 dark:text-amber-400">Pre-Reservas</span>
-                                <span className="font-medium text-slate-900 dark:text-white">{spacesData?.summary.on_hold || 0}</span>
+                                <span className="font-medium text-keikichi-forest-900 dark:text-white">{spacesData?.summary.on_hold || 0}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-red-600 dark:text-red-400">Reservados</span>
-                                <span className="font-medium text-slate-900 dark:text-white">{spacesData?.summary.reserved || 0}</span>
+                                <span className="font-medium text-keikichi-forest-900 dark:text-white">{spacesData?.summary.reserved || 0}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-600 dark:text-slate-400">Internos/Bloqueados</span>
-                                <span className="font-medium text-slate-900 dark:text-white">
+                                <span className="text-keikichi-forest-600 dark:text-keikichi-lime-400">Internos/Bloqueados</span>
+                                <span className="font-medium text-keikichi-forest-900 dark:text-white">
                                     {(spacesData?.summary.internal || 0) + (spacesData?.summary.blocked || 0)}
                                 </span>
                             </div>

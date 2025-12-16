@@ -123,7 +123,7 @@ export default function ProfilePage() {
 
     return (
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-bold text-slate-900 mb-8">Mi Perfil</h1>
+            <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white mb-8">Mi Perfil</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Profile Details */}
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                         <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
                             <User className="w-6 h-6" />
                         </div>
-                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Datos Personales</h2>
+                        <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white">Datos Personales</h2>
                     </div>
 
                     <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-4">
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                         <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
                             <Lock className="w-6 h-6" />
                         </div>
-                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Cambiar Contraseña</h2>
+                        <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white">Cambiar Contraseña</h2>
                     </div>
 
                     <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
@@ -238,13 +238,13 @@ export default function ProfilePage() {
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Mis Archivos</h2>
-                            <p className="text-sm text-slate-500 dark:text-keikichi-lime-300">Gestiona tus documentos (INE, Constancia, Contratos)</p>
+                            <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white">Mis Archivos</h2>
+                            <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-300">Gestiona tus documentos (INE, Constancia, Contratos)</p>
                         </div>
                     </div>
                     <button
                         onClick={() => navigate("/my-files")}
-                        className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                        className="flex items-center gap-2 text-keikichi-forest-600 dark:text-keikichi-lime-400 hover:text-keikichi-forest-800 dark:hover:text-keikichi-lime-300 font-medium"
                     >
                         Ver todos
                         <ArrowRight className="w-4 h-4" />
@@ -269,8 +269,8 @@ export default function ProfilePage() {
                         <CreditCard className="w-6 h-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Datos Bancarios</h2>
-                        <p className="text-sm text-slate-500 dark:text-keikichi-lime-300">Información para realizar pagos</p>
+                        <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white">Datos Bancarios</h2>
+                        <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-300">Información para realizar pagos</p>
                     </div>
                 </div>
 
@@ -307,10 +307,10 @@ Concepto: ${details.concept}
     return (
         <div className="space-y-4 bg-slate-50 dark:bg-keikichi-forest-900/30 p-6 rounded-xl border border-slate-200 dark:border-keikichi-forest-600 transition-colors">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-keikichi-forest-600 pb-3">
-                <h3 className="font-semibold text-slate-900 dark:text-white">{title}</h3>
+                <h3 className="font-semibold text-keikichi-forest-800 dark:text-white">{title}</h3>
                 <button
                     onClick={handleCopy}
-                    className="text-xs flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                    className="text-xs flex items-center gap-1 text-keikichi-forest-600 dark:text-keikichi-lime-400 hover:text-keikichi-forest-800 dark:hover:text-keikichi-lime-300 font-medium"
                 >
                     {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     {copied ? "Copiado" : "Copiar"}

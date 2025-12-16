@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -139,13 +140,14 @@ async def update_trip(trip_id: str, payload: TripUpdate, db: AsyncSession = Depe
 
 @router.patch("/{trip_id}/status", response_model=TripOut)
 async def change_status(trip_id: str, status: TripStatus, db: AsyncSession = Depends(get_db_session), current_user=Depends(require_manager_or_superadmin)):
-    print(f"DEBUG: change_status called for trip {trip_id} with status {status}")
+    logger = logging.getLogger(__name__)
+    logger.info(f"Changing status for trip {trip_id} to {status}")
     try:
         service = TripService(db)
         trip = await service.get_trip(trip_id)
-        print(f"DEBUG: Trip found: {trip.id}, current status: {trip.status}")
+        logger.debug(f"Trip found: {trip.id}, current status: {trip.status}")
         trip = await service.change_status(trip, status)
-        print(f"DEBUG: Status changed successfully to {trip.status}")
+        logger.info(f"Status changed successfully to {trip.status}")
         
         # Notify affected users (passengers with active reservations)
         try:
@@ -164,12 +166,12 @@ async def change_status(trip_id: str, status: TripStatus, db: AsyncSession = Dep
             await notification_service.notify_trip_status_changed(trip, status, affected_user_ids)
             
         except Exception as ne:
-            print(f"Error sending status notifications: {ne}")
+            logger.error(f"Error sending status notifications: {ne}", exc_info=True)
             # Don't fail request
         
         return TripOut.model_validate(trip)
     except Exception as e:
-        print(f"ERROR in change_status: {e}")
+        logger.error(f"Error in change_status: {e}", exc_info=True)
         raise e
 
 
@@ -213,7 +215,8 @@ async def delete_trip(trip_id: str, db: AsyncSession = Depends(get_db_session), 
             raise e
             
         # Catch unexpected
-        print(f"ERROR deleting trip: {e}")
+        logger = logging.getLogger(__name__)
+        logger.error(f\"Error deleting trip: {e}\", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error interno eliminando viaje: {str(e)}"

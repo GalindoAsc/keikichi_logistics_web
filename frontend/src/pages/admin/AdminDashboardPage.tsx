@@ -240,7 +240,7 @@ export default function AdminDashboardPage() {
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase mt-1 inline-block
                                     ${res.payment_status === 'paid' ? 'bg-keikichi-lime-100 text-keikichi-lime-700 dark:bg-keikichi-lime-900/30 dark:text-keikichi-lime-400' :
                                         res.payment_status === 'pending_review' ? 'bg-keikichi-yellow-100 text-keikichi-yellow-700 dark:bg-keikichi-yellow-900/30 dark:text-keikichi-yellow-400' :
-                                            'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
+                                            'bg-keikichi-forest-100 text-keikichi-forest-600 dark:bg-keikichi-forest-700 dark:text-keikichi-lime-400'}`}>
                                     {res.payment_status === 'paid' ? t('reservations.status.paid') :
                                         res.payment_status === 'pending_review' ? t('reservations.status.pendingReview') : t('reservations.status.pending')}
                                 </span>

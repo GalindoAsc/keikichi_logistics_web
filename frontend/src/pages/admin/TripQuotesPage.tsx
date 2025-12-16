@@ -43,7 +43,7 @@ const statusColors: Record<string, string> = {
     negotiating: "bg-keikichi-forest-100 text-keikichi-forest-800 dark:bg-keikichi-forest-600 dark:text-keikichi-lime-300",
     accepted: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
     rejected: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    expired: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+    expired: "bg-keikichi-forest-100 text-keikichi-forest-600 dark:bg-keikichi-forest-700 dark:text-keikichi-lime-500"
 };
 
 export default function TripQuotesPage() {

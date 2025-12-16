@@ -1,7 +1,10 @@
+import logging
 from typing import List, Dict
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, desc
+
+logger = logging.getLogger(__name__)
 
 from app.api.deps import get_current_user, get_db_session
 from app.models.notification import Notification
@@ -46,8 +49,8 @@ class ConnectionManager:
             for connection in connections:
                 try:
                     await connection.send_text(text)
-                except Exception:
-                    pass  # Connection might be closed
+                except Exception as e:
+                    logger.warning(f"Failed to send message to user {user_id}: {e}")
 
 manager = ConnectionManager()
 
@@ -127,7 +130,8 @@ async def websocket_endpoint(
              # You could also allow admins to subscribe to others, but for now strict check
              await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
              return
-    except Exception:
+    except Exception as e:
+        logger.error(f"WebSocket auth failed for user {user_id}: {e}")
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
