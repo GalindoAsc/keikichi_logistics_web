@@ -7,7 +7,7 @@ REMOTE_USER="dgali"
 REMOTE_HOST="100.106.83.19"
 # 3. La carpeta donde pusiste el proyecto en el N5
 # Nota: Usa barras normales '/' aunque sea Windows para evitar problemas con SSH
-REMOTE_DIR="C:/Proyectos/Keikichi"
+REMOTE_DIR="D:\Projectos\keikichi_logistics_web"
 
 # Colores para que se vea pro
 GREEN='\033[0;32m'
