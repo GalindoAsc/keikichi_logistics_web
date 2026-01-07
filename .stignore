@@ -1,0 +1,34 @@
+# --- 1. Dependencias y Compilados (CRÍTICO) ---
+# Evita mezclar binarios de Mac (ARM) con PC (x86)
+node_modules
+dist
+build
+out
+.orbstack
+__pycache__
+.pytest_cache
+*.pyc
+
+# --- 2. Logs y Ruido (Para ahorrar CPU y Red) ---
+# Veo que generas muchos logs de tests, esto evita que se sincronicen
+*.log
+npm-debug.log*
+yarn-debug.log*
+backend/app.log
+backend/test_results*.log
+
+# --- 3. Archivos de Sistema y Basura de Mac ---
+(?d).DS_Store
+(?d)._*
+(?d)Thumbs.db
+
+# --- 4. Configuración Local (Seguridad) ---
+# Recomendado: No sincronizar .env para poder tener configs distintas 
+# en Mac (Localhost) y N5 (Docker network) si fuera necesario.
+.env
+# El .env.example SÍ se sincronizará para que sepas qué variables faltan.
+
+# --- 5. Git ---
+# Descomenta esto si prefieres usar git pull/push manualmente
+# y evitar corrupciones si se te olvida cerrar VS Code en un lado.
+# .git
