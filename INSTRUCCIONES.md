@@ -1,67 +1,101 @@
-# Keikichi Logistics - Guía de Operación y Despliegue
+# Keikichi Logistics - Guía de Operación
 
-## 🔑 1. Acceso al Sistema
+## 🔑 Acceso al Sistema
 
-### Credenciales de Administrador (Reset)
+### Credenciales de Administrador
 - **Email**: `admin@keikichi.com`
-- **Contraseña**: `admin123`
+- **Contraseña**: La que configuraste en `.env` (`DEFAULT_ADMIN_PASSWORD`)
 
-### URLs del Sistema (Producción / Docker)
-- **Frontend (Aplicación)**: 
-  - Local: http://localhost
-  - Red Local: `http://<TU_IP_LOCAL>` (ej. `http://192.168.1.100`)
-- **Backend (API)**: http://localhost:8000/api/v1
-- **API Docs (Swagger)**: http://localhost/api/docs
-
----
-
-## 🚀 2. Despliegue en NAS (Synology/Otro)
-
-Gracias a las recientes optimizaciones, el despliegue en NAS es directo:
-
-1. **Copiar archivos**:
-   Copia toda la carpeta del proyecto a tu NAS.
-
-2. **Configuración (.env)**:
-   El archivo `.env` ya está pre-configurado. No necesitas cambiar `VITE_API_URL` ni IPs manualmente.
-   - El frontend detectará automáticamente la API usando rutas relativas (`/api/v1`).
-   - Solo asegúrate de que los puertos `80` y `8000` estén libres en tu NAS.
-
-3. **Ejecutar**:
-   Desde la terminal del NAS (SSH) o Portainer:
-   ```bash
-   ./sincronizacion-local.sh 
-   # O directamente:
-   docker-compose up -d --build
-   ```
+### URLs
+| Entorno | Frontend | Backend | API Docs |
+|---------|----------|---------|----------|
+| **Producción** | https://keikichi.com | https://keikichi.com/api/v1 | https://keikichi.com/docs |
+| **Local (dev)** | http://localhost:5173 | http://localhost:8000 | http://localhost:8000/docs |
 
 ---
 
-## 🔧 3. Solución de Problemas Comunes
+## �️ Desarrollo Local (MacBook + OrbStack)
 
-### Error "Network Error" o 405 Method Not Allowed
-- **Causa**: El navegador intenta conectar a `localhost` en lugar de la IP del servidor, o la ruta de la API es incorrecta.
-- **Solución**: Ya está corregido en la última versión. El frontend usa rutas relativas `/api/v1` que funcionan bajo cualquier IP o dominio.
-- **Acción**: Si persiste, **limpia la caché del navegador** (Ctrl+Shift+R) para cargar el nuevo código del frontend.
-
-### El Frontend no carga cambios
-Si haces cambios y no se ven:
 ```bash
-docker-compose up -d --build frontend
+# Iniciar
+./dev.sh
+
+# Otros comandos
+./dev.sh down      # Detener
+./dev.sh logs      # Ver logs
+./dev.sh rebuild   # Reconstruir
+./dev.sh db        # Conectar a PostgreSQL
+./dev.sh shell     # Shell en backend
 ```
 
-### Reiniciar todo el sistema (limpieza)
+> ⚠️ La base de datos local (`keikichi_dev`) está separada de producción.
+
+---
+
+## 🚀 Deploy a Producción (N5 Pro)
+
+### Arquitectura
+```
+MacBook ──SSH/Tailscale──▶ N5 Pro (Windows 11 + Docker)
+                                    │
+                                    ▼
+                          Cloudflare Tunnel ──▶ keikichi.com
+```
+
+### Comando de deploy
 ```bash
-docker-compose down
-docker-compose up -d --build
+./deploy-n5.sh
+```
+
+El script:
+1. Hace commit y push a GitHub
+2. Conecta al N5 vía Tailscale (100.106.83.19)
+3. Pull + rebuild de contenedores
+
+### Cloudflare Tunnel (rutas configuradas)
+| Hostname | Service |
+|----------|---------|
+| `keikichi.com` | `http://host.docker.internal:3080` |
+| `keikichi.com/api` | `http://host.docker.internal:8001` |
+| `keikichi.com/docs` | `http://host.docker.internal:8001` |
+
+---
+
+## 🔧 Solución de Problemas
+
+### Error "Network Error" o 405
+Limpia caché del navegador (Ctrl+Shift+R / Cmd+Shift+R)
+
+### Credenciales Docker expiradas (N5)
+```powershell
+docker logout
+docker login
+```
+
+### Reiniciar todo en N5
+```powershell
+cd D:\Projectos\keikichi_logistics_web
+docker compose -f docker-compose.n5.yml down
+docker compose -f docker-compose.n5.yml up -d --build
+```
+
+### Ver logs del backend en N5
+```powershell
+docker logs keikichi_backend -f
 ```
 
 ---
 
-## 📊 4. Arquitectura
+## 📁 Archivos Importantes
 
-- **Frontend**: Nginx sirviendo React (Puerto 80). Redirecciona `/api` al backend.
-- **Backend**: FastAPI (Puerto 8000 interno, expuesto vía Nginx).
-- **Base de Datos**: PostgreSQL (Puerto 5432).
+| Archivo | Propósito |
+|---------|-----------|
+| `dev.sh` | Desarrollo local (MacBook) |
+| `deploy-n5.sh` | Deploy a producción (N5 Pro) |
+| `docker-compose.dev.yml` | Compose para desarrollo |
+| `docker-compose.n5.yml` | Compose para producción N5 |
+| `.env.n5.example` | Template de variables para N5 |
 
-**Última actualización**: 2025-12-12
+---
+
+**Última actualización**: 2026-01-07
