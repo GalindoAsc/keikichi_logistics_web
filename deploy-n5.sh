@@ -2,7 +2,7 @@
 
 # --- CONFIGURACIÓN DEL N5 PRO ---
 # 1. Tu usuario de Windows (el que usas para entrar al PC)
-REMOTE_USER="DGali" 
+REMOTE_USER="dgali" 
 # 2. La IP de Tailscale del N5 (Esa no cambia nunca)
 REMOTE_HOST="100.106.83.19"
 # 3. La carpeta donde pusiste el proyecto en el N5
@@ -28,7 +28,8 @@ echo -e "${GREEN}>>> Actualizando código y reconstruyendo contenedores...${NC}"
 # 2. Va a la carpeta
 # 3. Descarga lo nuevo de GitHub
 # 4. Reconstruye los contenedores (esto adapta todo al chip Ryzen AI 9)
+# Versión corregida para Windows PowerShell estándar
 ssh -o StrictHostKeyChecking=no "$REMOTE_USER@$REMOTE_HOST" \
-"cd $REMOTE_DIR && git pull && docker-compose up -d --build"
+"cd $REMOTE_DIR; git pull; docker-compose up -d --build"
 
 echo -e "${GREEN}>>> ¡Despliegue en N5 Pro completado con éxito! 🚀${NC}"
