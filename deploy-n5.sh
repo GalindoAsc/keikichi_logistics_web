@@ -64,10 +64,6 @@ git fetch --all
 git reset --hard origin/main
 git clean -fd
 
-Write-Host '>>> Verificando login de Docker...'
-# Re-login si es necesario (evita error de credenciales)
-docker login -u galindoasc 2>null || Write-Host 'Ya logueado o login manual requerido'
-
 Write-Host '>>> Reconstruyendo contenedores Docker...'
 docker compose -f docker-compose.n5.yml down
 docker compose -f docker-compose.n5.yml up -d --build
