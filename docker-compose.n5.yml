@@ -1,5 +1,3 @@
-version: '3.8'
-
 # ============================================
 # KEIKICHI LOGISTICS - N5 Pro (Windows 11)
 # Usa Cloudflare Tunnel para exponer keikichi.com
@@ -39,9 +37,9 @@ services:
     restart: unless-stopped
     # Puerto expuesto solo localmente - Cloudflare Tunnel conecta aquí
     expose:
-      - "8000"
+      - "8001"
     ports:
-      - "127.0.0.1:8000:8000" # Solo localhost (para Cloudflare Tunnel)
+      - "127.0.0.1:8001:8000" # Puerto 8001 externo (8000 ocupado por Portainer)
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-production}
       - DEBUG=${DEBUG:-false}
