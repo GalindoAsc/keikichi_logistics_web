@@ -1,0 +1,101 @@
+version: '3.8'
+
+# ============================================
+# KEIKICHI LOGISTICS - N5 Pro (Windows 11)
+# Usa Cloudflare Tunnel para exponer keikichi.com
+#
+# Arquitectura:
+#   Internet → keikichi.com → Cloudflare Tunnel → localhost:80/8000
+# ============================================
+
+services:
+  # ========== DATABASE ==========
+  db:
+    image: postgres:15-alpine
+    container_name: keikichi_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-keikichi_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-keikichi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TIMEZONE:-America/Tijuana}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-keikichi} -d ${POSTGRES_DB:-keikichi_prod}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - keikichi_network
+
+  # ========== BACKEND ==========
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: keikichi_backend
+    restart: unless-stopped
+    # Puerto expuesto solo localmente - Cloudflare Tunnel conecta aquí
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000" # Solo localhost (para Cloudflare Tunnel)
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - DEBUG=${DEBUG:-false}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-keikichi}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-keikichi_prod}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-30}
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL:-admin@keikichi.com}
+      - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD}
+      - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME:-Administrador}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      - TZ=${TIMEZONE:-America/Tijuana}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - keikichi_network
+
+  # ========== FRONTEND ==========
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-https://keikichi.com/api/v1}
+        - VITE_WS_URL=${VITE_WS_URL:-wss://keikichi.com}
+    container_name: keikichi_frontend
+    restart: unless-stopped
+    # Puerto expuesto solo localmente - Cloudflare Tunnel conecta aquí
+    expose:
+      - "80"
+    ports:
+      - "127.0.0.1:3080:80" # Solo localhost (para Cloudflare Tunnel)
+    depends_on:
+      - backend
+    networks:
+      - keikichi_network
+
+# ========== VOLUMES ==========
+volumes:
+  postgres_data:
+    driver: local
+
+# ========== NETWORKS ==========
+networks:
+  keikichi_network:
+    driver: bridge

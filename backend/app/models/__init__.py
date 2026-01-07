@@ -14,6 +14,7 @@ from app.models.load_item import LoadItem
 from app.models.label_price import LabelPrice
 from app.models.waitlist import Waitlist
 from app.models.trip_quote import TripQuote, QuoteStatus
+from app.models.notification import Notification
 
 __all__ = [
     "Base",
@@ -36,4 +37,11 @@ __all__ = [
     "AuditLog",
     "Message",
     "LabelPrice",
+    "Product",
+    "Unit",
+    "Waitlist",
+    "TripQuote",
+    "QuoteStatus",
+    "Notification",
 ]
+

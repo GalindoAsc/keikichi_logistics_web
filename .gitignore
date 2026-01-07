@@ -12,6 +12,7 @@ nginx/ssl/*.pem
 # Keep the example files
 !.env.example
 !.env.production.example
+!.env.n5.example
 
 # ----- Python -----
 __pycache__/
@@ -72,11 +73,9 @@ backups/*
 *.sqlite3
 
 # ----- OS -----
-.DS_Store
 Thumbs.db
 
 # ----- Tests -----
-*.log
 test_results*.log
 
 # ----- Backend Debug & Maintenance Scripts -----
