@@ -2,7 +2,7 @@
 
 # --- CONFIGURACIÓN DEL N5 PRO ---
 # 1. Tu usuario de Windows (el que usas para entrar al PC)
-REMOTE_USER="Daniel" 
+REMOTE_USER="DGali" 
 # 2. La IP de Tailscale del N5 (Esa no cambia nunca)
 REMOTE_HOST="100.106.83.19"
 # 3. La carpeta donde pusiste el proyecto en el N5
