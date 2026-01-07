@@ -55,29 +55,22 @@ fi
 
 echo -e "${GREEN}>>> Actualizando código y reconstruyendo contenedores...${NC}"
 
-# Comando remoto con mejor manejo de errores
-# Nota: En Windows con Git Bash, usamos 'docker compose' (sin guión)
-ssh -o StrictHostKeyChecking=no "$REMOTE_USER@$REMOTE_HOST" << 'REMOTE_SCRIPT'
-cd /d/Projectos/keikichi_logistics_web || exit 1
+# Comando remoto - PowerShell syntax (Windows SSH usa PowerShell por defecto)
+ssh -o StrictHostKeyChecking=no "$REMOTE_USER@$REMOTE_HOST" "
+cd D:\\Projectos\\keikichi_logistics_web
 
-echo ">>> Actualizando desde GitHub..."
+Write-Host '>>> Actualizando desde GitHub...'
 git fetch --all
 git reset --hard origin/main
 git clean -fd
 
-echo ">>> Reconstruyendo contenedores Docker..."
-# Usar docker-compose.n5.yml específico para N5 Pro
-if command -v docker &> /dev/null; then
-    docker compose -f docker-compose.n5.yml down 2>/dev/null || docker-compose -f docker-compose.n5.yml down
-    docker compose -f docker-compose.n5.yml up -d --build 2>/dev/null || docker-compose -f docker-compose.n5.yml up -d --build
-else
-    echo "Error: Docker no está disponible"
-    exit 1
-fi
+Write-Host '>>> Reconstruyendo contenedores Docker...'
+docker compose -f docker-compose.n5.yml down
+docker compose -f docker-compose.n5.yml up -d --build
 
-echo ">>> Verificando estado..."
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-REMOTE_SCRIPT
+Write-Host '>>> Verificando estado...'
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+"
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
