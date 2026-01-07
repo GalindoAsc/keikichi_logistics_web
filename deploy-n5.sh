@@ -23,13 +23,11 @@ git push origin main
 echo -e "${BLUE}>>> [N5 PRO] Conectando vía Tailscale...${NC}"
 echo -e "${GREEN}>>> Actualizando código y reconstruyendo contenedores...${NC}"
 
-# COMANDO MAGICO:
-# 1. Entra al N5
-# 2. Va a la carpeta
-# 3. Descarga lo nuevo de GitHub
-# 4. Reconstruye los contenedores (esto adapta todo al chip Ryzen AI 9)
-# Versión corregida para Windows PowerShell estándar
+# COMANDO SSH ACTUALIZADO (Modo "Reset Forzado")
+# 1. git fetch --all: Descarga info de GitHub pero no toca nada.
+# 2. git reset --hard origin/main: Borra cambios locales y fuerza que sea idéntico a GitHub.
+# 3. git clean -fd: Borra archivos "basura" que no están en Git (como los de Syncthing).
 ssh -o StrictHostKeyChecking=no "$REMOTE_USER@$REMOTE_HOST" \
-"cd $REMOTE_DIR; git pull; docker-compose up -d --build"
+"cd $REMOTE_DIR; git fetch --all; git reset --hard origin/main; git clean -fd; docker-compose up -d --build"
 
 echo -e "${GREEN}>>> ¡Despliegue en N5 Pro completado con éxito! 🚀${NC}"
