@@ -258,9 +258,14 @@ async def download_manifest(
     # Build reservations data for PDF
     reservations_data = []
     for res in reservations:
-        # Get space numbers
+        # Get space numbers via ReservationSpace join table
         from app.models.space import Space
-        spaces_stmt = select(Space.number).where(Space.reservation_id == res.id)
+        from app.models.reservation_space import ReservationSpace
+        spaces_stmt = (
+            select(Space.space_number)
+            .join(ReservationSpace, ReservationSpace.space_id == Space.id)
+            .where(ReservationSpace.reservation_id == res.id)
+        )
         spaces_result = await db.execute(spaces_stmt)
         space_numbers = [row[0] for row in spaces_result.all()]
         
