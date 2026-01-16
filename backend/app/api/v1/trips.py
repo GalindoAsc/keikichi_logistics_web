@@ -238,7 +238,7 @@ async def download_manifest(
     """
     from app.utils.pdf_generator import generate_trip_manifest
     from app.models.reservation import Reservation
-    from app.services.system_config_service import SystemConfigService
+    from app.models.system_config import SystemConfig
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
     from uuid import UUID
@@ -273,8 +273,9 @@ async def download_manifest(
         })
     
     # Get PDF config from system settings
-    config_service = SystemConfigService(db)
-    pdf_config = await config_service.get_config_dict()
+    config_stmt = select(SystemConfig)
+    config_result = await db.execute(config_stmt)
+    pdf_config = {c.key: c.value for c in config_result.scalars().all()}
     
     # Generate PDF - Trip model has truck/driver info directly
     relative_path = generate_trip_manifest(
