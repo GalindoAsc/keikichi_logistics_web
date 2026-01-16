@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { Plus, Edit, Trash2, Truck, Calendar, MapPin, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Truck, Calendar, MapPin, Eye, FileText } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchTrips, deleteTrip } from "../../api/trips";
+import { fetchTrips, deleteTrip, downloadManifest } from "../../api/trips";
 import api from "../../api/client";
 import { Trip } from "../../types/trip";
 import { toast } from "sonner";
@@ -213,6 +213,21 @@ export default function AdminTripsPage() {
                                         >
                                             <Eye className="w-4 h-4" />
                                         </Link>
+                                        <button
+                                            onClick={async (e) => {
+                                                e.preventDefault();
+                                                try {
+                                                    await downloadManifest(trip.id, { origin: trip.origin, destination: trip.destination });
+                                                    toast.success('Manifiesto descargado');
+                                                } catch (err) {
+                                                    toast.error('Error al descargar manifiesto');
+                                                }
+                                            }}
+                                            className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
+                                            title="Descargar Manifiesto"
+                                        >
+                                            <FileText className="w-4 h-4" />
+                                        </button>
                                         <button
                                             onClick={() => navigate(`/admin/trips/${trip.id}/edit`)}
                                             className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"

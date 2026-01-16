@@ -662,3 +662,236 @@ def delete_summary(reservation_id: str) -> bool:
             return False
     
     return False
+
+
+def generate_trip_manifest(
+    trip_id: str,
+    origin: str,
+    destination: str,
+    departure_date: str,
+    departure_time: Optional[str],
+    truck_plate: Optional[str],
+    trailer_plate: Optional[str],
+    driver_name: Optional[str],
+    driver_phone: Optional[str],
+    total_spaces: int,
+    reservations: list[dict],  # List of {client_name, client_phone, space_numbers, payment_status, total_amount}
+    pdf_config: Optional[Dict[str, str]] = None,
+    currency: str = "USD"
+) -> str:
+    """
+    Generate trip manifest PDF for drivers/warehouse.
+    Shows all reservations with client contacts and space allocations.
+    
+    Returns the path to the generated file relative to upload_dir.
+    """
+    manifests_dir = Path(settings.upload_dir) / 'manifests'
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f"manifest_{trip_id}.pdf"
+    file_path = manifests_dir / filename
+    
+    doc = SimpleDocTemplate(
+        str(file_path), 
+        pagesize=letter,
+        leftMargin=0.4*inch,
+        rightMargin=0.4*inch,
+        topMargin=0.3*inch,
+        bottomMargin=0.3*inch
+    )
+    elements = []
+    config = get_pdf_config(pdf_config)
+    
+    # Currency
+    currency_symbol = "$" if currency in ["USD", "MXN"] else currency
+    
+    # =========== HEADER ===========
+    logo_path = Path(__file__).parent.parent / 'static' / 'keikichi_logo.jpg'
+    
+    if logo_path.exists():
+        logo = Image(str(logo_path), width=1.4*inch, height=0.56*inch)
+    else:
+        logo = Paragraph(f"<b>{config['company_name']}</b>", ParagraphStyle('Logo', fontSize=14, textColor=Colors.BRAND_SECONDARY))
+    
+    title = Paragraph(
+        "<b>MANIFIESTO DE VIAJE</b>",
+        ParagraphStyle('Title', fontSize=16, textColor=Colors.BRAND_SECONDARY, alignment=TA_RIGHT)
+    )
+    
+    header = Table([[logo, title]], colWidths=[3.5*inch, 4*inch])
+    header.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, Colors.BRAND_PRIMARY),
+    ]))
+    elements.append(header)
+    elements.append(Spacer(1, 10))
+    
+    # =========== TRIP INFO ===========
+    departure_str = f"{departure_date}"
+    if departure_time:
+        departure_str += f" - {departure_time}"
+    
+    route_text = Paragraph(
+        f"<font size='10' color='#0077b6'>RUTA</font><br/>"
+        f"<font size='18' color='#212529'><b>{origin}</b></font> "
+        f"<font size='14' color='#00a8cc'>→</font> "
+        f"<font size='18' color='#212529'><b>{destination}</b></font>",
+        ParagraphStyle('Route', fontSize=18, leading=22)
+    )
+    
+    route_box = Table([[route_text]], colWidths=[7.5*inch])
+    route_box.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), Colors.BG_LIGHT),
+        ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    elements.append(route_box)
+    elements.append(Spacer(1, 8))
+    
+    # Vehicle and driver info
+    info_style = ParagraphStyle('Info', fontSize=9, leading=12)
+    label_style = ParagraphStyle('Label', fontSize=8, textColor=Colors.TEXT_MUTED)
+    
+    vehicle_data = [
+        [Paragraph("Fecha Salida", label_style), Paragraph(f"<b>{departure_str}</b>", info_style),
+         Paragraph("Camión", label_style), Paragraph(f"<b>{truck_plate or 'No asignado'}</b>", info_style)],
+        [Paragraph("Chofer", label_style), Paragraph(f"<b>{driver_name or 'No asignado'}</b>", info_style),
+         Paragraph("Trailer", label_style), Paragraph(f"<b>{trailer_plate or 'No asignado'}</b>", info_style)],
+        [Paragraph("Teléfono", label_style), Paragraph(driver_phone or "-", info_style),
+         Paragraph("ID Viaje", label_style), Paragraph(trip_id[:16], info_style)],
+    ]
+    
+    vehicle_table = Table(vehicle_data, colWidths=[1*inch, 2.5*inch, 1*inch, 3*inch])
+    vehicle_table.setStyle(TableStyle([
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LINEBELOW', (0, -1), (-1, -1), 0.5, Colors.BORDER),
+    ]))
+    elements.append(vehicle_table)
+    elements.append(Spacer(1, 12))
+    
+    # =========== RESERVATIONS TABLE ===========
+    elements.append(Paragraph("<b>RESERVACIONES</b>", ParagraphStyle('SectionTitle', fontSize=11, textColor=Colors.BRAND_SECONDARY)))
+    elements.append(Spacer(1, 6))
+    
+    # Table header
+    header_style = ParagraphStyle('TH', fontSize=8, textColor=Colors.WHITE, alignment=TA_CENTER)
+    cell_style = ParagraphStyle('TD', fontSize=8, leading=10)
+    cell_center = ParagraphStyle('TDC', fontSize=8, alignment=TA_CENTER)
+    
+    table_data = [[
+        Paragraph("<b>#</b>", header_style),
+        Paragraph("<b>CLIENTE</b>", header_style),
+        Paragraph("<b>TELÉFONO</b>", header_style),
+        Paragraph("<b>ESPACIOS</b>", header_style),
+        Paragraph("<b>MONTO</b>", header_style),
+        Paragraph("<b>ESTADO</b>", header_style),
+    ]]
+    
+    # Add rows
+    confirmed_count = 0
+    pending_count = 0
+    total_revenue = 0
+    
+    for idx, res in enumerate(reservations, 1):
+        spaces_str = ", ".join(map(str, sorted(res.get('space_numbers', []))))
+        spaces_count = len(res.get('space_numbers', []))
+        amount = res.get('total_amount', 0)
+        total_revenue += float(amount)
+        
+        payment_status = res.get('payment_status', 'unpaid')
+        if payment_status == 'paid':
+            status_text = "<font color='#10b981'>✓ PAGADO</font>"
+            confirmed_count += spaces_count
+        elif payment_status == 'pending_review':
+            status_text = "<font color='#f59e0b'>⏳ EN REVISIÓN</font>"
+            pending_count += spaces_count
+        else:
+            status_text = "<font color='#ef4444'>✗ PENDIENTE</font>"
+            pending_count += spaces_count
+        
+        table_data.append([
+            Paragraph(str(idx), cell_center),
+            Paragraph(res.get('client_name', 'Desconocido')[:25], cell_style),
+            Paragraph(res.get('client_phone', '-'), cell_center),
+            Paragraph(f"{spaces_str} ({spaces_count})", cell_center),
+            Paragraph(f"{currency_symbol}{float(amount):,.0f}", cell_center),
+            Paragraph(status_text, cell_center),
+        ])
+    
+    # Build table
+    res_table = Table(table_data, colWidths=[0.4*inch, 2.2*inch, 1.2*inch, 1.2*inch, 1*inch, 1.4*inch])
+    res_table.setStyle(TableStyle([
+        # Header
+        ('BACKGROUND', (0, 0), (-1, 0), Colors.BRAND_SECONDARY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), Colors.WHITE),
+        # All cells
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # Grid
+        ('GRID', (0, 0), (-1, -1), 0.5, Colors.BORDER),
+        # Alternating rows
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [Colors.WHITE, Colors.BG_LIGHT]),
+    ]))
+    elements.append(res_table)
+    elements.append(Spacer(1, 12))
+    
+    # =========== SUMMARY ===========
+    reserved_spaces = confirmed_count + pending_count
+    available_spaces = total_spaces - reserved_spaces
+    
+    summary_text = Paragraph(
+        f"<font size='10'><b>RESUMEN:</b> "
+        f"<font color='#10b981'>{confirmed_count} confirmados</font> | "
+        f"<font color='#f59e0b'>{pending_count} pendientes</font> | "
+        f"<font color='#6c757d'>{available_spaces} disponibles</font> de {total_spaces} espacios</font><br/>"
+        f"<font size='9' color='#6c757d'>Ingreso estimado: {currency_symbol}{total_revenue:,.2f} {currency}</font>",
+        ParagraphStyle('Summary', fontSize=10, leading=14)
+    )
+    
+    summary_box = Table([[summary_text]], colWidths=[7.5*inch])
+    summary_box.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), Colors.BG_SECTION),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(summary_box)
+    elements.append(Spacer(1, 10))
+    
+    # =========== QR + FOOTER ===========
+    qr_buffer = generate_qr_code(f"trip:{trip_id}", box_size=6)
+    qr_img = Image(qr_buffer, width=0.8*inch, height=0.8*inch)
+    
+    footer_text = Paragraph(
+        f"<font size='7' color='#6c757d'>Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}</font><br/>"
+        f"<font size='7' color='#0077b6'>{config['pdf_footer_text']}</font>",
+        ParagraphStyle('FooterText', fontSize=7, leading=10)
+    )
+    
+    footer_row = Table([[footer_text, qr_img]], colWidths=[6.5*inch, 1*inch])
+    footer_row.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
+    elements.append(footer_row)
+    
+    doc.build(elements)
+    return f"manifests/{filename}"
+
+
+def delete_manifest(trip_id: str) -> bool:
+    """
+    Delete manifest PDF for a trip
+    """
+    filename = f"manifest_{trip_id}.pdf"
+    file_path = Path(settings.upload_dir) / 'manifests' / filename
+    
+    if file_path.exists():
+        try:
+            file_path.unlink()
+            return True
+        except Exception:
+            return False
+    
+    return False

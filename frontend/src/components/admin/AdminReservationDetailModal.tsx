@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { X, Check, AlertTriangle, FileText, User, Truck, DollarSign, Trash2, Ban, MessageCircle, History } from "lucide-react";
 import { getReservationById, confirmPayment, cancelReservation, deleteReservation, getAuditHistory } from "../../api/reservations";
@@ -74,17 +75,17 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
         retry: 1
     });
 
-    // ... existing mutations ...
-
-    // (This part of the code is context for the replace, ensuring I land in the right spot for the component start, 
-    // but honestly I should just edit the createWhatsAppUrl area to add this new helper next to it to be cleaner, 
-    // and then edit the JSX separately. Let's do that. simpler edits are better.)
-
+    // State for rejection modal
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectionNotes, setRejectionNotes] = useState("");
 
     const confirmMutation = useMutation({
-        mutationFn: (approved: boolean) => confirmPayment(reservationId, { approved }),
+        mutationFn: ({ approved, notes }: { approved: boolean; notes?: string }) =>
+            confirmPayment(reservationId, { approved, notes }),
         onSuccess: (data) => {
             toast.success(data.message);
+            setShowRejectModal(false);
+            setRejectionNotes("");
             refetch();
         },
         onError: () => {
@@ -359,22 +360,58 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
 
                         {/* Actions */}
                         {isPendingReview && (
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    onClick={() => confirmMutation.mutate(false)}
-                                    disabled={confirmMutation.isPending}
-                                    className="flex-1 px-4 py-3 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <X className="w-5 h-5" /> Rechazar
-                                </button>
-                                <button
-                                    onClick={() => confirmMutation.mutate(true)}
-                                    disabled={confirmMutation.isPending}
-                                    className="flex-1 px-4 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
-                                >
-                                    <Check className="w-5 h-5" /> Aprobar Pago
-                                </button>
-                            </div>
+                            <>
+                                {/* Rejection Modal */}
+                                {showRejectModal && (
+                                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                                        <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">Motivo del Rechazo</h4>
+                                        <textarea
+                                            value={rejectionNotes}
+                                            onChange={(e) => setRejectionNotes(e.target.value)}
+                                            placeholder="Ej: El comprobante está borroso, por favor sube uno más claro..."
+                                            className="w-full rounded-lg border border-red-200 dark:border-red-700 p-2 text-sm bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-red-500"
+                                            rows={3}
+                                        />
+                                        <div className="flex gap-2 mt-3">
+                                            <button
+                                                onClick={() => {
+                                                    setShowRejectModal(false);
+                                                    setRejectionNotes("");
+                                                }}
+                                                className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-slate-700"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                onClick={() => confirmMutation.mutate({ approved: false, notes: rejectionNotes })}
+                                                disabled={confirmMutation.isPending}
+                                                className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                                            >
+                                                Confirmar Rechazo
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!showRejectModal && (
+                                    <div className="flex gap-3 pt-4">
+                                        <button
+                                            onClick={() => setShowRejectModal(true)}
+                                            disabled={confirmMutation.isPending}
+                                            className="flex-1 px-4 py-3 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <X className="w-5 h-5" /> Rechazar
+                                        </button>
+                                        <button
+                                            onClick={() => confirmMutation.mutate({ approved: true })}
+                                            disabled={confirmMutation.isPending}
+                                            className="flex-1 px-4 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                                        >
+                                            <Check className="w-5 h-5" /> Aprobar Pago
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {reservation.payment_status === PaymentStatus.PAID && (

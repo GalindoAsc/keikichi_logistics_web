@@ -1,5 +1,7 @@
 import logging
-from fastapi import APIRouter, Depends
+from pathlib import Path
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db_session
@@ -221,6 +223,114 @@ async def delete_trip(trip_id: str, db: AsyncSession = Depends(get_db_session), 
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error interno eliminando viaje: {str(e)}"
         )
+
+# ==================== MANIFEST ENDPOINT ====================
+
+@router.get("/{trip_id}/manifest")
+async def download_manifest(
+    trip_id: str,
+    db: AsyncSession = Depends(get_db_session),
+    current_user=Depends(require_manager_or_superadmin)
+):
+    """
+    Download trip manifest PDF with all reservations.
+    For driver/warehouse use.
+    """
+    from app.utils.pdf_generator import generate_trip_manifest
+    from app.models.reservation import Reservation
+    from app.models.user import User
+    from app.services.system_config_service import SystemConfigService
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from uuid import UUID
+    from app.config import settings
+    
+    service = TripService(db)
+    trip = await service.get_trip(trip_id)
+    
+    # Get all reservations for this trip
+    stmt = select(Reservation).where(
+        Reservation.trip_id == UUID(trip_id)
+    ).options(selectinload(Reservation.client))
+    
+    result = await db.execute(stmt)
+    reservations = result.scalars().all()
+    
+    # Build reservations data for PDF
+    reservations_data = []
+    for res in reservations:
+        # Get space numbers
+        from app.models.space import Space
+        spaces_stmt = select(Space.number).where(Space.reservation_id == res.id)
+        spaces_result = await db.execute(spaces_stmt)
+        space_numbers = [row[0] for row in spaces_result.all()]
+        
+        reservations_data.append({
+            "client_name": res.client.full_name if res.client else "Desconocido",
+            "client_phone": res.client.phone if res.client else None,
+            "space_numbers": space_numbers,
+            "payment_status": res.payment_status.value if res.payment_status else "unpaid",
+            "total_amount": float(res.total_amount) if res.total_amount else 0,
+        })
+    
+    # Get PDF config from system settings
+    config_service = SystemConfigService(db)
+    pdf_config = await config_service.get_config_dict()
+    
+    # Get fleet info if assigned
+    truck_plate = None
+    trailer_plate = None
+    driver_name = None
+    driver_phone = None
+    
+    if trip.truck_id:
+        from app.models.fleet import Truck
+        truck = await db.get(Truck, trip.truck_id)
+        if truck:
+            truck_plate = truck.plate
+            
+    if trip.trailer_id:
+        from app.models.fleet import Trailer
+        trailer = await db.get(Trailer, trip.trailer_id)
+        if trailer:
+            trailer_plate = trailer.plate
+            
+    if trip.driver_id:
+        driver = await db.get(User, trip.driver_id)
+        if driver:
+            driver_name = driver.full_name
+            driver_phone = driver.phone
+    
+    # Generate PDF
+    relative_path = generate_trip_manifest(
+        trip_id=str(trip.id),
+        origin=trip.origin,
+        destination=trip.destination,
+        departure_date=trip.departure_date.strftime("%d/%m/%Y"),
+        departure_time=trip.departure_time.strftime("%H:%M") if trip.departure_time else None,
+        truck_plate=truck_plate,
+        trailer_plate=trailer_plate,
+        driver_name=driver_name,
+        driver_phone=driver_phone,
+        total_spaces=trip.total_spaces,
+        reservations=reservations_data,
+        pdf_config=pdf_config,
+        currency=trip.currency or "USD"
+    )
+    
+    file_path = Path(settings.upload_dir) / relative_path
+    
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error generando el manifiesto"
+        )
+    
+    return FileResponse(
+        path=str(file_path),
+        filename=f"manifiesto_{trip.origin}_{trip.destination}_{trip.departure_date.strftime('%Y%m%d')}.pdf",
+        media_type="application/pdf"
+    )
 
 
 # ==================== WAITLIST ENDPOINTS ====================

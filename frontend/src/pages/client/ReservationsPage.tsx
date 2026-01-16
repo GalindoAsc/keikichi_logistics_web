@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar, Package, Truck, Upload, FileText, Loader2, Download, CreditCard } from "lucide-react";
+import { Calendar, Package, Truck, Upload, FileText, Loader2, Download, CreditCard, X, Eye } from "lucide-react";
 import { getReservations, uploadPaymentProof, downloadAndSaveTicket, downloadAndSaveSummary, updateReservation } from "../../api/reservations";
 import { ReservationStatus, PaymentStatus, PaymentMethod } from "../../types/reservation";
 import { RESERVATION_STATUS_LABELS, PAYMENT_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "../../types/translations";
@@ -32,11 +32,36 @@ export default function ReservationsPage() {
     const [downloadingSummaryId, setDownloadingSummaryId] = useState<string | null>(null);
     const [changingPaymentId, setChangingPaymentId] = useState<string | null>(null);
 
-    const handleFileUpload = async (reservationId: string, file: File) => {
+    // Preview state
+    const [previewFile, setPreviewFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [previewReservationId, setPreviewReservationId] = useState<string | null>(null);
+
+    const handleFileSelect = (reservationId: string, file: File) => {
+        // Create preview URL
+        const url = URL.createObjectURL(file);
+        setPreviewFile(file);
+        setPreviewUrl(url);
+        setPreviewReservationId(reservationId);
+    };
+
+    const handleCancelPreview = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        setPreviewFile(null);
+        setPreviewUrl(null);
+        setPreviewReservationId(null);
+    };
+
+    const handleConfirmUpload = async () => {
+        if (!previewFile || !previewReservationId) return;
+
         try {
-            setUploadingId(reservationId);
-            await uploadPaymentProof(reservationId, file);
+            setUploadingId(previewReservationId);
+            await uploadPaymentProof(previewReservationId, previewFile);
             toast.success("Comprobante subido exitosamente");
+            handleCancelPreview();
             refetch();
         } catch (error) {
             toast.error("Error al subir el comprobante");
@@ -201,7 +226,8 @@ export default function ReservationsPage() {
                                                     accept="image/*,.pdf"
                                                     onChange={(e) => {
                                                         const file = e.target.files?.[0];
-                                                        if (file) handleFileUpload(reservation.id, file);
+                                                        if (file) handleFileSelect(reservation.id, file);
+                                                        e.target.value = ''; // Reset to allow same file selection
                                                     }}
                                                     disabled={uploadingId === reservation.id}
                                                 />
@@ -227,6 +253,63 @@ export default function ReservationsPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Payment Proof Preview Modal */}
+            {previewUrl && previewFile && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
+                        <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                            <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Eye className="w-5 h-5" />
+                                Vista Previa del Comprobante
+                            </h3>
+                            <button
+                                onClick={handleCancelPreview}
+                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full"
+                            >
+                                <X className="w-5 h-5 text-slate-500" />
+                            </button>
+                        </div>
+
+                        <div className="p-4 bg-slate-100 dark:bg-slate-900 max-h-80 overflow-auto flex items-center justify-center">
+                            {previewFile.type.startsWith('image/') ? (
+                                <img
+                                    src={previewUrl}
+                                    alt="Vista previa"
+                                    className="max-w-full max-h-72 object-contain rounded-lg shadow"
+                                />
+                            ) : (
+                                <div className="text-center py-8">
+                                    <FileText className="w-16 h-16 mx-auto text-slate-400 mb-2" />
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">{previewFile.name}</p>
+                                    <p className="text-xs text-slate-400 mt-1">Archivo PDF</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex gap-3">
+                            <button
+                                onClick={handleCancelPreview}
+                                className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleConfirmUpload}
+                                disabled={uploadingId !== null}
+                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {uploadingId ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Upload className="w-4 h-4" />
+                                )}
+                                Confirmar y Subir
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
