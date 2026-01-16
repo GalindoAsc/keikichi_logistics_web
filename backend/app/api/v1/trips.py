@@ -238,7 +238,6 @@ async def download_manifest(
     """
     from app.utils.pdf_generator import generate_trip_manifest
     from app.models.reservation import Reservation
-    from app.models.user import User
     from app.services.system_config_service import SystemConfigService
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
@@ -277,41 +276,17 @@ async def download_manifest(
     config_service = SystemConfigService(db)
     pdf_config = await config_service.get_config_dict()
     
-    # Get fleet info if assigned
-    truck_plate = None
-    trailer_plate = None
-    driver_name = None
-    driver_phone = None
-    
-    if trip.truck_id:
-        from app.models.fleet import Truck
-        truck = await db.get(Truck, trip.truck_id)
-        if truck:
-            truck_plate = truck.plate
-            
-    if trip.trailer_id:
-        from app.models.fleet import Trailer
-        trailer = await db.get(Trailer, trip.trailer_id)
-        if trailer:
-            trailer_plate = trailer.plate
-            
-    if trip.driver_id:
-        driver = await db.get(User, trip.driver_id)
-        if driver:
-            driver_name = driver.full_name
-            driver_phone = driver.phone
-    
-    # Generate PDF
+    # Generate PDF - Trip model has truck/driver info directly
     relative_path = generate_trip_manifest(
         trip_id=str(trip.id),
         origin=trip.origin,
         destination=trip.destination,
         departure_date=trip.departure_date.strftime("%d/%m/%Y"),
         departure_time=trip.departure_time.strftime("%H:%M") if trip.departure_time else None,
-        truck_plate=truck_plate,
-        trailer_plate=trailer_plate,
-        driver_name=driver_name,
-        driver_phone=driver_phone,
+        truck_plate=trip.truck_plate,
+        trailer_plate=trip.trailer_plate,
+        driver_name=trip.driver_name,
+        driver_phone=trip.driver_phone,
         total_spaces=trip.total_spaces,
         reservations=reservations_data,
         pdf_config=pdf_config,
