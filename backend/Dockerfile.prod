@@ -38,7 +38,7 @@ RUN pip install --no-cache /wheels/*
 COPY . .
 
 # Create upload directories
-RUN mkdir -p /app/uploads/documents /app/uploads/invoices /app/uploads/payments /app/uploads/tickets /app/uploads/summaries
+RUN mkdir -p /app/uploads/documents /app/uploads/invoices /app/uploads/payments /app/uploads/tickets /app/uploads/summaries /app/uploads/manifests
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
