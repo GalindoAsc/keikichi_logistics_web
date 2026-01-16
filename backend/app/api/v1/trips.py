@@ -229,18 +229,22 @@ async def delete_trip(trip_id: str, db: AsyncSession = Depends(get_db_session), 
 @router.get("/{trip_id}/manifest")
 async def download_manifest(
     trip_id: str,
+    manifest_type: str = "office",  # office or driver
     db: AsyncSession = Depends(get_db_session),
     current_user=Depends(require_manager_or_superadmin)
 ):
     """
     Download trip manifest PDF with all reservations.
-    For driver/warehouse use.
+    
+    Args:
+        manifest_type: 'office' for summary view, 'driver' for detailed delivery view
     """
     import traceback
     
     try:
-        from app.utils.pdf_generator import generate_trip_manifest
+        from app.utils.pdf_generator import generate_trip_manifest, generate_driver_manifest
         from app.models.reservation import Reservation
+        from app.models.load_item import LoadItem
         from app.models.system_config import SystemConfig
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
@@ -250,10 +254,10 @@ async def download_manifest(
         service = TripService(db)
         trip = await service.get_trip(trip_id)
         
-        # Get all reservations for this trip
+        # Get all reservations for this trip with client relationship
         stmt = select(Reservation).where(
             Reservation.trip_id == UUID(trip_id)
-        ).options(selectinload(Reservation.client))
+        ).options(selectinload(Reservation.client), selectinload(Reservation.items))
         
         result = await db.execute(stmt)
         reservations = result.scalars().all()
@@ -272,35 +276,77 @@ async def download_manifest(
             spaces_result = await db.execute(spaces_stmt)
             space_numbers = [row[0] for row in spaces_result.all()]
             
-            reservations_data.append({
+            res_data = {
                 "client_name": res.client.full_name if res.client else "Desconocido",
                 "client_phone": res.client.phone if res.client else None,
+                "client_email": res.client.email if res.client else None,
                 "space_numbers": space_numbers,
                 "payment_status": res.payment_status.value if res.payment_status else "unpaid",
                 "total_amount": float(res.total_amount) if res.total_amount else 0,
-            })
+            }
+            
+            # For driver manifest, add extra details
+            if manifest_type == "driver":
+                # Items/cargo details
+                items_data = []
+                for item in res.items:
+                    items_data.append({
+                        "product_name": item.product_name,
+                        "box_count": item.box_count,
+                        "total_weight": float(item.total_weight) if item.total_weight else 0,
+                    })
+                res_data["items"] = items_data
+                
+                # Pickup address from pickup_details JSON
+                pickup_details = res.pickup_details or {}
+                pickup_address = pickup_details.get("address", None)
+                res_data["pickup_address"] = pickup_address
+                
+                # Internal notes
+                res_data["notes"] = res.discount_reason or ""  # Using discount_reason as notes for now
+            
+            reservations_data.append(res_data)
         
         # Get PDF config from system settings
         config_stmt = select(SystemConfig)
         config_result = await db.execute(config_stmt)
         pdf_config = {c.key: c.value for c in config_result.scalars().all()}
         
-        # Generate PDF - Trip model has truck/driver info directly
-        relative_path = generate_trip_manifest(
-            trip_id=str(trip.id),
-            origin=trip.origin,
-            destination=trip.destination,
-            departure_date=trip.departure_date.strftime("%d/%m/%Y"),
-            departure_time=trip.departure_time.strftime("%H:%M") if trip.departure_time else None,
-            truck_plate=trip.truck_plate,
-            trailer_plate=trip.trailer_plate,
-            driver_name=trip.driver_name,
-            driver_phone=trip.driver_phone,
-            total_spaces=trip.total_spaces,
-            reservations=reservations_data,
-            pdf_config=pdf_config,
-            currency=trip.currency or "USD"
-        )
+        # Generate appropriate PDF
+        if manifest_type == "driver":
+            relative_path = generate_driver_manifest(
+                trip_id=str(trip.id),
+                origin=trip.origin,
+                destination=trip.destination,
+                departure_date=trip.departure_date.strftime("%d/%m/%Y"),
+                departure_time=trip.departure_time.strftime("%H:%M") if trip.departure_time else None,
+                truck_plate=trip.truck_plate,
+                trailer_plate=trip.trailer_plate,
+                driver_name=trip.driver_name,
+                driver_phone=trip.driver_phone,
+                total_spaces=trip.total_spaces,
+                reservations=reservations_data,
+                pdf_config=pdf_config,
+                currency=trip.currency or "USD"
+            )
+            filename_prefix = "chofer"
+        else:
+            relative_path = generate_trip_manifest(
+                trip_id=str(trip.id),
+                origin=trip.origin,
+                destination=trip.destination,
+                departure_date=trip.departure_date.strftime("%d/%m/%Y"),
+                departure_time=trip.departure_time.strftime("%H:%M") if trip.departure_time else None,
+                truck_plate=trip.truck_plate,
+                trailer_plate=trip.trailer_plate,
+                driver_name=trip.driver_name,
+                driver_phone=trip.driver_phone,
+                total_spaces=trip.total_spaces,
+                reservations=reservations_data,
+                pdf_config=pdf_config,
+                currency=trip.currency or "USD"
+            )
+            filename_prefix = "oficina"
         
         file_path = Path(settings.upload_dir) / relative_path
         
@@ -312,7 +358,7 @@ async def download_manifest(
         
         return FileResponse(
             path=str(file_path),
-            filename=f"manifiesto_{trip.origin}_{trip.destination}_{trip.departure_date.strftime('%Y%m%d')}.pdf",
+            filename=f"manifiesto_{filename_prefix}_{trip.origin}_{trip.destination}_{trip.departure_date.strftime('%Y%m%d')}.pdf",
             media_type="application/pdf"
         )
     except HTTPException:

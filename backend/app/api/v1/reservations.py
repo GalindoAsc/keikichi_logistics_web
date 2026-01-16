@@ -405,17 +405,22 @@ async def update_reservation(
 @router.post("/{reservation_id}/cancel", status_code=204)
 async def cancel_reservation(
     reservation_id: str,
+    reason: Optional[str] = None,
     db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
     """
     Cancel reservation and release spaces (Soft Delete/Cancel)
+    
+    Args:
+        reason: Optional cancellation reason provided by user
     """
     service = ReservationService(db)
     
     await service.cancel_reservation(
         reservation_id=UUID(reservation_id),
-        user=current_user
+        user=current_user,
+        reason=reason
     )
     
     # Notify about cancellation

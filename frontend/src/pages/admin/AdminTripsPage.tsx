@@ -213,21 +213,44 @@ export default function AdminTripsPage() {
                                         >
                                             <Eye className="w-4 h-4" />
                                         </Link>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.preventDefault();
-                                                try {
-                                                    await downloadManifest(trip.id, { origin: trip.origin, destination: trip.destination });
-                                                    toast.success('Manifiesto descargado');
-                                                } catch (err) {
-                                                    toast.error('Error al descargar manifiesto');
-                                                }
-                                            }}
-                                            className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
-                                            title="Descargar Manifiesto"
-                                        >
-                                            <FileText className="w-4 h-4" />
-                                        </button>
+                                        <div className="relative group">
+                                            <button
+                                                className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
+                                                title="Descargar Manifiesto"
+                                            >
+                                                <FileText className="w-4 h-4" />
+                                            </button>
+                                            <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 min-w-[160px]">
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.preventDefault();
+                                                        try {
+                                                            await downloadManifest(trip.id, 'office', { origin: trip.origin, destination: trip.destination });
+                                                            toast.success('Manifiesto de oficina descargado');
+                                                        } catch {
+                                                            toast.error('Error al descargar manifiesto');
+                                                        }
+                                                    }}
+                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                                                >
+                                                    📋 Manifiesto Oficina
+                                                </button>
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.preventDefault();
+                                                        try {
+                                                            await downloadManifest(trip.id, 'driver', { origin: trip.origin, destination: trip.destination });
+                                                            toast.success('Manifiesto de chofer descargado');
+                                                        } catch {
+                                                            toast.error('Error al descargar manifiesto');
+                                                        }
+                                                    }}
+                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg"
+                                                >
+                                                    🚚 Manifiesto Chofer
+                                                </button>
+                                            </div>
+                                        </div>
                                         <button
                                             onClick={() => navigate(`/admin/trips/${trip.id}/edit`)}
                                             className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"

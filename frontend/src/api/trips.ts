@@ -35,10 +35,16 @@ export const updateTrip = async (id: string, data: any): Promise<Trip> => {
 
 /**
  * Download trip manifest PDF (for driver/warehouse)
+ * @param manifestType 'office' for summary, 'driver' for detailed delivery view
  */
-export const downloadManifest = async (tripId: string, tripInfo?: { origin?: string; destination?: string; date?: string }): Promise<void> => {
+export const downloadManifest = async (
+  tripId: string,
+  manifestType: 'office' | 'driver' = 'office',
+  tripInfo?: { origin?: string; destination?: string; date?: string }
+): Promise<void> => {
   try {
     const response = await api.get(`/trips/${tripId}/manifest`, {
+      params: { manifest_type: manifestType },
       responseType: 'blob',
       headers: {
         'Accept': 'application/pdf'
@@ -59,7 +65,8 @@ export const downloadManifest = async (tripId: string, tripInfo?: { origin?: str
       // Fallback to download link
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `manifiesto_${tripInfo?.origin || 'viaje'}_${tripInfo?.destination || ''}_${tripId.slice(0, 8)}.pdf`;
+      const prefix = manifestType === 'driver' ? 'chofer' : 'oficina';
+      link.download = `manifiesto_${prefix}_${tripInfo?.origin || 'viaje'}_${tripInfo?.destination || ''}_${tripId.slice(0, 8)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

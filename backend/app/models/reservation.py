@@ -62,6 +62,10 @@ class Reservation(Base):
     payment_proof_path = Column(String(500))
     payment_confirmed_at = Column(DateTime(timezone=True))
     payment_confirmed_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    # Cancellation
+    cancellation_reason = Column(String(500))
+    cancelled_at = Column(DateTime(timezone=True))
+    cancelled_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

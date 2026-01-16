@@ -895,3 +895,257 @@ def delete_manifest(trip_id: str) -> bool:
             return False
     
     return False
+
+
+def generate_driver_manifest(
+    trip_id: str,
+    origin: str,
+    destination: str,
+    departure_date: str,
+    departure_time: Optional[str],
+    truck_plate: Optional[str],
+    trailer_plate: Optional[str],
+    driver_name: Optional[str],
+    driver_phone: Optional[str],
+    total_spaces: int,
+    reservations: list[dict],  # Extended: {client_name, client_phone, client_email, space_numbers, payment_status, total_amount, items, pickup_address, notes}
+    pdf_config: Optional[Dict[str, str]] = None,
+    currency: str = "USD"
+) -> str:
+    """
+    Generate detailed driver manifest PDF with cargo details, addresses, and signature lines.
+    For driver/warehouse delivery operations.
+    
+    Returns the path to the generated file relative to upload_dir.
+    """
+    manifests_dir = Path(settings.upload_dir) / 'manifests'
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f"manifest_driver_{trip_id}.pdf"
+    file_path = manifests_dir / filename
+    
+    doc = SimpleDocTemplate(
+        str(file_path), 
+        pagesize=letter,
+        leftMargin=0.4*inch,
+        rightMargin=0.4*inch,
+        topMargin=0.3*inch,
+        bottomMargin=0.3*inch
+    )
+    elements = []
+    config = get_pdf_config(pdf_config)
+    
+    currency_symbol = "$" if currency in ["USD", "MXN"] else currency
+    
+    # =========== HEADER ===========
+    logo_path = Path(__file__).parent.parent / 'static' / 'keikichi_logo.jpg'
+    
+    if logo_path.exists():
+        logo = Image(str(logo_path), width=1.2*inch, height=0.48*inch)
+    else:
+        logo = Paragraph(f"<b>{config['company_name']}</b>", ParagraphStyle('Logo', fontSize=12, textColor=Colors.BRAND_SECONDARY))
+    
+    title = Paragraph(
+        "<b>MANIFIESTO DE CHOFER</b><br/><font size='9' color='#6c757d'>Documento de entrega</font>",
+        ParagraphStyle('Title', fontSize=14, textColor=Colors.BRAND_SECONDARY, alignment=TA_RIGHT, leading=16)
+    )
+    
+    header = Table([[logo, title]], colWidths=[3*inch, 4.5*inch])
+    header.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, Colors.BRAND_PRIMARY),
+    ]))
+    elements.append(header)
+    elements.append(Spacer(1, 8))
+    
+    # =========== TRIP/VEHICLE BOX ===========
+    departure_str = f"{departure_date}"
+    if departure_time:
+        departure_str += f" - {departure_time}"
+    
+    info_style = ParagraphStyle('Info', fontSize=9, leading=11)
+    label_style = ParagraphStyle('Label', fontSize=7, textColor=Colors.TEXT_MUTED)
+    big_style = ParagraphStyle('Big', fontSize=11, leading=13)
+    
+    trip_box_data = [
+        [
+            Paragraph(f"<font size='8' color='#0077b6'>RUTA</font><br/><b>{origin} → {destination}</b>", big_style),
+            Paragraph(f"<font size='8' color='#0077b6'>SALIDA</font><br/><b>{departure_str}</b>", big_style),
+        ],
+        [
+            Paragraph(f"Camión: <b>{truck_plate or 'N/A'}</b> | Trailer: <b>{trailer_plate or 'N/A'}</b>", info_style),
+            Paragraph(f"Chofer: <b>{driver_name or 'N/A'}</b> | Tel: <b>{driver_phone or 'N/A'}</b>", info_style),
+        ],
+    ]
+    
+    trip_box = Table(trip_box_data, colWidths=[3.75*inch, 3.75*inch])
+    trip_box.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), Colors.BG_LIGHT),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    elements.append(trip_box)
+    elements.append(Spacer(1, 10))
+    
+    # =========== DELIVERIES (One per client) ===========
+    elements.append(Paragraph("<b>ENTREGAS</b>", ParagraphStyle('SectionTitle', fontSize=11, textColor=Colors.BRAND_SECONDARY)))
+    elements.append(Spacer(1, 4))
+    
+    phone_style = ParagraphStyle('Phone', fontSize=12, textColor=Colors.BRAND_SECONDARY, alignment=TA_CENTER)
+    client_style = ParagraphStyle('Client', fontSize=9, leading=11)
+    cargo_style = ParagraphStyle('Cargo', fontSize=8, leading=10, textColor=Colors.TEXT_DARK)
+    notes_style = ParagraphStyle('Notes', fontSize=7, leading=9, textColor=Colors.TEXT_MUTED)
+    check_style = ParagraphStyle('Check', fontSize=9, alignment=TA_CENTER)
+    
+    for idx, res in enumerate(reservations, 1):
+        client_name = res.get('client_name', 'Cliente')
+        client_phone = res.get('client_phone', '-')
+        spaces = res.get('space_numbers', [])
+        spaces_str = ", ".join(map(str, sorted(spaces))) if spaces else "-"
+        payment_status = res.get('payment_status', 'unpaid')
+        items = res.get('items', [])
+        pickup_address = res.get('pickup_address', None)
+        notes = res.get('notes', '')
+        
+        # Payment badge
+        if payment_status == 'paid':
+            payment_badge = "<font color='#10b981'>✓ PAGADO</font>"
+        elif payment_status == 'pending_review':
+            payment_badge = "<font color='#f59e0b'>⏳ REVISIÓN</font>"
+        else:
+            payment_badge = "<font color='#ef4444'>⚠ PENDIENTE</font>"
+        
+        # Build cargo details
+        cargo_lines = []
+        for item in items:
+            product = item.get('product_name', 'Carga')
+            boxes = item.get('box_count', 0)
+            weight = item.get('total_weight', 0)
+            cargo_lines.append(f"• {boxes}x {product} ({weight}kg)")
+        
+        cargo_text = "<br/>".join(cargo_lines) if cargo_lines else "Sin detalles de carga"
+        
+        # Address
+        address_text = pickup_address if pickup_address else "Entrega en destino"
+        
+        # Delivery card
+        card_data = [
+            [
+                # Column 1: Checkbox + Number
+                Paragraph(f"<b>☐ {idx}</b>", check_style),
+                # Column 2: Client info
+                Paragraph(f"<b>{client_name}</b><br/>{payment_badge}", client_style),
+                # Column 3: Phone (BIG)
+                Paragraph(f"<b>📞 {client_phone}</b>", phone_style),
+                # Column 4: Spaces
+                Paragraph(f"<font size='7'>Espacios</font><br/><b>{spaces_str}</b>", ParagraphStyle('Sp', fontSize=9, alignment=TA_CENTER)),
+            ],
+            [
+                Paragraph("", check_style),
+                Paragraph(f"<font size='7'>📍 {address_text}</font>", notes_style),
+                Paragraph(cargo_text, cargo_style),
+                Paragraph(f"<font size='7'>{notes or '-'}</font>", notes_style),
+            ],
+        ]
+        
+        card = Table(card_data, colWidths=[0.5*inch, 2.3*inch, 2.2*inch, 2.5*inch])
+        card.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), Colors.WHITE),
+            ('BACKGROUND', (0, 1), (-1, 1), Colors.BG_LIGHT),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 0.5, Colors.BORDER),
+            ('LINEBELOW', (0, 0), (-1, 0), 0.5, Colors.BORDER),
+        ]))
+        elements.append(card)
+        elements.append(Spacer(1, 3))
+    
+    # Empty rows for additional deliveries
+    if len(reservations) < 5:
+        elements.append(Spacer(1, 6))
+        empty_rows = [["☐", "_" * 25, "Tel: ____________", "Esp: ____"]]
+        for _ in range(min(3, 5 - len(reservations))):
+            empty_table = Table(empty_rows, colWidths=[0.5*inch, 2.5*inch, 2.2*inch, 2.3*inch])
+            empty_table.setStyle(TableStyle([
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ('TEXTCOLOR', (0, 0), (-1, -1), Colors.TEXT_MUTED),
+                ('LINEBELOW', (0, 0), (-1, 0), 0.5, Colors.BORDER),
+            ]))
+            elements.append(empty_table)
+    
+    elements.append(Spacer(1, 12))
+    
+    # =========== SUMMARY ===========
+    reserved_spaces = sum(len(r.get('space_numbers', [])) for r in reservations)
+    available_spaces = total_spaces - reserved_spaces
+    
+    summary = Paragraph(
+        f"<b>Total entregas:</b> {len(reservations)} | "
+        f"<b>Espacios ocupados:</b> {reserved_spaces}/{total_spaces} | "
+        f"<b>Disponibles:</b> {available_spaces}",
+        ParagraphStyle('SummaryLine', fontSize=9)
+    )
+    elements.append(summary)
+    elements.append(Spacer(1, 15))
+    
+    # =========== SIGNATURES ===========
+    elements.append(Paragraph("<b>FIRMAS</b>", ParagraphStyle('SectionTitle', fontSize=10, textColor=Colors.BRAND_SECONDARY)))
+    elements.append(Spacer(1, 8))
+    
+    sig_data = [
+        [
+            Paragraph("Firma del Chofer", label_style),
+            Paragraph("Firma Recibe Bodega", label_style),
+            Paragraph("Fecha/Hora Llegada", label_style),
+        ],
+        [
+            Paragraph("_" * 30, info_style),
+            Paragraph("_" * 30, info_style),
+            Paragraph("___ / ___ / _____ : ___", info_style),
+        ],
+        [
+            Paragraph(f"<b>{driver_name or '_______________'}</b>", info_style),
+            Paragraph("Nombre: _______________", info_style),
+            Paragraph("", info_style),
+        ],
+    ]
+    
+    sig_table = Table(sig_data, colWidths=[2.5*inch, 2.5*inch, 2.5*inch])
+    sig_table.setStyle(TableStyle([
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    elements.append(sig_table)
+    elements.append(Spacer(1, 10))
+    
+    # =========== NOTES SECTION ===========
+    elements.append(Paragraph("<b>OBSERVACIONES:</b>", label_style))
+    notes_box = Table([["" ]], colWidths=[7.5*inch], rowHeights=[0.6*inch])
+    notes_box.setStyle(TableStyle([
+        ('BOX', (0, 0), (-1, -1), 0.5, Colors.BORDER),
+        ('BACKGROUND', (0, 0), (-1, -1), Colors.BG_LIGHT),
+    ]))
+    elements.append(notes_box)
+    elements.append(Spacer(1, 8))
+    
+    # =========== FOOTER ===========
+    qr_buffer = generate_qr_code(f"trip:{trip_id}", box_size=5)
+    qr_img = Image(qr_buffer, width=0.6*inch, height=0.6*inch)
+    
+    footer_text = Paragraph(
+        f"<font size='6' color='#6c757d'>ID: {trip_id[:16]} | Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}</font>",
+        ParagraphStyle('FooterText', fontSize=6)
+    )
+    
+    footer_row = Table([[footer_text, qr_img]], colWidths=[6.9*inch, 0.6*inch])
+    footer_row.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
+    elements.append(footer_row)
+    
+    doc.build(elements)
+    return f"manifests/{filename}"

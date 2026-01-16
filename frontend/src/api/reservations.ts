@@ -69,10 +69,12 @@ export const updateReservation = async (
 };
 
 /**
- * Cancel reservation
+ * Cancel reservation with optional reason
  */
-export const cancelReservation = async (id: string): Promise<void> => {
-    await api.post(`/reservations/${id}/cancel`);
+export const cancelReservation = async (id: string, reason?: string): Promise<void> => {
+    await api.post(`/reservations/${id}/cancel`, null, {
+        params: reason ? { reason } : undefined
+    });
 };
 
 /**

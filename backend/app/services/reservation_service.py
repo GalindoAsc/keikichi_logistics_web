@@ -632,11 +632,14 @@ class ReservationService:
     async def cancel_reservation(
         self,
         reservation_id: UUID,
-        user: User
+        user: User,
+        reason: Optional[str] = None
     ) -> None:
         """
         Cancel reservation and release spaces
         """
+        from datetime import datetime
+        
         reservation = await self.get_reservation_by_id(reservation_id, user)
 
         # Check permissions
@@ -650,8 +653,11 @@ class ReservationService:
         if user.role == UserRole.client and reservation.status != ReservationStatus.pending:
             raise ConflictException("Solo puedes cancelar reservaciones pendientes")
 
-        # Update reservation status
+        # Update reservation status with cancellation details
         reservation.status = ReservationStatus.cancelled
+        reservation.cancellation_reason = reason
+        reservation.cancelled_at = datetime.now()
+        reservation.cancelled_by = user.id
 
         # Get and release spaces
         res_spaces_stmt = select(ReservationSpace).where(
