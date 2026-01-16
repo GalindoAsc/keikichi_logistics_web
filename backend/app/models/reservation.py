@@ -66,3 +66,4 @@ class Reservation(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     items = relationship("LoadItem", back_populates="reservation", cascade="all, delete-orphan")
+    client = relationship("User", foreign_keys=[client_id], lazy="select")
