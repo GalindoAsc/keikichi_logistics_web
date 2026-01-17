@@ -80,7 +80,7 @@ const MyFilesPage = () => {
 
     // Real-time updates
     // Use a single listener for all document events to avoid multiple socket connections
-    useSocketEvents(["DOCUMENT_UPDATED", "DOCUMENT_APPROVED", "DOCUMENT_DELETED"], (data, event) => {
+    useSocketEvents(["DOCUMENT_UPDATED", "DOCUMENT_APPROVED", "DOCUMENT_DELETED"], (_data, event) => {
         // Invalidate all my-documents queries to be safe
         queryClient.invalidateQueries({ queryKey: ["my-documents"] });
 
