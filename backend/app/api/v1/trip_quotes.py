@@ -21,6 +21,17 @@ router = APIRouter(prefix="/trip-quotes", tags=["Trip Quotes"])
 
 # === Schemas ===
 
+class PalletProduct(BaseModel):
+    """Producto dentro de una tarima"""
+    product: str  # Nombre del producto
+    boxes: int = 0  # Cantidad de cajas
+    weight_per_box: float = 0  # Peso por caja
+    unit: str = "lbs"  # Unidad de peso (lbs o kg)
+
+class StopPallet(BaseModel):
+    """Tarima con sus productos"""
+    products: List[PalletProduct] = []
+
 class QuoteStop(BaseModel):
     name: Optional[str] = None  # Nombre identificador de la parada
     address: str
@@ -29,26 +40,21 @@ class QuoteStop(BaseModel):
     time: Optional[str] = None  # Hora de apertura (HH:MM)
     unknown_time: Optional[bool] = False  # No conoce la hora
     notes: Optional[str] = None
+    pallets: Optional[List[StopPallet]] = []  # Tarimas para esta parada
 
 class TripQuoteCreate(BaseModel):
     origin: str
     destination: str
     is_international: bool = False
-    pallet_count: int = Field(ge=1)
     preferred_date: str  # YYYY-MM-DD
     flexible_dates: bool = False
     preferred_currency: str = "USD"  # USD or MXN
     
-    # Paradas detalladas
+    # Paradas detalladas con tarimas y productos
     stops: Optional[List[QuoteStop]] = []
     
     # Opciones Internacionales
     requires_bond: bool = False
-    
-    # Mercancía
-    merchandise_type: Optional[str] = None
-    merchandise_weight: Optional[str] = None
-    merchandise_description: Optional[str] = None
     
     # Servicios
     requires_refrigeration: bool = False
@@ -80,16 +86,12 @@ class TripQuoteOut(BaseModel):
     origin: str
     destination: str
     is_international: bool
-    pallet_count: int
+    pallet_count: Optional[int] = None  # Calculado de las tarimas
     preferred_date: str
     flexible_dates: bool
     preferred_currency: str
     stops: Optional[List[QuoteStop]]
     requires_bond: bool
-    
-    merchandise_type: Optional[str]
-    merchandise_weight: Optional[str]
-    merchandise_description: Optional[str]
     
     requires_refrigeration: bool
     temperature_min: Optional[float]
@@ -137,22 +139,23 @@ async def create_quote_request(
     
     # Serializar stops a dicts para JSON
     stops_data = [stop.model_dump() for stop in data.stops] if data.stops else []
+    
+    # Calcular el conteo total de tarimas de todas las paradas
+    total_pallets = 0
+    for stop in (data.stops or []):
+        total_pallets += len(stop.pallets or [])
 
     quote = TripQuote(
         client_id=current_user.id,
         origin=data.origin,
         destination=data.destination,
         is_international=data.is_international,
-        pallet_count=data.pallet_count,
+        pallet_count=total_pallets if total_pallets > 0 else 1,  # Mínimo 1
         preferred_date=preferred_date,
         flexible_dates=data.flexible_dates,
         preferred_currency=data.preferred_currency,
         stops=stops_data,
         requires_bond=data.requires_bond,
-        
-        merchandise_type=data.merchandise_type,
-        merchandise_weight=data.merchandise_weight,
-        merchandise_description=data.merchandise_description,
         
         requires_refrigeration=data.requires_refrigeration,
         temperature_min=data.temperature_min,

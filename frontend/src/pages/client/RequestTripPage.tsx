@@ -3,12 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Package, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock } from "lucide-react";
+import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock, Layers, Box } from "lucide-react";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
-import { useStops } from "../../hooks/useProducts";
+import { useStops, useProducts } from "../../hooks/useProducts";
 import { SavedStop } from "../../api/catalog";
 import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
+
+// Producto dentro de una tarima
+interface PalletProduct {
+    product: string;        // Nombre del producto
+    boxes: number;          // Cantidad de cajas
+    weight_per_box: number; // Peso por caja
+    unit: "lbs" | "kg";     // Unidad de peso
+}
+
+// Tarima con sus productos
+interface StopPallet {
+    products: PalletProduct[];
+}
 
 interface QuoteStop {
     name?: string;  // Nombre identificador de la parada
@@ -17,24 +30,19 @@ interface QuoteStop {
     time?: string;  // Hora de apertura (HH:MM)
     unknownTime?: boolean;  // No conoce la hora de apertura
     notes?: string;
+    pallets: StopPallet[];  // Tarimas para esta parada
 }
 
 interface QuoteFormData {
     origin: string;
     destination: string;
     is_international: boolean;
-    pallet_count: number;
     preferred_date: string;
     flexible_dates: boolean;
     preferred_currency: "USD" | "MXN";
 
-    // Stops
+    // Stops con sus tarimas y productos
     stops: QuoteStop[];
-
-    // Merchandise
-    merchandise_type: string;
-    merchandise_weight: string;
-    merchandise_description: string;
 
     // Services
     requires_bond: boolean;
@@ -44,7 +52,7 @@ interface QuoteFormData {
 
     // Pickup Details
     pickup_address?: string;
-    pickup_date?: string; // datetime string for input
+    pickup_date?: string;
 
     // Temp
     temperature_min?: number;
@@ -58,15 +66,19 @@ export default function RequestTripPage() {
     const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const { searchStops } = useStops();
+    const { products: savedProducts, searchProducts } = useProducts();
     
     // Estado para autocompletado de paradas
     const [stopSuggestions, setStopSuggestions] = useState<{ [key: number]: SavedStop[] }>({});
     const [showStopSuggestions, setShowStopSuggestions] = useState<{ [key: number]: boolean }>({});
+    
+    // Estado para autocompletado de productos
+    const [productSuggestions, setProductSuggestions] = useState<{ [key: string]: typeof savedProducts }>({});
+    const [showProductSuggestions, setShowProductSuggestions] = useState<{ [key: string]: boolean }>({});
 
     const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<QuoteFormData>({
         defaultValues: {
             is_international: false,
-            pallet_count: 1,
             flexible_dates: false,
             preferred_currency: "USD",
             stops: [],
@@ -255,7 +267,7 @@ export default function RequestTripPage() {
                                         </h3>
                                         <button
                                             type="button"
-                                            onClick={() => append({ name: "", address: "" })}
+                                            onClick={() => append({ name: "", address: "", pallets: [] })}
                                             className="text-sm flex items-center gap-1 text-keikichi-lime-600 hover:text-keikichi-lime-700 font-medium"
                                         >
                                             <Plus className="w-4 h-4" />
@@ -264,7 +276,10 @@ export default function RequestTripPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        {fields.map((field, index) => (
+                                        {fields.map((field, index) => {
+                                            const stopPallets = watch(`stops.${index}.pallets`) || [];
+                                            
+                                            return (
                                             <div key={field.id} className="bg-white dark:bg-keikichi-forest-700 p-4 rounded-lg border border-keikichi-lime-200 dark:border-keikichi-forest-600 relative group">
                                                 <button
                                                     type="button"
@@ -379,8 +394,211 @@ export default function RequestTripPage() {
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {/* TARIMAS Y PRODUCTOS DE ESTA PARADA */}
+                                                <div className="mt-4 pt-4 border-t border-keikichi-lime-100 dark:border-keikichi-forest-600">
+                                                    <div className="flex justify-between items-center mb-3">
+                                                        <h5 className="text-sm font-semibold text-keikichi-forest-700 dark:text-keikichi-lime-300 flex items-center gap-2">
+                                                            <Layers className="w-4 h-4" />
+                                                            {t('quotes.palletsForStop')}
+                                                        </h5>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const currentPallets = watch(`stops.${index}.pallets`) || [];
+                                                                setValue(`stops.${index}.pallets`, [
+                                                                    ...currentPallets,
+                                                                    { products: [{ product: "", boxes: 0, weight_per_box: 0, unit: "lbs" }] }
+                                                                ]);
+                                                            }}
+                                                            className="text-xs flex items-center gap-1 text-keikichi-lime-600 hover:text-keikichi-lime-700 font-medium"
+                                                        >
+                                                            <Plus className="w-3 h-3" />
+                                                            {t('quotes.addPallet')}
+                                                        </button>
+                                                    </div>
+
+                                                    {stopPallets.length === 0 ? (
+                                                        <div className="text-center py-4 border border-dashed border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg text-keikichi-forest-400 dark:text-keikichi-forest-300 text-xs">
+                                                            {t('quotes.noPalletsYet')}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            {stopPallets.map((pallet, palletIdx) => (
+                                                                <div key={palletIdx} className="bg-keikichi-lime-50/50 dark:bg-keikichi-forest-800/50 p-3 rounded-lg border border-keikichi-lime-100 dark:border-keikichi-forest-600">
+                                                                    <div className="flex justify-between items-center mb-2">
+                                                                        <span className="text-xs font-bold text-keikichi-lime-700 dark:text-keikichi-lime-400 flex items-center gap-1">
+                                                                            <Box className="w-3 h-3" />
+                                                                            {t('quotes.pallet')} #{palletIdx + 1}
+                                                                        </span>
+                                                                        <div className="flex gap-1">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const currentProducts = pallet.products || [];
+                                                                                    const newPallets = [...stopPallets];
+                                                                                    newPallets[palletIdx] = {
+                                                                                        ...newPallets[palletIdx],
+                                                                                        products: [...currentProducts, { product: "", boxes: 0, weight_per_box: 0, unit: "lbs" as const }]
+                                                                                    };
+                                                                                    setValue(`stops.${index}.pallets`, newPallets);
+                                                                                }}
+                                                                                className="text-xs text-keikichi-lime-600 hover:text-keikichi-lime-700 p-1"
+                                                                                title={t('quotes.addProduct')}
+                                                                            >
+                                                                                <Plus className="w-3 h-3" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const newPallets = stopPallets.filter((_, i) => i !== palletIdx);
+                                                                                    setValue(`stops.${index}.pallets`, newPallets);
+                                                                                }}
+                                                                                className="text-xs text-red-400 hover:text-red-600 p-1"
+                                                                            >
+                                                                                <Trash2 className="w-3 h-3" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Productos de esta tarima */}
+                                                                    <div className="space-y-2">
+                                                                        {(pallet.products || []).map((product, productIdx) => (
+                                                                            <div key={productIdx} className="grid grid-cols-12 gap-2 items-end">
+                                                                                {/* Producto */}
+                                                                                <div className="col-span-4 relative">
+                                                                                    {productIdx === 0 && (
+                                                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.product')}</label>
+                                                                                    )}
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        value={product.product || ""}
+                                                                                        onChange={(e) => {
+                                                                                            const val = e.target.value;
+                                                                                            const newPallets = [...stopPallets];
+                                                                                            newPallets[palletIdx].products[productIdx].product = val;
+                                                                                            setValue(`stops.${index}.pallets`, newPallets);
+                                                                                            
+                                                                                            // Autocompletado de productos
+                                                                                            const key = `${index}-${palletIdx}-${productIdx}`;
+                                                                                            if (val.length >= 2) {
+                                                                                                const filtered = searchProducts(val);
+                                                                                                setProductSuggestions(prev => ({ ...prev, [key]: filtered }));
+                                                                                                setShowProductSuggestions(prev => ({ ...prev, [key]: true }));
+                                                                                            } else {
+                                                                                                setShowProductSuggestions(prev => ({ ...prev, [key]: false }));
+                                                                                            }
+                                                                                        }}
+                                                                                        onBlur={() => {
+                                                                                            const key = `${index}-${palletIdx}-${productIdx}`;
+                                                                                            setTimeout(() => setShowProductSuggestions(prev => ({ ...prev, [key]: false })), 200);
+                                                                                        }}
+                                                                                        placeholder={t('quotes.productName')}
+                                                                                        className="w-full form-input text-xs py-1"
+                                                                                        autoComplete="off"
+                                                                                    />
+                                                                                    {/* Sugerencias de productos */}
+                                                                                    {showProductSuggestions[`${index}-${palletIdx}-${productIdx}`] && 
+                                                                                     productSuggestions[`${index}-${palletIdx}-${productIdx}`]?.length > 0 && (
+                                                                                        <ul className="absolute z-30 w-full bg-white dark:bg-keikichi-forest-800 border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded shadow-lg max-h-32 overflow-auto mt-0.5">
+                                                                                            {productSuggestions[`${index}-${palletIdx}-${productIdx}`].map((p) => (
+                                                                                                <li
+                                                                                                    key={p.id}
+                                                                                                    className="px-2 py-1 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 cursor-pointer text-xs"
+                                                                                                    onClick={() => {
+                                                                                                        const newPallets = [...stopPallets];
+                                                                                                        newPallets[palletIdx].products[productIdx].product = p.name_es;
+                                                                                                        setValue(`stops.${index}.pallets`, newPallets);
+                                                                                                        setShowProductSuggestions(prev => ({ ...prev, [`${index}-${palletIdx}-${productIdx}`]: false }));
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {p.name_es}
+                                                                                                </li>
+                                                                                            ))}
+                                                                                        </ul>
+                                                                                    )}
+                                                                                </div>
+                                                                                {/* Cajas */}
+                                                                                <div className="col-span-2">
+                                                                                    {productIdx === 0 && (
+                                                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.boxes')}</label>
+                                                                                    )}
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        min="1"
+                                                                                        value={product.boxes || ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newPallets = [...stopPallets];
+                                                                                            newPallets[palletIdx].products[productIdx].boxes = parseInt(e.target.value) || 0;
+                                                                                            setValue(`stops.${index}.pallets`, newPallets);
+                                                                                        }}
+                                                                                        placeholder="0"
+                                                                                        className="w-full form-input text-xs py-1"
+                                                                                    />
+                                                                                </div>
+                                                                                {/* Peso */}
+                                                                                <div className="col-span-2">
+                                                                                    {productIdx === 0 && (
+                                                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.weightPerBox')}</label>
+                                                                                    )}
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        min="0"
+                                                                                        step="0.1"
+                                                                                        value={product.weight_per_box || ""}
+                                                                                        onChange={(e) => {
+                                                                                            const newPallets = [...stopPallets];
+                                                                                            newPallets[palletIdx].products[productIdx].weight_per_box = parseFloat(e.target.value) || 0;
+                                                                                            setValue(`stops.${index}.pallets`, newPallets);
+                                                                                        }}
+                                                                                        placeholder="0"
+                                                                                        className="w-full form-input text-xs py-1"
+                                                                                    />
+                                                                                </div>
+                                                                                {/* Unidad */}
+                                                                                <div className="col-span-2">
+                                                                                    {productIdx === 0 && (
+                                                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.unit')}</label>
+                                                                                    )}
+                                                                                    <select
+                                                                                        value={product.unit || "lbs"}
+                                                                                        onChange={(e) => {
+                                                                                            const newPallets = [...stopPallets];
+                                                                                            newPallets[palletIdx].products[productIdx].unit = e.target.value as "lbs" | "kg";
+                                                                                            setValue(`stops.${index}.pallets`, newPallets);
+                                                                                        }}
+                                                                                        className="w-full form-select text-xs py-1"
+                                                                                    >
+                                                                                        <option value="lbs">lbs</option>
+                                                                                        <option value="kg">kg</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                                {/* Eliminar producto */}
+                                                                                <div className="col-span-2 flex justify-end">
+                                                                                    {(pallet.products?.length || 0) > 1 && (
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => {
+                                                                                                const newPallets = [...stopPallets];
+                                                                                                newPallets[palletIdx].products = newPallets[palletIdx].products.filter((_, i) => i !== productIdx);
+                                                                                                setValue(`stops.${index}.pallets`, newPallets);
+                                                                                            }}
+                                                                                            className="text-red-400 hover:text-red-600 p-1"
+                                                                                        >
+                                                                                            <Trash2 className="w-3 h-3" />
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        ))}
+                                        )})}
                                         {fields.length === 0 && (
                                             <div className="text-center py-6 border-2 border-dashed border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg text-keikichi-forest-400 dark:text-keikichi-forest-300 text-sm">
                                                 {t('quotes.tiradasHelp')}
@@ -395,58 +613,19 @@ export default function RequestTripPage() {
                     {/* Step 2: Cargo & Services */}
                     {step === 2 && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                            {/* Cargo Details */}
+                            {/* Currency preference */}
                             <div>
                                 <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white flex items-center gap-2 mb-4">
-                                    <Package className="w-5 h-5 text-keikichi-lime-600" />
-                                    {t('quotes.cargoDetails')}
+                                    <DollarSign className="w-5 h-5 text-keikichi-lime-600" />
+                                    {t('quotes.preferredCurrency')}
                                 </h2>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">
-                                            {t('quotes.palletCount')} *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            {...register("pallet_count", { required: true, valueAsNumber: true, min: 1 })}
-                                            className="w-full form-input"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">
-                                            {t('quotes.preferredCurrency')}
-                                        </label>
-                                        <select
-                                            {...register("preferred_currency")}
-                                            className="w-full form-select"
-                                        >
-                                            <option value="USD">USD - Dólares</option>
-                                            <option value="MXN">MXN - Pesos</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gray-50 dark:bg-keikichi-forest-700/50 p-4 rounded-lg border border-gray-100 dark:border-keikichi-forest-600 space-y-4">
-                                    <h3 className="text-sm font-semibold text-keikichi-forest-700 dark:text-keikichi-lime-300">
-                                        {t('quotes.merchandiseDetails')}
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-xs text-gray-500 dark:text-gray-400">{t('quotes.productType')}</label>
-                                            <input {...register("merchandise_type")} placeholder={t('quotes.productTypePlaceholder')} className="w-full form-input text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-gray-500 dark:text-gray-400">{t('quotes.weight')}</label>
-                                            <input {...register("merchandise_weight")} placeholder={t('quotes.weightPlaceholder')} className="w-full form-input text-sm" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="text-xs text-gray-500 dark:text-gray-400">{t('quotes.description')}</label>
-                                            <textarea {...register("merchandise_description")} rows={2} maxLength={500} className="w-full form-input text-sm" />
-                                        </div>
-                                    </div>
-                                </div>
+                                <select
+                                    {...register("preferred_currency")}
+                                    className="w-full md:w-1/2 form-select"
+                                >
+                                    <option value="USD">USD - Dólares</option>
+                                    <option value="MXN">MXN - Pesos</option>
+                                </select>
                             </div>
 
                             {/* Services */}

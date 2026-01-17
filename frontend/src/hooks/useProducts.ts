@@ -27,12 +27,22 @@ export const useProducts = () => {
     // Format for ProductCard (Name ES/Name EN)
     const productOptions = products.map((p: Product) => p.name_en ? `${p.name_es}/${p.name_en}` : p.name_es);
 
+    // Search products by name
+    const searchProducts = (query: string) => {
+        const lowerQuery = query.toLowerCase();
+        return products.filter((p: Product) => 
+            p.name_es.toLowerCase().includes(lowerQuery) || 
+            (p.name_en && p.name_en.toLowerCase().includes(lowerQuery))
+        );
+    };
+
     return {
         products, // Raw objects with IDs
         productOptions, // Formatted strings for dropdowns
         isLoading,
         addProduct: addMutation.mutateAsync,
         removeProduct: removeMutation.mutateAsync,
+        searchProducts, // Search function
     };
 };
 

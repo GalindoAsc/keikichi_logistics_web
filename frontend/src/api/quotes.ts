@@ -1,5 +1,18 @@
 import api from "./client";
 
+// Producto dentro de una tarima
+export interface PalletProduct {
+    product: string;        // Nombre del producto
+    boxes: number;          // Cantidad de cajas
+    weight_per_box: number; // Peso por caja
+    unit: "lbs" | "kg";     // Unidad de peso
+}
+
+// Tarima con sus productos
+export interface StopPallet {
+    products: PalletProduct[];
+}
+
 export interface QuoteStop {
     name?: string;  // Nombre identificador de la parada (para autocompletado)
     address: string;
@@ -8,21 +21,18 @@ export interface QuoteStop {
     time?: string;  // Hora de apertura (HH:MM)
     unknownTime?: boolean;  // No conoce la hora
     notes?: string;
+    pallets?: StopPallet[];  // Tarimas para esta parada
 }
 
 export interface TripQuoteCreate {
     origin: string;
     destination: string;
     is_international: boolean;
-    pallet_count: number;
     preferred_date: string;
     flexible_dates: boolean;
     preferred_currency: "USD" | "MXN";
     stops?: QuoteStop[];
     requires_bond: boolean;
-    merchandise_type?: string;
-    merchandise_weight?: string;
-    merchandise_description?: string;
     requires_refrigeration: boolean;
     temperature_min?: number;
     temperature_max?: number;
