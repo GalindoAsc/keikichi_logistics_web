@@ -55,7 +55,7 @@ export default function RequestTripPage() {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const [step, setStep] = useState(1);
-    const { stops: savedStops, searchStops, addStop } = useStops();
+    const { searchStops } = useStops();
     
     // Estado para autocompletado de paradas
     const [stopSuggestions, setStopSuggestions] = useState<{ [key: number]: SavedStop[] }>({});
