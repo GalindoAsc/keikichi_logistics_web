@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { Plus, Edit, Trash2, Truck, Calendar, MapPin, Eye, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, Truck, Calendar, MapPin, Eye, FileText, Copy, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchTrips, deleteTrip, downloadManifest } from "../../api/trips";
+import { fetchTrips, deleteTrip, downloadManifest, cloneTrip } from "../../api/trips";
 import api from "../../api/client";
 import { Trip } from "../../types/trip";
 import { toast } from "sonner";
@@ -16,6 +16,10 @@ export default function AdminTripsPage() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const { t, i18n } = useTranslation();
     const dateLocale = i18n.language === 'es' ? es : enUS;
+
+    // Clone modal state
+    const [cloneTarget, setCloneTarget] = useState<Trip | null>(null);
+    const [cloneDate, setCloneDate] = useState<string>("");
 
     const { data: trips, isLoading, refetch } = useQuery({
         queryKey: ["admin-trips", statusFilter],
@@ -252,6 +256,16 @@ export default function AdminTripsPage() {
                                             </div>
                                         </div>
                                         <button
+                                            onClick={() => {
+                                                setCloneTarget(trip);
+                                                setCloneDate("");
+                                            }}
+                                            className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
+                                            title="Clonar viaje"
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                        </button>
+                                        <button
                                             onClick={() => navigate(`/admin/trips/${trip.id}/edit`)}
                                             className="p-1.5 text-keikichi-forest-400 dark:text-keikichi-lime-400 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-300 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-lime-900/20 rounded-lg transition-colors"
                                             title={t('common.edit')}
@@ -318,6 +332,70 @@ export default function AdminTripsPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Clone Modal */}
+            {cloneTarget && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                Clonar Viaje
+                            </h3>
+                            <button
+                                onClick={() => setCloneTarget(null)}
+                                className="p-1 text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                            {cloneTarget.origin} → {cloneTarget.destination}
+                        </p>
+
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nueva fecha de salida
+                        </label>
+                        <input
+                            type="date"
+                            value={cloneDate}
+                            onChange={(e) => setCloneDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+                            min={new Date().toISOString().split('T')[0]}
+                        />
+
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setCloneTarget(null)}
+                                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (!cloneDate) {
+                                        toast.error("Selecciona una fecha");
+                                        return;
+                                    }
+                                    try {
+                                        const result = await cloneTrip(cloneTarget.id, cloneDate);
+                                        toast.success(result.message);
+                                        setCloneTarget(null);
+                                        refetch();
+                                        navigate(`/admin/trips/${result.id}/edit`);
+                                    } catch {
+                                        toast.error("Error al clonar viaje");
+                                    }
+                                }}
+                                disabled={!cloneDate}
+                                className="px-4 py-2 bg-keikichi-lime-600 text-white rounded-lg hover:bg-keikichi-lime-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Clonar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

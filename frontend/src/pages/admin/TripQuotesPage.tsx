@@ -16,7 +16,7 @@ interface TripQuote {
     preferred_date: string;
     flexible_dates: boolean;
     preferred_currency: string;
-    tiradas: number;
+    stops: any[] | null;
     requires_bond: boolean;
     requires_refrigeration: boolean;
     temperature_min: number | null;
@@ -25,8 +25,8 @@ interface TripQuote {
     special_requirements: string | null;
     quoted_price: number | null;
     quoted_currency: string | null;
-    free_tiradas: number | null;
-    price_per_extra_tirada: number | null;
+    free_stops: number | null;
+    price_per_extra_stop: number | null;
     admin_notes: string | null;
     status: string;
     client_response: string | null;
@@ -56,8 +56,8 @@ export default function TripQuotesPage() {
     const [quoteForm, setQuoteForm] = useState({
         quoted_price: "",
         quoted_currency: "USD",
-        free_tiradas: "0",
-        price_per_extra_tirada: "",
+        free_stops: "0",
+        price_per_extra_stop: "",
         admin_notes: ""
     });
 
@@ -78,7 +78,7 @@ export default function TripQuotesPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["admin-quotes"] });
             setQuotingId(null);
-            setQuoteForm({ quoted_price: "", quoted_currency: "USD", free_tiradas: "0", price_per_extra_tirada: "", admin_notes: "" });
+            setQuoteForm({ quoted_price: "", quoted_currency: "USD", free_stops: "0", price_per_extra_stop: "", admin_notes: "" });
             toast.success(t('quotes.priceSent'));
         },
         onError: (error: any) => {
@@ -121,8 +121,8 @@ export default function TripQuotesPage() {
             data: {
                 quoted_price: parseFloat(quoteForm.quoted_price),
                 quoted_currency: quoteForm.quoted_currency,
-                free_tiradas: parseInt(quoteForm.free_tiradas) || 0,
-                price_per_extra_tirada: quoteForm.price_per_extra_tirada ? parseFloat(quoteForm.price_per_extra_tirada) : null,
+                free_stops: parseInt(quoteForm.free_stops) || 0,
+                price_per_extra_stop: quoteForm.price_per_extra_stop ? parseFloat(quoteForm.price_per_extra_stop) : null,
                 admin_notes: quoteForm.admin_notes || null
             }
         });
@@ -226,10 +226,10 @@ export default function TripQuotesPage() {
                                                     <p className="text-xs text-keikichi-lime-600">{t('quotes.flexible')}</p>
                                                 )}
                                             </div>
-                                            {quote.is_international && (
+                                            {quote.is_international && quote.stops && quote.stops.length > 0 && (
                                                 <div>
-                                                    <p className="text-keikichi-forest-400 dark:text-keikichi-lime-500">{t('quotes.tiradas')}</p>
-                                                    <p className="font-medium text-keikichi-forest-800 dark:text-white">{quote.tiradas}</p>
+                                                    <p className="text-keikichi-forest-400 dark:text-keikichi-lime-500">{t('quotes.stops')}</p>
+                                                    <p className="font-medium text-keikichi-forest-800 dark:text-white">{quote.stops.length}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -283,17 +283,17 @@ export default function TripQuotesPage() {
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <input
                                                                 type="number"
-                                                                placeholder={t('quotes.freeTiradas')}
-                                                                value={quoteForm.free_tiradas}
-                                                                onChange={(e) => setQuoteForm({ ...quoteForm, free_tiradas: e.target.value })}
+                                                                placeholder={t('quotes.freeStops')}
+                                                                value={quoteForm.free_stops}
+                                                                onChange={(e) => setQuoteForm({ ...quoteForm, free_stops: e.target.value })}
                                                                 className="border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-keikichi-forest-600"
                                                             />
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                placeholder={t('quotes.extraTiradaPrice')}
-                                                                value={quoteForm.price_per_extra_tirada}
-                                                                onChange={(e) => setQuoteForm({ ...quoteForm, price_per_extra_tirada: e.target.value })}
+                                                                placeholder={t('quotes.extraStopPrice')}
+                                                                value={quoteForm.price_per_extra_stop}
+                                                                onChange={(e) => setQuoteForm({ ...quoteForm, price_per_extra_stop: e.target.value })}
                                                                 className="border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-keikichi-forest-600"
                                                             />
                                                         </div>

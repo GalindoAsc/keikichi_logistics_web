@@ -34,6 +34,19 @@ export const updateTrip = async (id: string, data: any): Promise<Trip> => {
 };
 
 /**
+ * Clone a trip with a new departure date
+ */
+export const cloneTrip = async (
+  tripId: string,
+  newDepartureDate: string
+): Promise<{ id: string; message: string }> => {
+  const { data } = await api.post(`/trips/${tripId}/clone`, null, {
+    params: { new_departure_date: newDepartureDate }
+  });
+  return data;
+};
+
+/**
  * Download trip manifest PDF (for driver/warehouse)
  * @param manifestType 'office' for summary, 'driver' for detailed delivery view
  */

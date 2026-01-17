@@ -1,5 +1,7 @@
 import logging
+from datetime import date, time
 from pathlib import Path
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -223,6 +225,87 @@ async def delete_trip(trip_id: str, db: AsyncSession = Depends(get_db_session), 
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error interno eliminando viaje: {str(e)}"
         )
+
+# ==================== CLONE ENDPOINT ====================
+
+@router.post("/{trip_id}/clone")
+async def clone_trip(
+    trip_id: str,
+    new_departure_date: date,
+    new_departure_time: Optional[time] = None,
+    db: AsyncSession = Depends(get_db_session),
+    current_user=Depends(require_manager_or_superadmin)
+):
+    """
+    Clone an existing trip with a new departure date.
+    Copies all trip data and creates new spaces.
+    """
+    from app.models.trip import Trip, TripStatus
+    from app.models.space import Space, SpaceStatus
+    from sqlalchemy import select
+    from uuid import UUID as UUIDType
+    import uuid
+    
+    # Get original trip
+    service = TripService(db)
+    original = await service.get_trip(trip_id)
+    
+    # Create new trip with copied data
+    new_trip = Trip(
+        id=uuid.uuid4(),
+        origin=original.origin,
+        destination=original.destination,
+        departure_date=new_departure_date,
+        departure_time=new_departure_time or original.departure_time,
+        status=TripStatus.scheduled,
+        is_international=original.is_international,
+        total_spaces=original.total_spaces,
+        price_per_space=original.price_per_space,
+        pickup_cost=original.pickup_cost,
+        pickup_cost_type=original.pickup_cost_type,
+        bond_cost=original.bond_cost,
+        currency=original.currency,
+        exchange_rate=original.exchange_rate,
+        individual_pricing=original.individual_pricing,
+        tax_included=original.tax_included,
+        tax_rate=original.tax_rate,
+        payment_deadline_hours=original.payment_deadline_hours,
+        max_spaces_per_client=original.max_spaces_per_client,
+        notes_internal=original.notes_internal,
+        notes_public=original.notes_public,
+        truck_identifier=original.truck_identifier,
+        trailer_identifier=original.trailer_identifier,
+        truck_plate=original.truck_plate,
+        trailer_plate=original.trailer_plate,
+        driver_name=original.driver_name,
+        driver_phone=original.driver_phone,
+        created_by=current_user.id
+    )
+    
+    db.add(new_trip)
+    await db.flush()  # Get new_trip.id
+    
+    # Create spaces for new trip
+    for i in range(1, original.total_spaces + 1):
+        space = Space(
+            id=uuid.uuid4(),
+            trip_id=new_trip.id,
+            space_number=i,
+            status=SpaceStatus.available,
+            price_override=None  # Use trip price
+        )
+        db.add(space)
+    
+    await db.commit()
+    await db.refresh(new_trip)
+    
+    return {
+        "id": str(new_trip.id),
+        "origin": new_trip.origin,
+        "destination": new_trip.destination,
+        "departure_date": new_trip.departure_date.isoformat(),
+        "message": f"Viaje clonado exitosamente con {original.total_spaces} espacios"
+    }
 
 # ==================== MANIFEST ENDPOINT ====================
 

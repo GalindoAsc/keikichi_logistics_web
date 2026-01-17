@@ -17,15 +17,15 @@ interface TripQuote {
     preferred_date: string;
     flexible_dates: boolean;
     preferred_currency: string;
-    tiradas: number;
+    stops: any[] | null;
     requires_bond: boolean;
     requires_refrigeration: boolean;
     temperature_min: number | null;
     temperature_max: number | null;
     quoted_price: number | null;
     quoted_currency: string | null;
-    free_tiradas: number | null;
-    price_per_extra_tirada: number | null;
+    free_stops: number | null;
+    price_per_extra_stop: number | null;
     status: string;
     client_response: string | null;
     created_at: string;
@@ -186,8 +186,8 @@ export default function MyQuotesPage() {
                                                 <Clock className="w-4 h-4" />
                                                 {format(new Date(quote.preferred_date), i18n.language === 'es' ? "d MMM yyyy" : "MMM d, yyyy", { locale: dateLocale })}
                                             </span>
-                                            {quote.is_international && quote.tiradas > 0 && (
-                                                <span>{quote.tiradas} {t('quotes.tiradas')}</span>
+                                            {quote.is_international && quote.stops && quote.stops.length > 0 && (
+                                                <span>{quote.stops.length} {t('quotes.stops')}</span>
                                             )}
                                         </div>
 
@@ -204,9 +204,9 @@ export default function MyQuotesPage() {
                                                 <p className="text-2xl font-bold text-keikichi-lime-700 dark:text-keikichi-lime-400">
                                                     ${quote.quoted_price.toLocaleString()} {quote.quoted_currency}
                                                 </p>
-                                                {quote.free_tiradas !== null && quote.free_tiradas > 0 && (
+                                                {quote.free_stops !== null && quote.free_stops > 0 && (
                                                     <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mt-1">
-                                                        {quote.free_tiradas} {t('quotes.tiradasIncluded')}
+                                                        {quote.free_stops} {t('quotes.stopsIncluded')}
                                                     </p>
                                                 )}
                                             </div>
