@@ -301,9 +301,12 @@ async def admin_set_quote(
     quote.status = QuoteStatus.quoted
 
     await db.commit()
+    
+    # Refresh to get updated data including client relationship
+    await db.refresh(quote, ["client"])
 
-    # Notify client about the price
-    if quote.client:
+    # Notify client about the price (only if client has email)
+    if quote.client and quote.client.email:
         await notification_service.notify_quote_priced(quote, quote.client)
 
     return {"message": "Cotización enviada al cliente", "status": quote.status.value}
