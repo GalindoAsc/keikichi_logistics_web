@@ -37,29 +37,39 @@ export function useSpaceSocket({ tripId, onSpaceUpdate, enabled = true }: UseSpa
         const host = import.meta.env.DEV ? 'localhost:8000' : window.location.host;
         const wsUrl = `${protocol}//${host}/api/v1/spaces/ws/trip/${tripId}?token=${accessToken}`;
 
-        console.log('[SpaceSocket] Connecting to:', wsUrl);
+        if (import.meta.env.DEV) {
+            console.log('[SpaceSocket] Connecting to:', wsUrl);
+        }
 
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
-            console.log('[SpaceSocket] Connected to trip:', tripId);
+            if (import.meta.env.DEV) {
+                console.log('[SpaceSocket] Connected to trip:', tripId);
+            }
         };
 
         ws.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
-                console.log('[SpaceSocket] Received:', message);
+                if (import.meta.env.DEV) {
+                    console.log('[SpaceSocket] Received:', message);
+                }
 
                 if (message.event === 'space_update' && onSpaceUpdate) {
                     onSpaceUpdate(message.data);
                 }
             } catch (error) {
-                console.error('[SpaceSocket] Parse error:', error);
+                if (import.meta.env.DEV) {
+                    console.error('[SpaceSocket] Parse error:', error);
+                }
             }
         };
 
         ws.onclose = (event) => {
-            console.log('[SpaceSocket] Disconnected:', event.code, event.reason);
+            if (import.meta.env.DEV) {
+                console.log('[SpaceSocket] Disconnected:', event.code, event.reason);
+            }
             wsRef.current = null;
 
             // Reconnect after 3 seconds if still enabled
@@ -71,7 +81,9 @@ export function useSpaceSocket({ tripId, onSpaceUpdate, enabled = true }: UseSpa
         };
 
         ws.onerror = (error) => {
-            console.error('[SpaceSocket] Error:', error);
+            if (import.meta.env.DEV) {
+                console.error('[SpaceSocket] Error:', error);
+            }
         };
 
         wsRef.current = ws;

@@ -8,6 +8,14 @@ import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
+interface QuoteStop {
+    address: string;
+    contact?: string;
+    phone?: string;
+    time?: string;
+    notes?: string;
+}
+
 interface TripQuote {
     id: string;
     origin: string;
@@ -17,11 +25,17 @@ interface TripQuote {
     preferred_date: string;
     flexible_dates: boolean;
     preferred_currency: string;
-    stops: any[] | null;
+    stops: QuoteStop[] | null;
     requires_bond: boolean;
     requires_refrigeration: boolean;
     temperature_min: number | null;
     temperature_max: number | null;
+    requires_labeling: boolean;
+    requires_pickup: boolean;
+    pickup_date: string | null;
+    merchandise_type: string | null;
+    merchandise_weight: string | null;
+    merchandise_description: string | null;
     quoted_price: number | null;
     quoted_currency: string | null;
     free_stops: number | null;
@@ -39,7 +53,7 @@ const statusColors: Record<string, string> = {
     negotiating: "bg-keikichi-forest-100 text-keikichi-forest-800 dark:bg-keikichi-forest-600 dark:text-keikichi-lime-300",
     accepted: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
     rejected: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    expired: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+    expired: "bg-keikichi-forest-100 text-keikichi-forest-600 dark:bg-keikichi-forest-700 dark:text-keikichi-lime-500"
 };
 
 export default function MyQuotesPage() {

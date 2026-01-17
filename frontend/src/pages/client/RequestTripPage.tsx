@@ -326,7 +326,7 @@ export default function RequestTripPage() {
                                         </div>
                                         <div className="md:col-span-2">
                                             <label className="text-xs text-gray-500 dark:text-gray-400">{t('quotes.description')}</label>
-                                            <textarea {...register("merchandise_description")} rows={2} className="w-full form-input text-sm" />
+                                            <textarea {...register("merchandise_description")} rows={2} maxLength={500} className="w-full form-input text-sm" />
                                         </div>
                                     </div>
                                 </div>
@@ -462,6 +462,7 @@ export default function RequestTripPage() {
                                     <textarea
                                         {...register("special_requirements")}
                                         rows={4}
+                                        maxLength={1000}
                                         placeholder={t('quotes.specialRequirementsPlaceholder')}
                                         className="w-full form-input"
                                     />

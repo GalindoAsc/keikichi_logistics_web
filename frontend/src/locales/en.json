@@ -191,7 +191,12 @@
         "manageSpaces": "Manage Spaces",
         "viewSpaces": "View Spaces",
         "fixErrors": "Please fix the errors in",
-        "dateCannotBePast": "Date cannot be in the past"
+        "dateCannotBePast": "Date cannot be in the past",
+        "cloneTrip": "Clone Trip",
+        "newDepartureDate": "New departure date",
+        "selectDateError": "Select a date",
+        "cloneError": "Error cloning trip",
+        "cloneSuccess": "Trip cloned successfully"
     },
     "reservations": {
         "title": "Reservation Management",
@@ -477,7 +482,10 @@
         "sendPrice": "Send Quote",
         "price": "Price",
         "freeTiradas": "Free stops",
+        "freeStops": "Free stops",
         "extraTiradaPrice": "$/extra stop",
+        "extraStopPrice": "$/extra stop",
+        "stopsIncluded": "stops included",
         "adminNotes": "Internal notes",
         "priceSent": "Quote sent to client",
         "priceRequired": "Price is required",

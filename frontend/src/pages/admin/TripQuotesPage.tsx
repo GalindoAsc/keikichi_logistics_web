@@ -7,6 +7,14 @@ import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 
+interface QuoteStop {
+    address: string;
+    contact?: string;
+    phone?: string;
+    time?: string;
+    notes?: string;
+}
+
 interface TripQuote {
     id: string;
     origin: string;
@@ -16,12 +24,18 @@ interface TripQuote {
     preferred_date: string;
     flexible_dates: boolean;
     preferred_currency: string;
-    stops: any[] | null;
+    stops: QuoteStop[] | null;
     requires_bond: boolean;
     requires_refrigeration: boolean;
     temperature_min: number | null;
     temperature_max: number | null;
+    requires_labeling: boolean;
+    requires_pickup: boolean;
     pickup_address: string | null;
+    pickup_date: string | null;
+    merchandise_type: string | null;
+    merchandise_weight: string | null;
+    merchandise_description: string | null;
     special_requirements: string | null;
     quoted_price: number | null;
     quoted_currency: string | null;

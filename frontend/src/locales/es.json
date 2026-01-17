@@ -191,7 +191,12 @@
         "manageSpaces": "Gestionar Espacios",
         "viewSpaces": "Ver Espacios",
         "fixErrors": "Por favor corrige los errores en",
-        "dateCannotBePast": "La fecha no puede ser anterior a hoy"
+        "dateCannotBePast": "La fecha no puede ser anterior a hoy",
+        "cloneTrip": "Clonar Viaje",
+        "newDepartureDate": "Nueva fecha de salida",
+        "selectDateError": "Selecciona una fecha",
+        "cloneError": "Error al clonar viaje",
+        "cloneSuccess": "Viaje clonado exitosamente"
     },
     "reservations": {
         "title": "Gestión de Reservaciones",
@@ -477,7 +482,10 @@
         "sendPrice": "Enviar Cotización",
         "price": "Precio",
         "freeTiradas": "Tiradas gratis",
+        "freeStops": "Paradas gratis",
         "extraTiradaPrice": "$/tirada extra",
+        "extraStopPrice": "$/parada extra",
+        "stopsIncluded": "paradas incluidas",
         "adminNotes": "Notas internas",
         "priceSent": "Cotización enviada al cliente",
         "priceRequired": "El precio es requerido",

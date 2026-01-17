@@ -153,7 +153,6 @@ const CreateTripPage = () => {
     };
 
     const onInvalid = (errors: any) => {
-        console.log("Validation errors:", errors);
         const errorFields = Object.keys(errors).map(key => {
             const labels: Record<string, string> = {
                 origin: t('trips.origin'),

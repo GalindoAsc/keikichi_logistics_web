@@ -144,12 +144,7 @@ const ClientFilesPage = () => {
     };
 
     // Real-time updates
-    useSocketEvents(["DOCUMENT_UPLOADED", "DOCUMENT_DELETED"], (data, event) => {
-        console.log("ClientFilesPage received event:", event, data);
-        console.log("Current userId:", userId);
-
-        // Always invalidate to ensure update - ID check might be failing
-        console.log("Invalidating ALL document queries");
+    useSocketEvents(["DOCUMENT_UPLOADED", "DOCUMENT_DELETED"], () => {
         queryClient.invalidateQueries({ queryKey: ["documents"] });
     });
 

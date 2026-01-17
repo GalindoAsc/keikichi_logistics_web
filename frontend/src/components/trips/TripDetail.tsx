@@ -19,7 +19,6 @@ const TripDetail = () => {
 
   // Real-time space updates via WebSocket
   const handleSpaceUpdate = useCallback((data: { space_id: string; status: string }) => {
-    console.log('[TripDetail] Space updated:', data);
     // Refetch spaces to get the latest state
     refetchSpaces();
 

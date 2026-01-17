@@ -13,6 +13,7 @@ from app.api.deps import get_db_session, get_current_user
 from app.core.permissions import require_manager_or_superadmin
 from app.models import User, UserRole, Trip, TripStatus
 from app.models.trip_quote import TripQuote, QuoteStatus
+from app.models.space import Space, SpaceStatus
 
 # ... (imports unchanged)
 
@@ -271,13 +272,14 @@ async def client_respond(
     
     if data.action == "accept":
         # Crear viaje automáticamente
+        price_per_space = quote.quoted_price / quote.pallet_count if quote.pallet_count > 0 else quote.quoted_price
         new_trip = Trip(
             origin=quote.origin,
             destination=quote.destination,
             departure_date=quote.preferred_date,
             is_international=quote.is_international,
             total_spaces=quote.pallet_count,
-            price_per_space=quote.quoted_price / quote.pallet_count if quote.pallet_count > 0 else quote.quoted_price,
+            price_per_space=price_per_space,
             currency=quote.quoted_currency,
             status=TripStatus.scheduled,
             notes_internal=f"Viaje creado desde cotización {quote.id}. Cliente: {current_user.full_name}",
@@ -285,13 +287,23 @@ async def client_respond(
         )
         db.add(new_trip)
         await db.flush()
-        
+
+        # Crear espacios para el viaje
+        for idx in range(1, quote.pallet_count + 1):
+            space = Space(
+                trip_id=new_trip.id,
+                space_number=idx,
+                status=SpaceStatus.available,
+                price=price_per_space
+            )
+            db.add(space)
+
         quote.created_trip_id = new_trip.id
         quote.status = QuoteStatus.accepted
         quote.client_response = data.message
-        
+
         await db.commit()
-        
+
         return {
             "message": "Cotización aceptada. Viaje creado.",
             "status": quote.status.value,

@@ -341,7 +341,7 @@ export default function AdminTripsPage() {
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Clonar Viaje
+                                {t('trips.cloneTrip')}
                             </h3>
                             <button
                                 onClick={() => setCloneTarget(null)}
@@ -356,7 +356,7 @@ export default function AdminTripsPage() {
                         </p>
 
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Nueva fecha de salida
+                            {t('trips.newDepartureDate')}
                         </label>
                         <input
                             type="date"
@@ -371,28 +371,27 @@ export default function AdminTripsPage() {
                                 onClick={() => setCloneTarget(null)}
                                 className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                             >
-                                Cancelar
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={async () => {
                                     if (!cloneDate) {
-                                        toast.error("Selecciona una fecha");
+                                        toast.error(t('trips.selectDateError'));
                                         return;
                                     }
                                     try {
                                         const result = await cloneTrip(cloneTarget.id, cloneDate);
-                                        toast.success(result.message);
+                                        toast.success(result.message || t('trips.cloneSuccess'));
                                         setCloneTarget(null);
                                         refetch();
-                                        navigate(`/admin/trips/${result.id}/edit`);
                                     } catch {
-                                        toast.error("Error al clonar viaje");
+                                        toast.error(t('trips.cloneError'));
                                     }
                                 }}
                                 disabled={!cloneDate}
                                 className="px-4 py-2 bg-keikichi-lime-600 text-white rounded-lg hover:bg-keikichi-lime-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Clonar
+                                {t('trips.cloneTrip')}
                             </button>
                         </div>
                     </div>
