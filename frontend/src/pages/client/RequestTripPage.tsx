@@ -146,14 +146,46 @@ export default function RequestTripPage() {
 
     const createQuote = useMutation({
         mutationFn: async (data: QuoteFormData) => {
-            // Handle pickup_date transformation if needed
+            // Transform stops to convert camelCase to snake_case
+            const transformedStops = data.stops.map(s => ({
+                name: s.name,
+                address: s.address || "N/A",
+                address_reference: s.address_reference,
+                contact: s.contact,
+                time: s.time,
+                unknown_time: s.unknownTime,  // Convert camelCase to snake_case
+                notes: s.notes,
+                pallets: s.pallets
+            }));
+            
+            // Build payload without FileList fields (they need separate upload)
             const payload = {
-                ...data,
-                stops: data.stops.map(s => ({
-                    ...s,
-                    address: s.address || "N/A" // Ensure address is present
-                }))
+                origin: data.origin,
+                destination: data.destination,
+                is_international: data.is_international,
+                preferred_date: data.preferred_date,
+                flexible_dates: data.flexible_dates,
+                preferred_currency: data.preferred_currency,
+                stops: transformedStops,
+                requires_bond: data.requires_bond,
+                bond_type: data.bond_type,
+                requires_refrigeration: data.requires_refrigeration,
+                temperature_min: data.temperature_min,
+                temperature_max: data.temperature_max,
+                requires_labeling: data.requires_labeling,
+                labeling_type: data.labeling_type,
+                labeling_size: data.labeling_size,
+                labeling_quantity: data.labeling_quantity,
+                requires_pickup: data.requires_pickup,
+                pickup_address: data.pickup_address,
+                pickup_address_reference: data.pickup_address_reference,
+                pickup_date: data.pickup_date,
+                pickup_contact_name: data.pickup_contact_name,
+                pickup_contact_phone: data.pickup_contact_phone,
+                pickup_notes: data.pickup_notes,
+                special_requirements: data.special_requirements
             };
+            
             const response = await api.post("/trip-quotes", payload);
             return response.data;
         },

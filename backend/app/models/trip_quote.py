@@ -43,6 +43,7 @@ class TripQuote(Base):
     
     # Opciones Internacionales
     requires_bond = Column(Boolean, nullable=False, default=False)  # Usa fianza Keikichi
+    bond_type = Column(String(20), nullable=True)  # "keikichi" or "own"
     
     # Detalles de Mercancía
     merchandise_type = Column(String(100), nullable=True)  # Ej: Perecederos, Secos, etc.
@@ -54,10 +55,20 @@ class TripQuote(Base):
     temperature_min = Column(Numeric(5, 2), nullable=True)
     temperature_max = Column(Numeric(5, 2), nullable=True)
     
+    # Labeling
     requires_labeling = Column(Boolean, nullable=False, default=False)
+    labeling_type = Column(String(20), nullable=True)  # "keikichi" or "own"
+    labeling_size = Column(String(100), nullable=True)  # ID del tamaño de etiqueta
+    labeling_quantity = Column(Integer, nullable=True)
+    
+    # Pickup
     requires_pickup = Column(Boolean, nullable=False, default=False)
     pickup_address = Column(Text, nullable=True)
+    pickup_address_reference = Column(Text, nullable=True)  # Referencia de dirección
     pickup_date = Column(DateTime(timezone=True), nullable=True)
+    pickup_contact_name = Column(String(255), nullable=True)
+    pickup_contact_phone = Column(String(50), nullable=True)
+    pickup_notes = Column(Text, nullable=True)
     
     # Información adicional
     special_requirements = Column(Text, nullable=True)

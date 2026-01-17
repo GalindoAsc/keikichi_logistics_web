@@ -4,7 +4,7 @@ from uuid import UUID
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -35,12 +35,16 @@ class StopPallet(BaseModel):
 class QuoteStop(BaseModel):
     name: Optional[str] = None  # Nombre identificador de la parada
     address: str
+    address_reference: Optional[str] = Field(default=None, alias="address_reference")
     contact: Optional[str] = None
     phone: Optional[str] = None
     time: Optional[str] = None  # Hora de apertura (HH:MM)
-    unknown_time: Optional[bool] = False  # No conoce la hora
+    unknown_time: Optional[bool] = Field(default=False, alias="unknownTime")  # Accept camelCase
     notes: Optional[str] = None
     pallets: Optional[List[StopPallet]] = []  # Tarimas para esta parada
+    
+    class Config:
+        populate_by_name = True  # Accept both field name and alias
 
 class TripQuoteCreate(BaseModel):
     origin: str
@@ -55,15 +59,27 @@ class TripQuoteCreate(BaseModel):
     
     # Opciones Internacionales
     requires_bond: bool = False
+    bond_type: Optional[str] = None  # "keikichi" or "own"
     
     # Servicios
     requires_refrigeration: bool = False
     temperature_min: Optional[float] = None
     temperature_max: Optional[float] = None
+    
+    # Labeling
     requires_labeling: bool = False
+    labeling_type: Optional[str] = None  # "keikichi" or "own"
+    labeling_size: Optional[str] = None  # ID del tamaño de etiqueta
+    labeling_quantity: Optional[int] = None
+    
+    # Pickup
     requires_pickup: bool = False
     pickup_address: Optional[str] = None
+    pickup_address_reference: Optional[str] = None  # Referencia de dirección pickup
     pickup_date: Optional[datetime] = None
+    pickup_contact_name: Optional[str] = None
+    pickup_contact_phone: Optional[str] = None
+    pickup_notes: Optional[str] = None
     
     special_requirements: Optional[str] = None
 
@@ -97,9 +113,17 @@ class TripQuoteOut(BaseModel):
     temperature_min: Optional[float]
     temperature_max: Optional[float]
     requires_labeling: bool
+    labeling_type: Optional[str] = None
+    labeling_size: Optional[str] = None
+    labeling_quantity: Optional[int] = None
     requires_pickup: bool
     pickup_address: Optional[str]
+    pickup_address_reference: Optional[str] = None
     pickup_date: Optional[datetime]
+    pickup_contact_name: Optional[str] = None
+    pickup_contact_phone: Optional[str] = None
+    pickup_notes: Optional[str] = None
+    bond_type: Optional[str] = None
     
     special_requirements: Optional[str]
     quoted_price: Optional[float]
@@ -156,14 +180,26 @@ async def create_quote_request(
         preferred_currency=data.preferred_currency,
         stops=stops_data,
         requires_bond=data.requires_bond,
+        bond_type=data.bond_type,
         
         requires_refrigeration=data.requires_refrigeration,
         temperature_min=data.temperature_min,
         temperature_max=data.temperature_max,
+        
+        # Labeling
         requires_labeling=data.requires_labeling,
+        labeling_type=data.labeling_type,
+        labeling_size=data.labeling_size,
+        labeling_quantity=data.labeling_quantity,
+        
+        # Pickup
         requires_pickup=data.requires_pickup,
         pickup_address=data.pickup_address,
+        pickup_address_reference=data.pickup_address_reference,
         pickup_date=data.pickup_date,
+        pickup_contact_name=data.pickup_contact_name,
+        pickup_contact_phone=data.pickup_contact_phone,
+        pickup_notes=data.pickup_notes,
         
         special_requirements=data.special_requirements,
         status=QuoteStatus.pending,
