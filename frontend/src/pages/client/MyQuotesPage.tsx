@@ -16,6 +16,7 @@ interface QuoteStop {
     contact?: string;
     phone?: string;
     time?: string;
+    unknownTime?: boolean;
     notes?: string;
 }
 

@@ -5,6 +5,7 @@ import { useStops } from "../../hooks/useProducts";
 import { toast } from "sonner";
 import { SavedStop, SavedStopCreate } from "../../api/catalog";
 import { useTranslation } from "react-i18next";
+import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
 
 const StopsPage = () => {
     const navigate = useNavigate();
@@ -139,22 +140,25 @@ const StopsPage = () => {
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.schedule')}</label>
+                        <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.openingTime')}</label>
                         <input
-                            type="text"
+                            type="time"
                             value={defaultSchedule}
                             onChange={(e) => setDefaultSchedule(e.target.value)}
                             className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
-                            placeholder={t('stops.schedulePlaceholder')}
                         />
                     </div>
                     <div className="md:col-span-2 space-y-1">
                         <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.address')}</label>
-                        <input
-                            type="text"
+                        <AddressAutocomplete
                             value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
+                            onChange={setAddress}
+                            onAddressSelect={(components) => {
+                                setAddress(components.address);
+                                if (components.city && !city) setCity(components.city);
+                                if (components.state && !state) setState(components.state);
+                                if (components.country) setCountry(components.country);
+                            }}
                             placeholder={t('stops.addressPlaceholder')}
                         />
                     </div>

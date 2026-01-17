@@ -5,7 +5,8 @@ export interface QuoteStop {
     address: string;
     contact?: string;
     phone?: string;
-    time?: string;  // Horario aproximado
+    time?: string;  // Hora de apertura (HH:MM)
+    unknownTime?: boolean;  // No conoce la hora
     notes?: string;
 }
 

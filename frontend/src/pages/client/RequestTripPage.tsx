@@ -8,12 +8,14 @@ import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 import { useStops } from "../../hooks/useProducts";
 import { SavedStop } from "../../api/catalog";
+import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
 
 interface QuoteStop {
     name?: string;  // Nombre identificador de la parada
     address: string;
     contact?: string;
-    time?: string;
+    time?: string;  // Hora de apertura (HH:MM)
+    unknownTime?: boolean;  // No conoce la hora de apertura
     notes?: string;
 }
 
@@ -323,15 +325,20 @@ export default function RequestTripPage() {
                                                             </ul>
                                                         )}
                                                     </div>
-                                                    {/* Dirección */}
+                                                    {/* Dirección con autocompletado */}
                                                     <div className="col-span-2">
                                                         <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
                                                             {t('quotes.stopAddress')} *
                                                         </label>
-                                                        <input
-                                                            {...register(`stops.${index}.address` as const, { required: true })}
+                                                        <AddressAutocomplete
+                                                            value={watch(`stops.${index}.address`) || ""}
+                                                            onChange={(value) => setValue(`stops.${index}.address`, value, { shouldValidate: true })}
                                                             placeholder={t('quotes.stopAddressPlaceholder')}
-                                                            className="w-full form-input text-sm"
+                                                            className="text-sm"
+                                                        />
+                                                        <input
+                                                            type="hidden"
+                                                            {...register(`stops.${index}.address` as const, { required: true })}
                                                         />
                                                     </div>
                                                     {/* Contacto */}
@@ -345,16 +352,31 @@ export default function RequestTripPage() {
                                                             className="w-full form-input text-sm"
                                                         />
                                                     </div>
-                                                    {/* Horario */}
+                                                    {/* Hora de Apertura */}
                                                     <div>
                                                         <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
-                                                            {t('quotes.stopTime')}
+                                                            {t('quotes.stopOpeningTime')}
                                                         </label>
-                                                        <input
-                                                            {...register(`stops.${index}.time` as const)}
-                                                            placeholder={t('quotes.stopTimePlaceholder')}
-                                                            className="w-full form-input text-sm"
-                                                        />
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    {...register(`stops.${index}.unknownTime` as const)}
+                                                                    id={`unknownTime-${index}`}
+                                                                    className="rounded border-keikichi-lime-300 text-keikichi-lime-600 focus:ring-keikichi-lime-500"
+                                                                />
+                                                                <label htmlFor={`unknownTime-${index}`} className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400">
+                                                                    {t('quotes.unknownTime')}
+                                                                </label>
+                                                            </div>
+                                                            {!watch(`stops.${index}.unknownTime`) && (
+                                                                <input
+                                                                    type="time"
+                                                                    {...register(`stops.${index}.time` as const)}
+                                                                    className="w-full form-input text-sm"
+                                                                />
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -461,7 +483,13 @@ export default function RequestTripPage() {
                                                 <div className="grid grid-cols-1 gap-3 pl-8 border-l-2 border-keikichi-lime-300">
                                                     <div>
                                                         <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupAddress')}</label>
-                                                        <input {...register("pickup_address")} placeholder="Calle, Ciudad, Estado, CP" className="w-full form-input mt-1" />
+                                                        <AddressAutocomplete
+                                                            value={watch("pickup_address") || ""}
+                                                            onChange={(value) => setValue("pickup_address", value)}
+                                                            placeholder="Calle, Ciudad, Estado, CP"
+                                                            className="mt-1"
+                                                        />
+                                                        <input type="hidden" {...register("pickup_address")} />
                                                     </div>
                                                     <div>
                                                         <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupDate')}</label>
