@@ -41,6 +41,7 @@ interface AddressAutocompleteProps {
     placeholder?: string;
     className?: string;
     disabled?: boolean;
+    allowManualEntry?: boolean;  // Allow manual entry when no results
 }
 
 const extractAddressComponents = (result: NominatimResult): AddressComponents => {
@@ -80,6 +81,7 @@ export function GoogleAddressAutocomplete({
     placeholder,
     className = '',
     disabled = false,
+    allowManualEntry = true,
 }: AddressAutocompleteProps) {
     const { t } = useTranslation();
     const inputRef = useRef<HTMLInputElement>(null);
@@ -89,6 +91,7 @@ export function GoogleAddressAutocomplete({
     const [isLoading, setIsLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [searchAttempted, setSearchAttempted] = useState(false);
 
     const debouncedInput = useDebounce(inputValue, 400);
 
@@ -125,8 +128,9 @@ export function GoogleAddressAutocomplete({
             if (response.ok) {
                 const data: NominatimResult[] = await response.json();
                 setSuggestions(data);
-                setShowDropdown(data.length > 0);
+                setShowDropdown(true);  // Show dropdown even when empty to show "no results" message
                 setSelectedIndex(-1);
+                setSearchAttempted(true);
             }
         } catch (error) {
             console.error('Error fetching address suggestions:', error);
@@ -143,6 +147,7 @@ export function GoogleAddressAutocomplete({
         } else {
             setSuggestions([]);
             setShowDropdown(false);
+            setSearchAttempted(false);
         }
     }, [debouncedInput, fetchSuggestions]);
 
@@ -251,29 +256,52 @@ export function GoogleAddressAutocomplete({
             )}
 
             {/* Dropdown with suggestions */}
-            {showDropdown && suggestions.length > 0 && (
+            {showDropdown && (
                 <div 
                     ref={dropdownRef}
                     className="absolute z-50 w-full mt-1 bg-white dark:bg-keikichi-forest-700 border dark:border-keikichi-forest-600 rounded-md shadow-lg max-h-60 overflow-auto"
                 >
-                    {suggestions.map((result, index) => (
-                        <button
-                            key={result.place_id}
-                            type="button"
-                            onClick={() => handleSelect(result)}
-                            className={`w-full text-left px-3 py-2 text-sm hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-600 flex items-start gap-2 ${
-                                index === selectedIndex ? 'bg-keikichi-lime-50 dark:bg-keikichi-forest-600' : ''
-                            }`}
-                        >
-                            <MapPin className="h-4 w-4 text-keikichi-lime-600 dark:text-keikichi-lime-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-keikichi-forest-700 dark:text-white line-clamp-2">
-                                {result.display_name}
-                            </span>
-                        </button>
-                    ))}
-                    <div className="px-3 py-1.5 text-xs text-keikichi-forest-400 dark:text-keikichi-forest-300 border-t dark:border-keikichi-forest-600">
-                        © OpenStreetMap contributors
-                    </div>
+                    {suggestions.length > 0 ? (
+                        <>
+                            {suggestions.map((result, index) => (
+                                <button
+                                    key={result.place_id}
+                                    type="button"
+                                    onClick={() => handleSelect(result)}
+                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-600 flex items-start gap-2 ${
+                                        index === selectedIndex ? 'bg-keikichi-lime-50 dark:bg-keikichi-forest-600' : ''
+                                    }`}
+                                >
+                                    <MapPin className="h-4 w-4 text-keikichi-lime-600 dark:text-keikichi-lime-400 mt-0.5 flex-shrink-0" />
+                                    <span className="text-keikichi-forest-700 dark:text-white line-clamp-2">
+                                        {result.display_name}
+                                    </span>
+                                </button>
+                            ))}
+                            <div className="px-3 py-1.5 text-xs text-keikichi-forest-400 dark:text-keikichi-forest-300 border-t dark:border-keikichi-forest-600">
+                                © OpenStreetMap contributors
+                            </div>
+                        </>
+                    ) : searchAttempted && allowManualEntry && !isLoading ? (
+                        <div className="p-3 space-y-2">
+                            <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-forest-300">
+                                {t('address.noResultsFound')}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowDropdown(false);
+                                    // Keep the manual address
+                                }}
+                                className="w-full text-left px-3 py-2 text-sm bg-keikichi-lime-50 dark:bg-keikichi-forest-600 hover:bg-keikichi-lime-100 dark:hover:bg-keikichi-forest-500 rounded-md flex items-center gap-2"
+                            >
+                                <MapPin className="h-4 w-4 text-keikichi-lime-600 dark:text-keikichi-lime-400" />
+                                <span className="text-keikichi-forest-700 dark:text-white">
+                                    {t('address.useManualAddress')}: <strong>{inputValue}</strong>
+                                </span>
+                            </button>
+                        </div>
+                    ) : null}
                 </div>
             )}
         </div>

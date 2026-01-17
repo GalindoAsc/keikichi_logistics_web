@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock, Layers, Box } from "lucide-react";
+import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock, Layers, Box, Upload } from "lucide-react";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 import { useStops, useProducts } from "../../hooks/useProducts";
 import { SavedStop } from "../../api/catalog";
 import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
+import { fetchLabelPrices } from "../../api/labelPrices";
 
 // Producto dentro de una tarima
 interface PalletProduct {
@@ -26,6 +27,7 @@ interface StopPallet {
 interface QuoteStop {
     name?: string;  // Nombre identificador de la parada
     address: string;
+    address_reference?: string;  // Referencia de la dirección (entre calles, etc.)
     contact?: string;
     time?: string;  // Hora de apertura (HH:MM)
     unknownTime?: boolean;  // No conoce la hora de apertura
@@ -50,9 +52,23 @@ interface QuoteFormData {
     requires_labeling: boolean;
     requires_pickup: boolean;
 
+    // Labeling Details
+    labeling_type?: "own" | "keikichi";  // Etiqueta propia o de Keikichi
+    labeling_size?: string;               // ID del tamaño de etiqueta (de label_prices)
+    labeling_quantity?: number;            // Cantidad de etiquetas
+    labeling_file?: FileList;              // Archivo de etiqueta propia
+
+    // Bond Details
+    bond_type?: "keikichi" | "own";       // Fianza de Keikichi o propia
+    bond_file?: FileList;                  // Archivo de fianza propia
+
     // Pickup Details
     pickup_address?: string;
+    pickup_address_reference?: string;   // Referencia de la dirección de recolección
     pickup_date?: string;
+    pickup_contact_name?: string;          // Nombre del contacto de recolección
+    pickup_contact_phone?: string;         // Teléfono del contacto
+    pickup_notes?: string;                 // Notas adicionales para recolección
 
     // Temp
     temperature_min?: number;
@@ -97,6 +113,15 @@ export default function RequestTripPage() {
     const isInternational = watch("is_international");
     const requiresRefrigeration = watch("requires_refrigeration");
     const requiresPickup = watch("requires_pickup");
+    const requiresLabeling = watch("requires_labeling");
+    const labelingType = watch("labeling_type");
+    const bondType = watch("bond_type");
+    
+    // Query para obtener los precios/tamaños de etiquetas disponibles
+    const { data: labelPrices = [] } = useQuery({
+        queryKey: ["labelPrices"],
+        queryFn: fetchLabelPrices,
+    });
     
     // Función para manejar búsqueda de paradas guardadas
     const handleStopNameSearch = (index: number, value: string) => {
@@ -354,6 +379,17 @@ export default function RequestTripPage() {
                                                         <input
                                                             type="hidden"
                                                             {...register(`stops.${index}.address` as const, { required: true })}
+                                                        />
+                                                    </div>
+                                                    {/* Referencia de la dirección */}
+                                                    <div className="col-span-2">
+                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
+                                                            {t('address.reference')}
+                                                        </label>
+                                                        <input
+                                                            {...register(`stops.${index}.address_reference` as const)}
+                                                            placeholder={t('address.referencePlaceholder')}
+                                                            className="w-full form-input text-sm"
                                                         />
                                                     </div>
                                                     {/* Contacto */}
@@ -636,21 +672,183 @@ export default function RequestTripPage() {
                                 </h2>
 
                                 <div className="space-y-3">
-                                    {/* Labeling */}
-                                    <label className="flex items-center p-4 border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg cursor-pointer hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 transition-colors">
-                                        <input type="checkbox" {...register("requires_labeling")} className="w-5 h-5 rounded border-keikichi-lime-300 text-keikichi-lime-600 focus:ring-keikichi-lime-500" />
-                                        <span className="ml-3 font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('quotes.requiresLabeling')}</span>
-                                    </label>
-
-                                    {/* Bond (International) */}
-                                    {isInternational && (
-                                        <label className="flex items-center p-4 border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg cursor-pointer hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 transition-colors">
-                                            <input type="checkbox" {...register("requires_bond")} className="w-5 h-5 rounded border-keikichi-lime-300 text-keikichi-lime-600 focus:ring-keikichi-lime-500" />
-                                            <span className="ml-3 font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('quotes.requiresBond')}</span>
+                                    {/* Labeling - Expandible */}
+                                    <div className={`border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg overflow-hidden transition-all ${requiresLabeling ? 'bg-keikichi-lime-50 dark:bg-keikichi-forest-700' : ''}`}>
+                                        <label className="flex items-center p-4 cursor-pointer">
+                                            <input type="checkbox" {...register("requires_labeling")} className="w-5 h-5 rounded border-keikichi-lime-300 text-keikichi-lime-600 focus:ring-keikichi-lime-500" />
+                                            <span className="ml-3 font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('quotes.requiresLabeling')}</span>
                                         </label>
+
+                                        {requiresLabeling && (
+                                            <div className="px-4 pb-4 animate-in slide-in-from-top-2">
+                                                <div className="space-y-4 pl-8 border-l-2 border-keikichi-lime-300">
+                                                    {/* Tipo de etiqueta */}
+                                                    <div>
+                                                        <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300 mb-2 block">
+                                                            {t('quotes.labelingType')}
+                                                        </label>
+                                                        <div className="flex gap-3">
+                                                            <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${labelingType === 'keikichi' ? 'border-keikichi-lime-600 bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30' : 'border-keikichi-lime-200 dark:border-keikichi-forest-600 hover:border-keikichi-lime-400'}`}>
+                                                                <input
+                                                                    type="radio"
+                                                                    {...register("labeling_type")}
+                                                                    value="keikichi"
+                                                                    className="sr-only"
+                                                                />
+                                                                <span className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">
+                                                                    {t('quotes.useKeikichiLabel')}
+                                                                </span>
+                                                            </label>
+                                                            <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${labelingType === 'own' ? 'border-keikichi-lime-600 bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30' : 'border-keikichi-lime-200 dark:border-keikichi-forest-600 hover:border-keikichi-lime-400'}`}>
+                                                                <input
+                                                                    type="radio"
+                                                                    {...register("labeling_type")}
+                                                                    value="own"
+                                                                    className="sr-only"
+                                                                />
+                                                                <span className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">
+                                                                    {t('quotes.useOwnLabel')}
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Tamaño de etiqueta (select) */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                {t('quotes.labelSize')}
+                                                            </label>
+                                                            <select
+                                                                {...register("labeling_size")}
+                                                                className="w-full form-select mt-1"
+                                                            >
+                                                                <option value="">{t('quotes.selectLabelSize')}</option>
+                                                                {labelPrices.map((lp) => (
+                                                                    <option key={lp.id} value={lp.id}>
+                                                                        {lp.dimensions} - ${lp.price.toFixed(2)} USD
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                {t('quotes.labelQuantity')}
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                {...register("labeling_quantity", { valueAsNumber: true })}
+                                                                placeholder="Ej. 500"
+                                                                className="w-full form-input mt-1"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Subir archivo de etiqueta propia */}
+                                                    {labelingType === 'own' && (
+                                                        <div>
+                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                {t('quotes.uploadLabelFile')}
+                                                            </label>
+                                                            <div className="mt-1 flex items-center gap-2">
+                                                                <label className="flex-1 flex items-center justify-center gap-2 p-3 border-2 border-dashed border-keikichi-lime-300 dark:border-keikichi-forest-500 rounded-lg cursor-pointer hover:border-keikichi-lime-500 transition-colors">
+                                                                    <Upload className="w-5 h-5 text-keikichi-lime-600" />
+                                                                    <span className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                        {t('quotes.selectFile')}
+                                                                    </span>
+                                                                    <input
+                                                                        type="file"
+                                                                        {...register("labeling_file")}
+                                                                        accept=".pdf,.png,.jpg,.jpeg"
+                                                                        className="sr-only"
+                                                                    />
+                                                                </label>
+                                                            </div>
+                                                            <p className="text-xs text-keikichi-forest-400 mt-1">
+                                                                {t('quotes.labelFileFormats')}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Bond (International) - Expandible */}
+                                    {isInternational && (
+                                        <div className={`border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg overflow-hidden transition-all ${watch("requires_bond") ? 'bg-keikichi-lime-50 dark:bg-keikichi-forest-700' : ''}`}>
+                                            <label className="flex items-center p-4 cursor-pointer">
+                                                <input type="checkbox" {...register("requires_bond")} className="w-5 h-5 rounded border-keikichi-lime-300 text-keikichi-lime-600 focus:ring-keikichi-lime-500" />
+                                                <span className="ml-3 font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">{t('quotes.requiresBondService')}</span>
+                                            </label>
+
+                                            {watch("requires_bond") && (
+                                                <div className="px-4 pb-4 animate-in slide-in-from-top-2">
+                                                    <div className="space-y-4 pl-8 border-l-2 border-keikichi-lime-300">
+                                                        {/* Tipo de fianza */}
+                                                        <div>
+                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300 mb-2 block">
+                                                                {t('quotes.bondType')}
+                                                            </label>
+                                                            <div className="flex gap-3">
+                                                                <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${bondType === 'keikichi' ? 'border-keikichi-lime-600 bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30' : 'border-keikichi-lime-200 dark:border-keikichi-forest-600 hover:border-keikichi-lime-400'}`}>
+                                                                    <input
+                                                                        type="radio"
+                                                                        {...register("bond_type")}
+                                                                        value="keikichi"
+                                                                        className="sr-only"
+                                                                    />
+                                                                    <span className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">
+                                                                        {t('quotes.useKeikichiBond')}
+                                                                    </span>
+                                                                </label>
+                                                                <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${bondType === 'own' ? 'border-keikichi-lime-600 bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30' : 'border-keikichi-lime-200 dark:border-keikichi-forest-600 hover:border-keikichi-lime-400'}`}>
+                                                                    <input
+                                                                        type="radio"
+                                                                        {...register("bond_type")}
+                                                                        value="own"
+                                                                        className="sr-only"
+                                                                    />
+                                                                    <span className="text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300">
+                                                                        {t('quotes.useOwnBond')}
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Subir archivo de fianza propia */}
+                                                        {bondType === 'own' && (
+                                                            <div>
+                                                                <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                    {t('quotes.uploadBondFile')}
+                                                                </label>
+                                                                <div className="mt-1 flex items-center gap-2">
+                                                                    <label className="flex-1 flex items-center justify-center gap-2 p-3 border-2 border-dashed border-keikichi-lime-300 dark:border-keikichi-forest-500 rounded-lg cursor-pointer hover:border-keikichi-lime-500 transition-colors">
+                                                                        <Upload className="w-5 h-5 text-keikichi-lime-600" />
+                                                                        <span className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                            {t('quotes.selectFile')}
+                                                                        </span>
+                                                                        <input
+                                                                            type="file"
+                                                                            {...register("bond_file")}
+                                                                            accept=".pdf,.png,.jpg,.jpeg"
+                                                                            className="sr-only"
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                                <p className="text-xs text-keikichi-forest-400 mt-1">
+                                                                    {t('quotes.bondFileFormats')}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
 
-                                    {/* Pickup */}
+                                    {/* Pickup - Expandible */}
                                     <div className={`border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg overflow-hidden transition-all ${requiresPickup ? 'bg-keikichi-lime-50 dark:bg-keikichi-forest-700' : ''}`}>
                                         <label className="flex items-center p-4 cursor-pointer">
                                             <input type="checkbox" {...register("requires_pickup")} className="w-5 h-5 rounded border-keikichi-lime-300 text-keikichi-lime-600 focus:ring-keikichi-lime-500" />
@@ -659,7 +857,7 @@ export default function RequestTripPage() {
 
                                         {requiresPickup && (
                                             <div className="px-4 pb-4 animate-in slide-in-from-top-2">
-                                                <div className="grid grid-cols-1 gap-3 pl-8 border-l-2 border-keikichi-lime-300">
+                                                <div className="space-y-4 pl-8 border-l-2 border-keikichi-lime-300">
                                                     <div>
                                                         <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupAddress')}</label>
                                                         <AddressAutocomplete
@@ -670,9 +868,51 @@ export default function RequestTripPage() {
                                                         />
                                                         <input type="hidden" {...register("pickup_address")} />
                                                     </div>
+                                                    
+                                                    <div>
+                                                        <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('address.reference')}</label>
+                                                        <input 
+                                                            type="text" 
+                                                            {...register("pickup_address_reference")} 
+                                                            placeholder={t('address.referencePlaceholder')}
+                                                            className="w-full form-input mt-1" 
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupContactName')}</label>
+                                                            <input 
+                                                                type="text" 
+                                                                {...register("pickup_contact_name")} 
+                                                                placeholder={t('quotes.pickupContactNamePlaceholder')}
+                                                                className="w-full form-input mt-1" 
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupContactPhone')}</label>
+                                                            <input 
+                                                                type="tel" 
+                                                                {...register("pickup_contact_phone")} 
+                                                                placeholder="Ej. +1 (555) 123-4567"
+                                                                className="w-full form-input mt-1" 
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    
                                                     <div>
                                                         <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupDate')}</label>
                                                         <input type="datetime-local" {...register("pickup_date")} className="w-full form-input mt-1" />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupNotes')}</label>
+                                                        <textarea 
+                                                            {...register("pickup_notes")} 
+                                                            rows={2}
+                                                            placeholder={t('quotes.pickupNotesPlaceholder')}
+                                                            className="w-full form-textarea mt-1" 
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
