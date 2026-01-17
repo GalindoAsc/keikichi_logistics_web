@@ -391,17 +391,239 @@ export default function TripQuotesPage() {
             {/* Detail Modal */}
             {selectedQuote && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedQuote(null)}>
-                    <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-keikichi-lime-100 dark:border-keikichi-forest-600 flex justify-between items-start">
-                            <h2 className="text-xl font-bold text-keikichi-forest-800 dark:text-white">{t('quotes.quoteDetail')}</h2>
+                            <div>
+                                <h2 className="text-xl font-bold text-keikichi-forest-800 dark:text-white">{t('quotes.quoteDetail')}</h2>
+                                <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-400">
+                                    {selectedQuote.origin} → {selectedQuote.destination}
+                                </p>
+                            </div>
                             <button onClick={() => setSelectedQuote(null)} className="text-keikichi-forest-400 hover:text-keikichi-forest-600">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-4">
-                            <pre className="text-xs bg-keikichi-lime-50 dark:bg-keikichi-forest-700 p-4 rounded-lg overflow-x-auto text-keikichi-forest-700 dark:text-keikichi-lime-200">
-                                {JSON.stringify(selectedQuote, null, 2)}
-                            </pre>
+                        <div className="p-6 space-y-6">
+                            {/* Status & Basic Info */}
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedQuote.status]}`}>
+                                    {getStatusLabel(selectedQuote.status)}
+                                </span>
+                                {selectedQuote.is_international && (
+                                    <span className="px-2 py-1 bg-keikichi-forest-100 dark:bg-keikichi-forest-600 text-keikichi-forest-700 dark:text-keikichi-lime-300 text-sm rounded">
+                                        {t('trips.international')}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Client Info */}
+                            <div className="bg-keikichi-lime-50 dark:bg-keikichi-forest-700 rounded-lg p-4">
+                                <h3 className="font-semibold text-keikichi-forest-800 dark:text-white mb-2">{t('quotes.client')}</h3>
+                                <p className="text-keikichi-forest-700 dark:text-keikichi-lime-200">{selectedQuote.client_name || '-'}</p>
+                                <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-400">{selectedQuote.client_email || '-'}</p>
+                            </div>
+
+                            {/* Trip Details */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.preferredDate')}</p>
+                                    <p className="font-medium text-keikichi-forest-800 dark:text-white">
+                                        {format(new Date(selectedQuote.preferred_date), i18n.language === 'es' ? "d MMM yyyy" : "MMM d, yyyy", { locale: dateLocale })}
+                                    </p>
+                                    {selectedQuote.flexible_dates && <p className="text-xs text-keikichi-lime-600">{t('quotes.flexible')}</p>}
+                                </div>
+                                <div>
+                                    <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.pallets')}</p>
+                                    <p className="font-medium text-keikichi-forest-800 dark:text-white">{selectedQuote.pallet_count || 0}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.currency')}</p>
+                                    <p className="font-medium text-keikichi-forest-800 dark:text-white">{selectedQuote.preferred_currency}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.createdAt')}</p>
+                                    <p className="font-medium text-keikichi-forest-800 dark:text-white">
+                                        {format(new Date(selectedQuote.created_at), i18n.language === 'es' ? "d MMM yyyy HH:mm" : "MMM d, yyyy HH:mm", { locale: dateLocale })}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Services */}
+                            <div>
+                                <h3 className="font-semibold text-keikichi-forest-800 dark:text-white mb-3">{t('quotes.services')}</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    {selectedQuote.requires_refrigeration && (
+                                        <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
+                                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                                                <Thermometer className="w-4 h-4" />
+                                                <span className="font-medium text-sm">{t('quotes.refrigeration')}</span>
+                                            </div>
+                                            <p className="text-sm mt-1 text-blue-600 dark:text-blue-300">
+                                                {selectedQuote.temperature_min}°C - {selectedQuote.temperature_max}°C
+                                            </p>
+                                        </div>
+                                    )}
+                                    {selectedQuote.requires_bond && (
+                                        <div className="bg-keikichi-yellow-50 dark:bg-keikichi-yellow-900/30 rounded-lg p-3">
+                                            <p className="font-medium text-sm text-keikichi-yellow-700 dark:text-keikichi-yellow-400">{t('quotes.bond')}</p>
+                                            <p className="text-sm mt-1 text-keikichi-yellow-600 dark:text-keikichi-yellow-300">
+                                                {selectedQuote.bond_type === 'keikichi' ? t('quotes.keikichiBond') : selectedQuote.bond_type === 'own' ? t('quotes.ownBond') : '-'}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {selectedQuote.requires_labeling && (
+                                        <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3">
+                                            <p className="font-medium text-sm text-purple-700 dark:text-purple-400">{t('quotes.labeling')}</p>
+                                            <p className="text-sm mt-1 text-purple-600 dark:text-purple-300">
+                                                {selectedQuote.labeling_type === 'keikichi' ? t('quotes.keikichiLabeling') : selectedQuote.labeling_type === 'own' ? t('quotes.ownLabeling') : '-'}
+                                                {selectedQuote.labeling_quantity && ` - ${selectedQuote.labeling_quantity} ${t('quotes.labels')}`}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {selectedQuote.requires_pickup && (
+                                        <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3">
+                                            <p className="font-medium text-sm text-green-700 dark:text-green-400">{t('quotes.pickup')}</p>
+                                            {selectedQuote.pickup_address && (
+                                                <p className="text-sm mt-1 text-green-600 dark:text-green-300">{selectedQuote.pickup_address}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Pickup Details */}
+                            {selectedQuote.requires_pickup && (selectedQuote.pickup_contact_name || selectedQuote.pickup_contact_phone || selectedQuote.pickup_notes) && (
+                                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                                    <h3 className="font-semibold text-green-800 dark:text-green-400 mb-2">{t('quotes.pickupDetails')}</h3>
+                                    <div className="grid grid-cols-2 gap-3 text-sm">
+                                        {selectedQuote.pickup_contact_name && (
+                                            <div>
+                                                <p className="text-green-600 dark:text-green-400">{t('quotes.contactName')}</p>
+                                                <p className="text-green-800 dark:text-green-200">{selectedQuote.pickup_contact_name}</p>
+                                            </div>
+                                        )}
+                                        {selectedQuote.pickup_contact_phone && (
+                                            <div>
+                                                <p className="text-green-600 dark:text-green-400">{t('quotes.contactPhone')}</p>
+                                                <p className="text-green-800 dark:text-green-200">{selectedQuote.pickup_contact_phone}</p>
+                                            </div>
+                                        )}
+                                        {selectedQuote.pickup_address_reference && (
+                                            <div className="col-span-2">
+                                                <p className="text-green-600 dark:text-green-400">{t('quotes.addressReference')}</p>
+                                                <p className="text-green-800 dark:text-green-200">{selectedQuote.pickup_address_reference}</p>
+                                            </div>
+                                        )}
+                                        {selectedQuote.pickup_notes && (
+                                            <div className="col-span-2">
+                                                <p className="text-green-600 dark:text-green-400">{t('quotes.notes')}</p>
+                                                <p className="text-green-800 dark:text-green-200">{selectedQuote.pickup_notes}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Stops */}
+                            {selectedQuote.stops && selectedQuote.stops.length > 0 && (
+                                <div>
+                                    <h3 className="font-semibold text-keikichi-forest-800 dark:text-white mb-3">{t('quotes.stops')} ({selectedQuote.stops.length})</h3>
+                                    <div className="space-y-3">
+                                        {selectedQuote.stops.map((stop, idx) => (
+                                            <div key={idx} className="bg-keikichi-lime-50 dark:bg-keikichi-forest-700 rounded-lg p-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-keikichi-lime-600 text-white flex items-center justify-center text-sm font-medium shrink-0">
+                                                        {idx + 1}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="font-medium text-keikichi-forest-800 dark:text-white">{stop.name || t('quotes.stopNumber', { number: idx + 1 })}</p>
+                                                        <p className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{stop.address}</p>
+                                                        {stop.address_reference && (
+                                                            <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mt-1">📍 {stop.address_reference}</p>
+                                                        )}
+                                                        <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                                            {stop.contact && (
+                                                                <div>
+                                                                    <span className="text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.contact')}:</span>{' '}
+                                                                    <span className="text-keikichi-forest-700 dark:text-keikichi-lime-200">{stop.contact}</span>
+                                                                </div>
+                                                            )}
+                                                            {stop.phone && (
+                                                                <div>
+                                                                    <span className="text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.phone')}:</span>{' '}
+                                                                    <span className="text-keikichi-forest-700 dark:text-keikichi-lime-200">{stop.phone}</span>
+                                                                </div>
+                                                            )}
+                                                            {stop.time && (
+                                                                <div>
+                                                                    <span className="text-keikichi-forest-500 dark:text-keikichi-lime-500">{t('quotes.time')}:</span>{' '}
+                                                                    <span className="text-keikichi-forest-700 dark:text-keikichi-lime-200">{stop.time}</span>
+                                                                </div>
+                                                            )}
+                                                            {stop.unknownTime && (
+                                                                <div className="text-keikichi-yellow-600 dark:text-keikichi-yellow-400">{t('quotes.unknownTime')}</div>
+                                                            )}
+                                                        </div>
+                                                        {stop.notes && (
+                                                            <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mt-2 italic">"{stop.notes}"</p>
+                                                        )}
+                                                        {/* Pallets in this stop */}
+                                                        {stop.pallets && stop.pallets.length > 0 && (
+                                                            <div className="mt-3 bg-white dark:bg-keikichi-forest-600 rounded p-2">
+                                                                <p className="text-xs font-medium text-keikichi-forest-600 dark:text-keikichi-lime-300 mb-2">
+                                                                    {t('quotes.palletsInStop', { count: stop.pallets.length })}
+                                                                </p>
+                                                                {stop.pallets.map((pallet: any, pIdx: number) => (
+                                                                    <div key={pIdx} className="text-xs text-keikichi-forest-600 dark:text-keikichi-lime-200">
+                                                                        {pallet.products?.map((prod: any, prodIdx: number) => (
+                                                                            <span key={prodIdx} className="inline-block bg-keikichi-lime-100 dark:bg-keikichi-forest-500 px-2 py-0.5 rounded mr-1 mb-1">
+                                                                                {prod.product}: {prod.boxes} {t('quotes.boxes')} ({prod.weight_per_box} {prod.unit})
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Special Requirements */}
+                            {selectedQuote.special_requirements && (
+                                <div className="bg-keikichi-forest-50 dark:bg-keikichi-forest-700 rounded-lg p-4">
+                                    <h3 className="font-semibold text-keikichi-forest-800 dark:text-white mb-2">{t('quotes.specialRequirements')}</h3>
+                                    <p className="text-sm text-keikichi-forest-700 dark:text-keikichi-lime-200">{selectedQuote.special_requirements}</p>
+                                </div>
+                            )}
+
+                            {/* Quoted Price */}
+                            {selectedQuote.quoted_price && (
+                                <div className="bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30 rounded-lg p-4 border border-keikichi-lime-300 dark:border-keikichi-lime-700">
+                                    <h3 className="font-semibold text-keikichi-lime-800 dark:text-keikichi-lime-400 mb-2">{t('quotes.quotedPrice')}</h3>
+                                    <p className="text-2xl font-bold text-keikichi-lime-700 dark:text-keikichi-lime-300">
+                                        ${selectedQuote.quoted_price.toLocaleString()} {selectedQuote.quoted_currency}
+                                    </p>
+                                    {selectedQuote.free_stops !== null && selectedQuote.free_stops !== undefined && (
+                                        <p className="text-sm text-keikichi-lime-600 dark:text-keikichi-lime-400 mt-1">
+                                            {t('quotes.freeStopsIncluded', { count: selectedQuote.free_stops })}
+                                        </p>
+                                    )}
+                                    {selectedQuote.price_per_extra_stop && (
+                                        <p className="text-sm text-keikichi-lime-600 dark:text-keikichi-lime-400">
+                                            {t('quotes.extraStopCost', { price: selectedQuote.price_per_extra_stop })}
+                                        </p>
+                                    )}
+                                    {selectedQuote.admin_notes && (
+                                        <p className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300 mt-2 italic">
+                                            "{selectedQuote.admin_notes}"
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
