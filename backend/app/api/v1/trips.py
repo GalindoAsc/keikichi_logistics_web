@@ -292,7 +292,7 @@ async def clone_trip(
             trip_id=new_trip.id,
             space_number=i,
             status=SpaceStatus.available,
-            price_override=None  # Use trip price
+            price=None  # Use trip price
         )
         db.add(space)
     
