@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar, Package, Truck, Upload, FileText, Loader2, Download, CreditCard, X, Eye } from "lucide-react";
 import { getReservations, uploadPaymentProof, downloadAndSaveTicket, downloadAndSaveSummary, updateReservation } from "../../api/reservations";
@@ -145,7 +145,7 @@ export default function ReservationsPage() {
                                             <Calendar className="w-4 h-4" />
                                             <span>
                                                 {reservation.trip_departure_date
-                                                    ? format(new Date(reservation.trip_departure_date), "d 'de' MMMM, yyyy", { locale: es })
+                                                    ? format(parseISO(reservation.trip_departure_date), "d 'de' MMMM, yyyy", { locale: es })
                                                     : "Fecha pendiente"}
                                             </span>
                                         </div>

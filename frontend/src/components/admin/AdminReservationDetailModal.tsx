@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { X, Check, AlertTriangle, FileText, User, Truck, DollarSign, Trash2, Ban, MessageCircle, History } from "lucide-react";
 import { getReservationById, confirmPayment, cancelReservation, deleteReservation, getAuditHistory } from "../../api/reservations";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { PaymentStatus, ReservationStatus } from "../../types/reservation";
 
@@ -39,7 +39,7 @@ const createEmailLink = (email: string, reservation: any): string => {
 
     if (isPaid) {
         body += `Tu pago ha sido confirmado para el viaje de ${reservation.trip?.origin} a ${reservation.trip?.destination}.\n\n`;
-        body += `📅 Salida: ${reservation.trip ? format(new Date(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es }) : ''}\n`;
+        body += `📅 Salida: ${reservation.trip ? format(parseISO(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es }) : ''}\n`;
         body += `✅ Total: $${reservation.total_amount?.toLocaleString()}\n\n`;
         body += `Puedes descargar tu ticket confirmado aquí:\n`;
         body += `${apiUrl}/reservations/public/ticket/${reservation.id}\n\n`;
@@ -235,7 +235,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                                     ? `¡Hola ${reservation.client_name || ''}! 🎉\n\n` +
                                                     `Tu pago ha sido *confirmado* para tu reservación en *Keikichi Logistics*:\n\n` +
                                                     `📦 Viaje: ${reservation.trip?.origin || ''} → ${reservation.trip?.destination || ''}\n` +
-                                                    `📅 Fecha: ${reservation.trip ? format(new Date(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es }) : ''}\n` +
+                                                    `📅 Fecha: ${reservation.trip ? format(parseISO(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es }) : ''}\n` +
                                                     `✅ Total pagado: *$${reservation.total_amount.toLocaleString()}*\n\n` +
                                                     `🎫 Descarga tu ticket aquí:\n` +
                                                     `${import.meta.env.VITE_API_URL}/reservations/public/ticket/${reservation.id}\n\n` +
@@ -243,7 +243,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                                     : `¡Hola ${reservation.client_name || ''}! 👋\n\n` +
                                                     `Te contactamos de *Keikichi Logistics* respecto a tu pre-reservación:\n\n` +
                                                     `📦 Viaje: ${reservation.trip?.origin || ''} → ${reservation.trip?.destination || ''}\n` +
-                                                    `📅 Fecha: ${reservation.trip ? format(new Date(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es }) : ''}\n` +
+                                                    `📅 Fecha: ${reservation.trip ? format(parseISO(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es }) : ''}\n` +
                                                     `💰 Total a pagar: *$${reservation.total_amount.toLocaleString()}*\n\n` +
                                                     `📄 Descarga tu resumen de pre-reservación aquí:\n` +
                                                     `${import.meta.env.VITE_API_URL}/reservations/public/summary/${reservation.id}\n\n` +
@@ -292,7 +292,7 @@ export default function AdminReservationDetailModal({ reservationId, onClose }: 
                                     <>
                                         <p className="font-medium text-base dark:text-white">{reservation.trip.origin} → {reservation.trip.destination}</p>
                                         <p className="text-slate-600 dark:text-slate-400">
-                                            Salida: {format(new Date(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es })}
+                                            Salida: {format(parseISO(reservation.trip.departure_date), "d 'de' MMMM, yyyy", { locale: es })}
                                         </p>
                                     </>
                                 )}

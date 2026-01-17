@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { Eye, Clock, Trash2, Ban, MoreVertical } from "lucide-react";
 import { getReservations, cancelReservation, deleteReservation } from "../../api/reservations";
@@ -326,7 +326,7 @@ export default function AdminReservationsPage() {
                                                 {res.trip_origin} → {res.trip_destination}
                                             </div>
                                             <div className="text-xs text-keikichi-forest-400 dark:text-keikichi-lime-400">
-                                                {res.trip_departure_date && format(new Date(res.trip_departure_date), i18n.language === 'es' ? "d MMM" : "MMM d", { locale: dateLocale })}
+                                                {res.trip_departure_date && format(parseISO(res.trip_departure_date), i18n.language === 'es' ? "d MMM" : "MMM d", { locale: dateLocale })}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-center">

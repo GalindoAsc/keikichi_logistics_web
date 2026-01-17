@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { Plus, Edit, Trash2, Truck, Calendar, MapPin, Eye, FileText, Copy, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -290,7 +290,7 @@ export default function AdminTripsPage() {
                                     </div>
                                     <div className="flex items-center gap-2 text-keikichi-forest-500 dark:text-keikichi-lime-300 text-sm mt-1">
                                         <Calendar className="w-4 h-4" />
-                                        {format(new Date(trip.departure_date), i18n.language === 'es' ? "d 'de' MMMM, yyyy" : "MMMM d, yyyy", { locale: dateLocale })}
+                                        {format(parseISO(trip.departure_date), i18n.language === 'es' ? "d 'de' MMMM, yyyy" : "MMMM d, yyyy", { locale: dateLocale })}
                                     </div>
                                 </div>
 

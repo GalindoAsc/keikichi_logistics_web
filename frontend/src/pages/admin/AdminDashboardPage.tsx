@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DollarSign, Package, Calendar, Clock, ArrowRight, TrendingUp, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../../api/client";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 
@@ -176,7 +176,7 @@ export default function AdminDashboardPage() {
                                         {trip.origin} → {trip.destination}
                                     </p>
                                     <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-300 mt-1 font-medium bg-keikichi-lime-50 dark:bg-keikichi-forest-700 inline-block px-2 py-0.5 rounded-full">
-                                        {format(new Date(trip.departure_date), i18n.language === 'es' ? "EEEE d 'de' MMMM" : "EEEE, MMMM d", { locale: dateLocale })}
+                                        {format(parseISO(trip.departure_date), i18n.language === 'es' ? "EEEE d 'de' MMMM" : "EEEE, MMMM d", { locale: dateLocale })}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-6">

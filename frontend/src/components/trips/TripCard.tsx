@@ -5,7 +5,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { authStore } from "../../stores/authStore";
 import { useDeleteTrip } from "../../hooks/useTrips";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 
@@ -107,7 +107,7 @@ const TripCard = ({ trip }: { trip: Trip }) => {
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold text-keikichi-forest-400 dark:text-keikichi-lime-400 tracking-wider">{t('trips.departure')}</span>
               <span className="text-sm font-semibold text-keikichi-forest-700 dark:text-keikichi-lime-200 font-numeric">
-                {trip.departure_date ? format(new Date(trip.departure_date), "d MMM", { locale: dateLocale }) : 'TBD'}
+                {trip.departure_date ? format(parseISO(trip.departure_date), "d MMM", { locale: dateLocale }) : 'TBD'}
               </span>
             </div>
           </div>
