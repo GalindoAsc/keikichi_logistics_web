@@ -477,6 +477,70 @@ class NotificationService:
         """
         await self.send_email(subject, [client.email], body)
 
+    async def notify_quote_created(self, quote, client):
+        """
+        Notify admins about a new quote request from a client
+        """
+        title = "Nueva Solicitud de Cotización"
+        message = f"{client.full_name} solicita cotización: {quote.origin} → {quote.destination} ({quote.pallet_count} pallets)"
+        link = "/admin/quotes"
+
+        await self.notify_admins(title, message, link, "info")
+
+    async def notify_quote_priced(self, quote, client):
+        """
+        Notify client that admin has set a price for their quote
+        """
+        title = "Cotización Lista"
+        currency_symbol = "$" if quote.quoted_currency == "USD" else "MX$"
+        message = f"Tu cotización {quote.origin} → {quote.destination} tiene precio: {currency_symbol}{quote.quoted_price:,.2f}"
+
+        await self.send_in_app(
+            str(client.id),
+            title,
+            message,
+            "/quotes",
+            "success"
+        )
+
+        # Email notification
+        subject = f"Cotización Lista - {quote.origin} → {quote.destination}"
+        body = f"""
+        <h1>¡Tu cotización está lista!</h1>
+        <p>Hola {client.full_name},</p>
+        <p>Hemos procesado tu solicitud de cotización:</p>
+        <ul>
+            <li><strong>Ruta:</strong> {quote.origin} → {quote.destination}</li>
+            <li><strong>Pallets:</strong> {quote.pallet_count}</li>
+            <li><strong>Precio:</strong> {currency_symbol}{quote.quoted_price:,.2f} {quote.quoted_currency}</li>
+        </ul>
+        <p>Ingresa a la plataforma para aceptar, negociar o rechazar la cotización.</p>
+        <br>
+        <p>Atentamente,<br>Equipo Keikichi Logistics</p>
+        """
+        await self.send_email(subject, [client.email], body)
+
+    async def notify_quote_response(self, quote, client, action: str):
+        """
+        Notify admins about client's response to a quote
+        """
+        action_messages = {
+            "accept": f"{client.full_name} ha ACEPTADO la cotización",
+            "negotiate": f"{client.full_name} desea NEGOCIAR la cotización",
+            "reject": f"{client.full_name} ha RECHAZADO la cotización"
+        }
+        action_types = {
+            "accept": "success",
+            "negotiate": "warning",
+            "reject": "error"
+        }
+
+        title = "Respuesta a Cotización"
+        message = f"{action_messages.get(action, 'Respuesta recibida')}: {quote.origin} → {quote.destination}"
+        link = "/admin/quotes"
+
+        await self.notify_admins(title, message, link, action_types.get(action, "info"))
+
     async def notify_trip_status_changed(self, trip, status, affected_user_ids: list = None):
         """
         Notify users about trip status changes (e.g. Departed, Arrived)

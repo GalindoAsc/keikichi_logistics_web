@@ -310,11 +310,27 @@ const Header = () => {
                       <span className="font-medium">{t('nav.reserve')}</span>
                     </Link>
                     <Link
-                      to="/reservations"
+                      to="/request-trip"
+                      className="flex items-center gap-3 px-4 py-3 text-keikichi-forest-700 dark:text-keikichi-lime-200 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <CalendarDays className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">{t('nav.requestTrip')}</span>
+                    </Link>
+                    <Link
+                      to="/my-quotes"
                       className="flex items-center gap-3 px-4 py-3 text-keikichi-forest-700 dark:text-keikichi-lime-200 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 rounded-lg transition-colors"
                       onClick={closeMobileMenu}
                     >
                       <List className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium">{t('nav.myQuotes')}</span>
+                    </Link>
+                    <Link
+                      to="/reservations"
+                      className="flex items-center gap-3 px-4 py-3 text-keikichi-forest-700 dark:text-keikichi-lime-200 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 hover:text-keikichi-lime-600 dark:hover:text-keikichi-lime-400 rounded-lg transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
                       <span className="font-medium">{t('nav.myReservations')}</span>
                     </Link>
                     <Link

@@ -6,6 +6,8 @@ import { DollarSign, MapPin, Thermometer, Send, Eye, X } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
+import ConfirmationModal from "../../components/shared/ConfirmationModal";
+import { QuoteCardSkeleton } from "../../components/shared/Skeleton";
 
 interface QuoteStop {
     address: string;
@@ -67,6 +69,7 @@ export default function TripQuotesPage() {
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [selectedQuote, setSelectedQuote] = useState<TripQuote | null>(null);
     const [quotingId, setQuotingId] = useState<string | null>(null);
+    const [deleteQuoteId, setDeleteQuoteId] = useState<string | null>(null);
     const [quoteForm, setQuoteForm] = useState({
         quoted_price: "",
         quoted_currency: "USD",
@@ -143,8 +146,13 @@ export default function TripQuotesPage() {
     };
 
     const handleDelete = (quoteId: string) => {
-        if (confirm(t('quotes.confirmDelete'))) {
-            deleteMutation.mutate(quoteId);
+        setDeleteQuoteId(quoteId);
+    };
+
+    const confirmDelete = () => {
+        if (deleteQuoteId) {
+            deleteMutation.mutate(deleteQuoteId);
+            setDeleteQuoteId(null);
         }
     };
 
@@ -180,7 +188,13 @@ export default function TripQuotesPage() {
             </div>
 
             {isLoading ? (
-                <div className="text-center py-12 text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('common.loading')}</div>
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white dark:bg-keikichi-forest-800 rounded-lg border border-keikichi-lime-100 dark:border-keikichi-forest-600">
+                            <QuoteCardSkeleton />
+                        </div>
+                    ))}
+                </div>
             ) : quotes.length === 0 ? (
                 <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border border-keikichi-lime-100 dark:border-keikichi-forest-600 p-12 text-center">
                     <DollarSign className="w-12 h-12 mx-auto text-keikichi-lime-300 dark:text-keikichi-forest-600 mb-4" />
@@ -390,6 +404,17 @@ export default function TripQuotesPage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={deleteQuoteId !== null}
+                onClose={() => setDeleteQuoteId(null)}
+                onConfirm={confirmDelete}
+                title={t('common.delete')}
+                message={t('quotes.confirmDelete')}
+                confirmText={t('common.delete')}
+                cancelText={t('common.cancel')}
+                isDestructive={true}
+            />
         </div>
     );
 }

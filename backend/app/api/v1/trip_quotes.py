@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -14,8 +14,7 @@ from app.core.permissions import require_manager_or_superadmin
 from app.models import User, UserRole, Trip, TripStatus
 from app.models.trip_quote import TripQuote, QuoteStatus
 from app.models.space import Space, SpaceStatus
-
-# ... (imports unchanged)
+from app.services.notification_service import notification_service
 
 router = APIRouter(prefix="/trip-quotes", tags=["Trip Quotes"])
 
@@ -169,7 +168,10 @@ async def create_quote_request(
     db.add(quote)
     await db.commit()
     await db.refresh(quote)
-    
+
+    # Notify admins about new quote request
+    await notification_service.notify_quote_created(quote, current_user)
+
     return quote # Pydantic v2 handles from_attributes mapping gracefully
 
 
@@ -227,15 +229,19 @@ async def admin_set_quote(
     current_user: User = Depends(require_manager_or_superadmin)
 ):
     """Admin asigna un precio a la cotización."""
-    result = await db.execute(select(TripQuote).where(TripQuote.id == quote_id))
+    result = await db.execute(
+        select(TripQuote)
+        .options(selectinload(TripQuote.client))
+        .where(TripQuote.id == quote_id)
+    )
     quote = result.scalar_one_or_none()
-    
+
     if not quote:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
-    
+
     if quote.status not in [QuoteStatus.pending, QuoteStatus.negotiating]:
         raise HTTPException(status_code=400, detail="No se puede cotizar en este estado")
-    
+
     quote.quoted_price = data.quoted_price
     quote.quoted_currency = data.quoted_currency
     quote.free_stops = data.free_stops
@@ -244,9 +250,13 @@ async def admin_set_quote(
     quote.quoted_by = current_user.id
     quote.quoted_at = datetime.now()
     quote.status = QuoteStatus.quoted
-    
+
     await db.commit()
-    
+
+    # Notify client about the price
+    if quote.client:
+        await notification_service.notify_quote_priced(quote, quote.client)
+
     return {"message": "Cotización enviada al cliente", "status": quote.status.value}
 
 
@@ -269,7 +279,13 @@ async def client_respond(
     
     if quote.status != QuoteStatus.quoted:
         raise HTTPException(status_code=400, detail="Solo puedes responder a cotizaciones con precio asignado")
-    
+
+    # Validar que la cotización no haya expirado
+    if quote.expires_at and quote.expires_at < datetime.now():
+        quote.status = QuoteStatus.expired
+        await db.commit()
+        raise HTTPException(status_code=400, detail="Esta cotización ha expirado")
+
     if data.action == "accept":
         # Crear viaje automáticamente
         price_per_space = quote.quoted_price / quote.pallet_count if quote.pallet_count > 0 else quote.quoted_price
@@ -304,25 +320,46 @@ async def client_respond(
 
         await db.commit()
 
+        # Notify admins
+        await notification_service.notify_quote_response(
+            quote, current_user, "accept"
+        )
+
         return {
             "message": "Cotización aceptada. Viaje creado.",
             "status": quote.status.value,
             "trip_id": str(new_trip.id)
         }
-    
+
     elif data.action == "negotiate":
         quote.status = QuoteStatus.negotiating
         quote.client_response = data.message
         await db.commit()
-        
-        return {"message": "Solicitud de negociación enviada", "status": quote.status.value}
-    
+
+        # Notify admins
+        await notification_service.notify_quote_response(
+            quote, current_user, "negotiate"
+        )
+
+        return {
+            "message": "Solicitud de negociación enviada",
+            "status": quote.status.value
+        }
+
     elif data.action == "reject":
         quote.status = QuoteStatus.rejected
         quote.client_response = data.message
         await db.commit()
-        
-        return {"message": "Cotización rechazada", "status": quote.status.value}
+
+        # Notify admins
+        await notification_service.notify_quote_response(
+            quote, current_user, "reject"
+        )
+
+        return {
+            "message": "Cotización rechazada",
+            "status": quote.status.value
+        }
     
     else:
         raise HTTPException(status_code=400, detail="Acción inválida. Usa: accept, negotiate, reject")

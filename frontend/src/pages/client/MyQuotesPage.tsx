@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import ConfirmationModal from "../../components/shared/ConfirmationModal";
+import { QuoteCardSkeleton } from "../../components/shared/Skeleton";
 
 interface QuoteStop {
     address: string;
@@ -63,6 +65,12 @@ export default function MyQuotesPage() {
     const dateLocale = i18n.language === 'es' ? es : enUS;
     const [respondingId, setRespondingId] = useState<string | null>(null);
     const [negotiateMessage, setNegotiateMessage] = useState("");
+    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        action: "accept" | "reject" | null;
+        quoteId: string | null;
+    }>({ isOpen: false, action: null, quoteId: null });
 
     const { data: quotes = [], isLoading } = useQuery<TripQuote[]>({
         queryKey: ["my-quotes"],
@@ -106,9 +114,7 @@ export default function MyQuotesPage() {
     };
 
     const handleAccept = (quoteId: string) => {
-        if (confirm(t('quotes.confirmAccept'))) {
-            respondMutation.mutate({ quoteId, action: "accept" });
-        }
+        setConfirmModal({ isOpen: true, action: "accept", quoteId });
     };
 
     const handleNegotiate = (quoteId: string) => {
@@ -120,8 +126,12 @@ export default function MyQuotesPage() {
     };
 
     const handleReject = (quoteId: string) => {
-        if (confirm(t('quotes.confirmReject'))) {
-            respondMutation.mutate({ quoteId, action: "reject" });
+        setConfirmModal({ isOpen: true, action: "reject", quoteId });
+    };
+
+    const handleConfirmAction = () => {
+        if (confirmModal.quoteId && confirmModal.action) {
+            respondMutation.mutate({ quoteId: confirmModal.quoteId, action: confirmModal.action });
         }
     };
 
@@ -145,14 +155,33 @@ export default function MyQuotesPage() {
             </div>
 
             <div className="bg-white dark:bg-keikichi-forest-800 rounded-xl shadow-sm border border-keikichi-lime-100 dark:border-keikichi-forest-600 overflow-hidden">
-                <div className="p-6 border-b border-keikichi-lime-100 dark:border-keikichi-forest-600">
-                    <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">{t('quotes.myQuotes')}</h1>
-                    <p className="text-keikichi-forest-500 dark:text-keikichi-lime-400 mt-1">{t('quotes.myQuotesSubtitle')}</p>
+                <div className="p-6 border-b border-keikichi-lime-100 dark:border-keikichi-forest-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">{t('quotes.myQuotes')}</h1>
+                        <p className="text-keikichi-forest-500 dark:text-keikichi-lime-400 mt-1">{t('quotes.myQuotesSubtitle')}</p>
+                    </div>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white"
+                    >
+                        <option value="all">{t('common.allStatuses')}</option>
+                        <option value="pending">{t('quotes.status.pending')}</option>
+                        <option value="quoted">{t('quotes.status.quoted')}</option>
+                        <option value="negotiating">{t('quotes.status.negotiating')}</option>
+                        <option value="accepted">{t('quotes.status.accepted')}</option>
+                        <option value="rejected">{t('quotes.status.rejected')}</option>
+                        <option value="expired">{t('quotes.status.expired')}</option>
+                    </select>
                 </div>
 
                 {isLoading ? (
-                    <div className="p-12 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('common.loading')}</div>
-                ) : quotes.length === 0 ? (
+                    <div className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
+                        <QuoteCardSkeleton />
+                        <QuoteCardSkeleton />
+                        <QuoteCardSkeleton />
+                    </div>
+                ) : quotes.filter(q => statusFilter === "all" || q.status === statusFilter).length === 0 ? (
                     <div className="p-12 text-center">
                         <DollarSign className="w-12 h-12 mx-auto text-keikichi-lime-300 dark:text-keikichi-forest-600 mb-4" />
                         <p className="text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-4">{t('quotes.noQuotes')}</p>
@@ -165,7 +194,7 @@ export default function MyQuotesPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
-                        {quotes.map((quote) => (
+                        {quotes.filter(q => statusFilter === "all" || q.status === statusFilter).map((quote) => (
                             <div key={quote.id} className="p-6 hover:bg-keikichi-lime-50/50 dark:hover:bg-keikichi-forest-700/50 transition-colors">
                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                                     <div className="flex-1 space-y-3">
@@ -305,6 +334,17 @@ export default function MyQuotesPage() {
                     </div>
                 )}
             </div>
+
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, action: null, quoteId: null })}
+                onConfirm={handleConfirmAction}
+                title={confirmModal.action === "accept" ? t('quotes.acceptTitle') : t('quotes.rejectTitle')}
+                message={confirmModal.action === "accept" ? t('quotes.confirmAccept') : t('quotes.confirmReject')}
+                confirmText={confirmModal.action === "accept" ? t('quotes.accept') : t('quotes.reject')}
+                cancelText={t('common.cancel')}
+                isDestructive={confirmModal.action === "reject"}
+            />
         </div>
     );
 }
