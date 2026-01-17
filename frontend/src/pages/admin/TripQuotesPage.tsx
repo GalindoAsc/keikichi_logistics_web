@@ -9,14 +9,27 @@ import { useTranslation } from "react-i18next";
 import ConfirmationModal from "../../components/shared/ConfirmationModal";
 import { QuoteCardSkeleton } from "../../components/shared/Skeleton";
 
+interface PalletProduct {
+    product: string;
+    boxes: number;
+    weight_per_box: number;
+    unit: string;
+}
+
+interface StopPallet {
+    products: PalletProduct[];
+}
+
 interface QuoteStop {
     name?: string;
     address: string;
+    address_reference?: string;
     contact?: string;
     phone?: string;
     time?: string;
     unknownTime?: boolean;
     notes?: string;
+    pallets?: StopPallet[];
 }
 
 interface TripQuote {
@@ -30,13 +43,21 @@ interface TripQuote {
     preferred_currency: string;
     stops: QuoteStop[] | null;
     requires_bond: boolean;
+    bond_type: string | null;
     requires_refrigeration: boolean;
     temperature_min: number | null;
     temperature_max: number | null;
     requires_labeling: boolean;
+    labeling_type: string | null;
+    labeling_size: string | null;
+    labeling_quantity: number | null;
     requires_pickup: boolean;
     pickup_address: string | null;
+    pickup_address_reference: string | null;
     pickup_date: string | null;
+    pickup_contact_name: string | null;
+    pickup_contact_phone: string | null;
+    pickup_notes: string | null;
     merchandise_type: string | null;
     merchandise_weight: string | null;
     merchandise_description: string | null;
