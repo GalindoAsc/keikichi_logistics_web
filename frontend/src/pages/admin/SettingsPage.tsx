@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Tag, Settings, DollarSign, CreditCard, Users, Truck, FileText, Bell } from "lucide-react";
+import { Tag, Settings, DollarSign, CreditCard, Users, Truck, FileText, Bell, MapPin } from "lucide-react";
 import { authStore } from "../../stores/authStore";
 import { useTranslation } from "react-i18next";
 
@@ -111,6 +111,22 @@ const SettingsPage = () => {
                                 <div>
                                     <h3 className="font-semibold text-keikichi-forest-800 dark:text-white">{t('settings.labelPrices')}</h3>
                                     <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-300">{t('settings.labelPricesDesc')}</p>
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Paradas / Tiradas */}
+                        <Link
+                            to="/admin/stops"
+                            className="bg-white dark:bg-keikichi-forest-800 border border-keikichi-lime-100 dark:border-keikichi-forest-600 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow group"
+                        >
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors">
+                                    <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-keikichi-forest-800 dark:text-white">{t('settings.stops')}</h3>
+                                    <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-300">{t('settings.stopsDesc')}</p>
                                 </div>
                             </div>
                         </Link>

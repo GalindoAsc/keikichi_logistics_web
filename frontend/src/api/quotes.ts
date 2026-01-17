@@ -1,10 +1,11 @@
 import api from "./client";
 
 export interface QuoteStop {
+    name?: string;  // Nombre identificador de la parada (para autocompletado)
     address: string;
     contact?: string;
     phone?: string;
-    time?: string;
+    time?: string;  // Horario aproximado
     notes?: string;
 }
 

@@ -1,8 +1,12 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
-from app.schemas.catalog import Product, ProductCreate, ProductUpdate, Unit, UnitCreate, UnitUpdate
+from app.schemas.catalog import (
+    Product, ProductCreate, ProductUpdate, 
+    Unit, UnitCreate, UnitUpdate,
+    SavedStop, SavedStopCreate, SavedStopUpdate
+)
 from app.services.catalog_service import CatalogService
 from app.models.user import User
 
@@ -110,3 +114,73 @@ async def delete_unit(
     if not db_unit:
         raise HTTPException(status_code=404, detail="Unit not found")
     return db_unit
+
+
+# SavedStops (Paradas/Tiradas guardadas)
+@router.get("/stops", response_model=List[SavedStop])
+async def read_stops(
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = Query(None, description="Buscar por nombre"),
+    db: AsyncSession = Depends(deps.get_db_session),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Lista las paradas guardadas, con búsqueda opcional por nombre."""
+    service = CatalogService(db)
+    return await service.list_stops(skip=skip, limit=limit, search=search)
+
+
+@router.post("/stops", response_model=SavedStop)
+async def create_stop(
+    stop: SavedStopCreate,
+    db: AsyncSession = Depends(deps.get_db_session),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Crea una nueva parada guardada. Cualquier usuario autenticado puede crear."""
+    service = CatalogService(db)
+    return await service.create_stop(stop)
+
+
+@router.get("/stops/{stop_id}", response_model=SavedStop)
+async def read_stop(
+    stop_id: int,
+    db: AsyncSession = Depends(deps.get_db_session),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Obtiene una parada por ID."""
+    service = CatalogService(db)
+    db_stop = await service.get_stop(stop_id)
+    if not db_stop:
+        raise HTTPException(status_code=404, detail="Stop not found")
+    return db_stop
+
+
+@router.put("/stops/{stop_id}", response_model=SavedStop)
+async def update_stop(
+    stop_id: int,
+    stop: SavedStopUpdate,
+    db: AsyncSession = Depends(deps.get_db_session),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Actualiza una parada guardada. Solo admins."""
+    check_admin_access(current_user)
+    service = CatalogService(db)
+    db_stop = await service.update_stop(stop_id, stop)
+    if not db_stop:
+        raise HTTPException(status_code=404, detail="Stop not found")
+    return db_stop
+
+
+@router.delete("/stops/{stop_id}", response_model=SavedStop)
+async def delete_stop(
+    stop_id: int,
+    db: AsyncSession = Depends(deps.get_db_session),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Elimina una parada guardada. Solo admins."""
+    check_admin_access(current_user)
+    service = CatalogService(db)
+    db_stop = await service.delete_stop(stop_id)
+    if not db_stop:
+        raise HTTPException(status_code=404, detail="Stop not found")
+    return db_stop

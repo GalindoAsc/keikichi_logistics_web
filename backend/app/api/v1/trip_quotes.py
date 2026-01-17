@@ -22,10 +22,11 @@ router = APIRouter(prefix="/trip-quotes", tags=["Trip Quotes"])
 # === Schemas ===
 
 class QuoteStop(BaseModel):
+    name: Optional[str] = None  # Nombre identificador de la parada (para autocompletado)
     address: str
     contact: Optional[str] = None
     phone: Optional[str] = None
-    time: Optional[str] = None
+    time: Optional[str] = None  # Horario aproximado de entrega
     notes: Optional[str] = None
 
 class TripQuoteCreate(BaseModel):

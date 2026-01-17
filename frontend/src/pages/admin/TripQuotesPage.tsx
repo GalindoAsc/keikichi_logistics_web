@@ -10,6 +10,7 @@ import ConfirmationModal from "../../components/shared/ConfirmationModal";
 import { QuoteCardSkeleton } from "../../components/shared/Skeleton";
 
 interface QuoteStop {
+    name?: string;
     address: string;
     contact?: string;
     phone?: string;

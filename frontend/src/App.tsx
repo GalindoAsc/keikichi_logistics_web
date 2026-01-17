@@ -16,6 +16,7 @@ import CreateTripPage from "./pages/admin/CreateTripPage";
 import LabelPricesPage from "./pages/admin/LabelPricesPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import ProductsPage from "./pages/admin/ProductsPage";
+import StopsPage from "./pages/admin/StopsPage";
 import AccountsPage from "./pages/admin/AccountsPage";
 import ExchangeRatePage from "./pages/admin/ExchangeRatePage";
 import BankDetailsPage from "./pages/admin/BankDetailsPage";
@@ -202,6 +203,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProductsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/stops"
+              element={
+                <ProtectedRoute allowedRoles={["superadmin", "manager"]}>
+                  <StopsPage />
                 </ProtectedRoute>
               }
             />

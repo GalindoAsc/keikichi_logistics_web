@@ -14,6 +14,32 @@ export interface Unit {
     is_active: boolean;
 }
 
+export interface SavedStop {
+    id: number;
+    name: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    default_contact?: string;
+    default_phone?: string;
+    default_schedule?: string;
+    notes?: string;
+    is_active: boolean;
+}
+
+export interface SavedStopCreate {
+    name: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    default_contact?: string;
+    default_phone?: string;
+    default_schedule?: string;
+    notes?: string;
+}
+
 export const fetchProducts = async () => {
     const { data } = await api.get<Product[]>("/catalog/products");
     return data;
@@ -40,4 +66,25 @@ export const createUnit = async (unit: { name: string; abbreviation?: string }) 
 
 export const deleteUnit = async (id: number) => {
     await api.delete(`/catalog/units/${id}`);
+};
+
+// SavedStops (Paradas/Tiradas guardadas)
+export const fetchStops = async (search?: string) => {
+    const params = search ? { search } : {};
+    const { data } = await api.get<SavedStop[]>("/catalog/stops", { params });
+    return data;
+};
+
+export const createStop = async (stop: SavedStopCreate) => {
+    const { data } = await api.post<SavedStop>("/catalog/stops", stop);
+    return data;
+};
+
+export const updateStop = async (id: number, stop: Partial<SavedStopCreate>) => {
+    const { data } = await api.put<SavedStop>(`/catalog/stops/${id}`, stop);
+    return data;
+};
+
+export const deleteStop = async (id: number) => {
+    await api.delete(`/catalog/stops/${id}`);
 };

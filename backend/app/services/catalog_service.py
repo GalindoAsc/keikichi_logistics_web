@@ -1,8 +1,12 @@
 from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.catalog import Product, Unit
-from app.schemas.catalog import ProductCreate, ProductUpdate, UnitCreate, UnitUpdate
+from app.models.catalog import Product, Unit, SavedStop
+from app.schemas.catalog import (
+    ProductCreate, ProductUpdate, 
+    UnitCreate, UnitUpdate,
+    SavedStopCreate, SavedStopUpdate
+)
 
 class CatalogService:
     def __init__(self, db: AsyncSession):
@@ -75,3 +79,55 @@ class CatalogService:
         await self.db.delete(unit)
         await self.db.commit()
         return unit
+
+    # SavedStops (Paradas/Tiradas guardadas)
+    async def list_stops(self, skip: int = 0, limit: int = 100, search: Optional[str] = None) -> List[SavedStop]:
+        query = select(SavedStop).where(SavedStop.is_active == True).order_by(SavedStop.name.asc())
+        if search:
+            query = query.where(SavedStop.name.ilike(f"%{search}%"))
+        result = await self.db.execute(query.offset(skip).limit(limit))
+        return list(result.scalars().all())
+
+    async def create_stop(self, payload: SavedStopCreate) -> SavedStop:
+        stop = SavedStop(**payload.model_dump())
+        self.db.add(stop)
+        await self.db.commit()
+        await self.db.refresh(stop)
+        return stop
+
+    async def get_stop(self, stop_id: int) -> Optional[SavedStop]:
+        result = await self.db.execute(select(SavedStop).where(SavedStop.id == stop_id))
+        return result.scalars().first()
+
+    async def get_stop_by_name(self, name: str) -> Optional[SavedStop]:
+        result = await self.db.execute(select(SavedStop).where(SavedStop.name == name))
+        return result.scalars().first()
+
+    async def update_stop(self, stop_id: int, payload: SavedStopUpdate) -> Optional[SavedStop]:
+        stop = await self.get_stop(stop_id)
+        if not stop:
+            return None
+        for field, value in payload.model_dump(exclude_unset=True).items():
+            setattr(stop, field, value)
+        await self.db.commit()
+        await self.db.refresh(stop)
+        return stop
+
+    async def delete_stop(self, stop_id: int) -> Optional[SavedStop]:
+        stop = await self.get_stop(stop_id)
+        if not stop:
+            return None
+        await self.db.delete(stop)
+        await self.db.commit()
+        return stop
+
+    async def get_or_create_stop(self, name: str, address: Optional[str] = None) -> SavedStop:
+        """Busca una parada por nombre o la crea si no existe."""
+        existing = await self.get_stop_by_name(name)
+        if existing:
+            return existing
+        new_stop = SavedStop(name=name, address=address)
+        self.db.add(new_stop)
+        await self.db.commit()
+        await self.db.refresh(new_stop)
+        return new_stop

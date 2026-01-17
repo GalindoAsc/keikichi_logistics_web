@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Package, Calendar, DollarSign, FileText, Plus, Trash2, Tag } from "lucide-react";
+import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Package, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock } from "lucide-react";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
+import { useStops } from "../../hooks/useProducts";
+import { SavedStop } from "../../api/catalog";
 
 interface QuoteStop {
+    name?: string;  // Nombre identificador de la parada
     address: string;
     contact?: string;
     time?: string;
@@ -52,6 +55,11 @@ export default function RequestTripPage() {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const [step, setStep] = useState(1);
+    const { stops: savedStops, searchStops, addStop } = useStops();
+    
+    // Estado para autocompletado de paradas
+    const [stopSuggestions, setStopSuggestions] = useState<{ [key: number]: SavedStop[] }>({});
+    const [showStopSuggestions, setShowStopSuggestions] = useState<{ [key: number]: boolean }>({});
 
     const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<QuoteFormData>({
         defaultValues: {
@@ -75,6 +83,27 @@ export default function RequestTripPage() {
     const isInternational = watch("is_international");
     const requiresRefrigeration = watch("requires_refrigeration");
     const requiresPickup = watch("requires_pickup");
+    
+    // Función para manejar búsqueda de paradas guardadas
+    const handleStopNameSearch = (index: number, value: string) => {
+        setValue(`stops.${index}.name` as const, value);
+        if (value.length >= 2) {
+            const filtered = searchStops(value);
+            setStopSuggestions(prev => ({ ...prev, [index]: filtered }));
+            setShowStopSuggestions(prev => ({ ...prev, [index]: true }));
+        } else {
+            setShowStopSuggestions(prev => ({ ...prev, [index]: false }));
+        }
+    };
+    
+    // Función para seleccionar una parada guardada
+    const selectSavedStop = (index: number, stop: SavedStop) => {
+        setValue(`stops.${index}.name` as const, stop.name);
+        setValue(`stops.${index}.address` as const, stop.address || "");
+        setValue(`stops.${index}.contact` as const, stop.default_contact || "");
+        setValue(`stops.${index}.time` as const, stop.default_schedule || "");
+        setShowStopSuggestions(prev => ({ ...prev, [index]: false }));
+    };
 
     const createQuote = useMutation({
         mutationFn: async (data: QuoteFormData) => {
@@ -224,7 +253,7 @@ export default function RequestTripPage() {
                                         </h3>
                                         <button
                                             type="button"
-                                            onClick={() => append({ address: "" })}
+                                            onClick={() => append({ name: "", address: "" })}
                                             className="text-sm flex items-center gap-1 text-keikichi-lime-600 hover:text-keikichi-lime-700 font-medium"
                                         >
                                             <Plus className="w-4 h-4" />
@@ -237,30 +266,96 @@ export default function RequestTripPage() {
                                             <div key={field.id} className="bg-white dark:bg-keikichi-forest-700 p-4 rounded-lg border border-keikichi-lime-200 dark:border-keikichi-forest-600 relative group">
                                                 <button
                                                     type="button"
-                                                    onClick={() => remove(index)}
+                                                    onClick={() => {
+                                                        remove(index);
+                                                        setShowStopSuggestions(prev => ({ ...prev, [index]: false }));
+                                                    }}
                                                     className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
-                                                <h4 className="text-xs font-bold text-keikichi-lime-600 uppercase mb-2">Stop #{index + 1}</h4>
+                                                <h4 className="text-xs font-bold text-keikichi-lime-600 uppercase mb-2">{t('quotes.stop')} #{index + 1}</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    {/* Nombre de la parada con autocompletado */}
+                                                    <div className="col-span-2 relative">
+                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
+                                                            {t('quotes.stopName')}
+                                                        </label>
+                                                        <input
+                                                            {...register(`stops.${index}.name` as const)}
+                                                            placeholder={t('quotes.stopNamePlaceholder')}
+                                                            onChange={(e) => handleStopNameSearch(index, e.target.value)}
+                                                            onFocus={() => {
+                                                                const currentName = watch(`stops.${index}.name`);
+                                                                if (currentName && currentName.length >= 2) {
+                                                                    const filtered = searchStops(currentName);
+                                                                    setStopSuggestions(prev => ({ ...prev, [index]: filtered }));
+                                                                    setShowStopSuggestions(prev => ({ ...prev, [index]: true }));
+                                                                }
+                                                            }}
+                                                            onBlur={() => setTimeout(() => setShowStopSuggestions(prev => ({ ...prev, [index]: false })), 200)}
+                                                            className="w-full form-input text-sm"
+                                                            autoComplete="off"
+                                                        />
+                                                        {/* Sugerencias de autocompletado */}
+                                                        {showStopSuggestions[index] && stopSuggestions[index]?.length > 0 && (
+                                                            <ul className="absolute z-20 w-full bg-white dark:bg-keikichi-forest-800 border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md shadow-lg max-h-48 overflow-auto mt-1">
+                                                                {stopSuggestions[index].map((stop) => (
+                                                                    <li
+                                                                        key={stop.id}
+                                                                        className="px-3 py-2 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 cursor-pointer text-sm"
+                                                                        onClick={() => selectSavedStop(index, stop)}
+                                                                    >
+                                                                        <div className="font-medium text-keikichi-forest-800 dark:text-white">{stop.name}</div>
+                                                                        {stop.address && (
+                                                                            <div className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 truncate">
+                                                                                {stop.address}
+                                                                            </div>
+                                                                        )}
+                                                                        {stop.default_schedule && (
+                                                                            <div className="text-xs text-keikichi-forest-400 dark:text-keikichi-lime-500 flex items-center gap-1">
+                                                                                <Clock className="w-3 h-3" />
+                                                                                {stop.default_schedule}
+                                                                            </div>
+                                                                        )}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                    {/* Dirección */}
                                                     <div className="col-span-2">
+                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
+                                                            {t('quotes.stopAddress')} *
+                                                        </label>
                                                         <input
                                                             {...register(`stops.${index}.address` as const, { required: true })}
-                                                            placeholder={t('quotes.stopAddress')}
+                                                            placeholder={t('quotes.stopAddressPlaceholder')}
                                                             className="w-full form-input text-sm"
                                                         />
                                                     </div>
-                                                    <input
-                                                        {...register(`stops.${index}.contact` as const)}
-                                                        placeholder={t('quotes.stopContact')}
-                                                        className="w-full form-input text-sm"
-                                                    />
-                                                    <input
-                                                        {...register(`stops.${index}.time` as const)}
-                                                        placeholder={t('quotes.stopTime')}
-                                                        className="w-full form-input text-sm"
-                                                    />
+                                                    {/* Contacto */}
+                                                    <div>
+                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
+                                                            {t('quotes.stopContact')}
+                                                        </label>
+                                                        <input
+                                                            {...register(`stops.${index}.contact` as const)}
+                                                            placeholder={t('quotes.stopContactPlaceholder')}
+                                                            className="w-full form-input text-sm"
+                                                        />
+                                                    </div>
+                                                    {/* Horario */}
+                                                    <div>
+                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
+                                                            {t('quotes.stopTime')}
+                                                        </label>
+                                                        <input
+                                                            {...register(`stops.${index}.time` as const)}
+                                                            placeholder={t('quotes.stopTimePlaceholder')}
+                                                            className="w-full form-input text-sm"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
