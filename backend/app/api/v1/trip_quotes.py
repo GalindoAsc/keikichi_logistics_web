@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from uuid import UUID
 from decimal import Decimal
@@ -165,9 +165,9 @@ async def create_quote_request(
     preferred_date = dt_date.fromisoformat(data.preferred_date)
     
     # Expira 3 días antes de la fecha preferida
-    expires_at = datetime.combine(preferred_date, datetime.min.time()) - timedelta(days=3)
-    if expires_at <= datetime.now():
-        expires_at = datetime.now() + timedelta(days=7) # Fallback seguro
+    expires_at = datetime.combine(preferred_date, datetime.min.time(), tzinfo=timezone.utc) - timedelta(days=3)
+    if expires_at <= datetime.now(timezone.utc):
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7) # Fallback seguro
     
     # Serializar stops a dicts para JSON
     stops_data = [stop.model_dump() for stop in data.stops] if data.stops else []
@@ -297,7 +297,7 @@ async def admin_set_quote(
     quote.price_per_extra_stop = data.price_per_extra_stop
     quote.admin_notes = data.admin_notes
     quote.quoted_by = current_user.id
-    quote.quoted_at = datetime.now()
+    quote.quoted_at = datetime.now(timezone.utc)
     quote.status = QuoteStatus.quoted
 
     await db.commit()
@@ -333,7 +333,7 @@ async def client_respond(
         raise HTTPException(status_code=400, detail="Solo puedes responder a cotizaciones con precio asignado")
 
     # Validar que la cotización no haya expirado
-    if quote.expires_at and quote.expires_at < datetime.now():
+    if quote.expires_at and quote.expires_at < datetime.now(timezone.utc):
         quote.status = QuoteStatus.expired
         await db.commit()
         raise HTTPException(status_code=400, detail="Esta cotización ha expirado")
