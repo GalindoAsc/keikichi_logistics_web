@@ -105,6 +105,14 @@ class TripQuoteOut(BaseModel):
     pallet_count: Optional[int] = None  # Calculado de las tarimas
     preferred_date: str
     flexible_dates: bool
+    
+    @field_validator('preferred_date', mode='before')
+    @classmethod
+    def serialize_date(cls, v):
+        """Convert date object to string for JSON serialization."""
+        if hasattr(v, 'isoformat'):
+            return v.isoformat()
+        return v
     preferred_currency: str
     stops: Optional[List[QuoteStop]]
     requires_bond: bool
