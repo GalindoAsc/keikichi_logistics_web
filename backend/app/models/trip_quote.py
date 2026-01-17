@@ -98,3 +98,17 @@ class TripQuote(Base):
     client = relationship("User", foreign_keys=[client_id])
     quoted_by_user = relationship("User", foreign_keys=[quoted_by])
     created_trip = relationship("Trip", foreign_keys=[created_trip_id])
+
+    @property
+    def client_name(self) -> str | None:
+        """Get client's full name from relationship."""
+        if self.client:
+            return self.client.full_name
+        return None
+    
+    @property
+    def client_email(self) -> str | None:
+        """Get client's email from relationship."""
+        if self.client:
+            return self.client.email
+        return None
