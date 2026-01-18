@@ -201,62 +201,70 @@ async def list_reservations(
     current_user: User = Depends(get_current_user)
 ):
     """
-    List reservations
+    List reservations - Optimized with JOINs to avoid N+1 queries
     - Clients see only their own
     - Admins/Managers see all with filters
     """
-    service = ReservationService(db)
-    skip = (page - 1) * page_size
-    
-    if current_user.role == UserRole.client:
-        # Clients can only see their own reservations
-        reservations = await service.get_user_reservations(
-            user_id=UUID(str(current_user.id)),
-            status=status,
-            payment_status=payment_status,
-            skip=skip,
-            limit=page_size
-        )
-        total = await service.count_reservations(
-            user_id=UUID(str(current_user.id)),
-            status=status,
-            payment_status=payment_status
-        )
-    else:
-        # Admin/Manager can see all
-        reservations = await service.get_all_reservations(
-            trip_id=UUID(trip_id) if trip_id else None,
-            client_id=UUID(client_id) if client_id else None,
-            status=status,
-            payment_status=payment_status,
-            skip=skip,
-            limit=page_size
-        )
-        total = await service.count_reservations(
-            user_id=UUID(client_id) if client_id else None,
-            trip_id=UUID(trip_id) if trip_id else None,
-            status=status,
-            payment_status=payment_status
-        )
-    
-    # Build list items
-    items = []
-    for reservation in reservations:
-        spaces = await service.get_reservation_spaces(reservation.id)
-        
-        # Load trip for summary
-        from app.models.trip import Trip
-        from sqlalchemy import select
-        trip_stmt = select(Trip).where(Trip.id == reservation.trip_id)
-        trip_result = await db.execute(trip_stmt)
-        trip = trip_result.scalars().first()
-        
-        # Load client for name
-        from app.models.user import User
-        client_stmt = select(User).where(User.id == reservation.client_id)
-        client_result = await db.execute(client_stmt)
-        client = client_result.scalars().first()
+    from sqlalchemy import select, func
+    from app.models.trip import Trip
+    from app.models.reservation import Reservation
+    from app.models.space import Space
 
+    skip = (page - 1) * page_size
+
+    # Base query with JOINs
+    base_stmt = (
+        select(Reservation, Trip, User)
+        .join(Trip, Reservation.trip_id == Trip.id)
+        .join(User, Reservation.client_id == User.id)
+    )
+
+    # Apply filters
+    if current_user.role == UserRole.client:
+        base_stmt = base_stmt.where(Reservation.client_id == current_user.id)
+    else:
+        if trip_id:
+            base_stmt = base_stmt.where(Reservation.trip_id == UUID(trip_id))
+        if client_id:
+            base_stmt = base_stmt.where(Reservation.client_id == UUID(client_id))
+
+    if status:
+        base_stmt = base_stmt.where(Reservation.status == status)
+    if payment_status:
+        base_stmt = base_stmt.where(Reservation.payment_status == payment_status)
+
+    # Count query (reuse filters)
+    count_stmt = select(func.count()).select_from(base_stmt.subquery())
+    total = await db.scalar(count_stmt) or 0
+
+    # Get paginated results
+    data_stmt = (
+        base_stmt
+        .order_by(Reservation.created_at.desc())
+        .offset(skip)
+        .limit(page_size)
+    )
+    result = await db.execute(data_stmt)
+    rows = result.all()
+
+    # Get space counts for all reservations in ONE query
+    reservation_ids = [row[0].id for row in rows]
+    spaces_count_map = {}
+
+    if reservation_ids:
+        spaces_stmt = (
+            select(Space.reservation_id, func.count(Space.id))
+            .where(Space.reservation_id.in_(reservation_ids))
+            .group_by(Space.reservation_id)
+        )
+        spaces_result = await db.execute(spaces_stmt)
+        spaces_count_map = {
+            str(rid): cnt for rid, cnt in spaces_result.all()
+        }
+
+    # Build response items
+    items = []
+    for reservation, trip, client in rows:
         items.append(ReservationListItem(
             id=str(reservation.id),
             trip_id=str(reservation.trip_id),
@@ -264,17 +272,17 @@ async def list_reservations(
             payment_status=reservation.payment_status,
             payment_method=reservation.payment_method,
             total_amount=reservation.total_amount,
-            spaces_count=len(spaces),
+            spaces_count=spaces_count_map.get(str(reservation.id), 0),
             created_at=reservation.created_at,
-            trip_origin=trip.origin if trip else None,
-            trip_destination=trip.destination if trip else None,
-            trip_departure_date=str(trip.departure_date) if trip else None,
+            trip_origin=trip.origin,
+            trip_destination=trip.destination,
+            trip_departure_date=str(trip.departure_date),
             client_name=client.full_name if client else "Desconocido",
-            currency=trip.currency if trip else "USD"
+            currency=trip.currency or "USD"
         ))
-    
+
     pages = (total + page_size - 1) // page_size
-    
+
     return ReservationListResponse(
         items=items,
         total=total,
