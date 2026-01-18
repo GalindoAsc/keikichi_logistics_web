@@ -23,6 +23,9 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 from app.api.v1 import trip_quotes
 api_router.include_router(trip_quotes.router)
 
+from app.api.v1 import quote_files
+api_router.include_router(quote_files.router)
+
 from app.api.v1.endpoints import files, verifications
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(verifications.router, prefix="/admin/verifications", tags=["admin-verifications"])

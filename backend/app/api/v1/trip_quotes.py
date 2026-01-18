@@ -71,6 +71,10 @@ class TripQuoteCreate(BaseModel):
     labeling_type: Optional[str] = None  # "keikichi" or "own"
     labeling_size: Optional[str] = None  # ID del tamaño de etiqueta
     labeling_quantity: Optional[int] = None
+    labeling_file_path: Optional[str] = None  # Ruta del archivo subido
+    
+    # Bond file
+    bond_file_path: Optional[str] = None  # Ruta del archivo de fianza
     
     # Pickup
     requires_pickup: bool = False
@@ -124,6 +128,7 @@ class TripQuoteOut(BaseModel):
     labeling_type: Optional[str] = None
     labeling_size: Optional[str] = None
     labeling_quantity: Optional[int] = None
+    labeling_file_path: Optional[str] = None
     requires_pickup: bool
     pickup_address: Optional[str]
     pickup_address_reference: Optional[str] = None
@@ -132,6 +137,7 @@ class TripQuoteOut(BaseModel):
     pickup_contact_phone: Optional[str] = None
     pickup_notes: Optional[str] = None
     bond_type: Optional[str] = None
+    bond_file_path: Optional[str] = None
     
     special_requirements: Optional[str]
     quoted_price: Optional[float]
@@ -199,6 +205,10 @@ async def create_quote_request(
         labeling_type=data.labeling_type,
         labeling_size=data.labeling_size,
         labeling_quantity=data.labeling_quantity,
+        labeling_file_path=data.labeling_file_path,
+        
+        # Bond file
+        bond_file_path=data.bond_file_path,
         
         # Pickup
         requires_pickup=data.requires_pickup,

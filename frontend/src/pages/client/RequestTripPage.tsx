@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock, Layers, Box, Upload } from "lucide-react";
+import { ArrowLeft, Plane, Truck, Thermometer, MapPin, Calendar, DollarSign, FileText, Plus, Trash2, Tag, Clock, Layers, Box, Upload, CheckCircle, Loader2 } from "lucide-react";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 import { useStops, useProducts } from "../../hooks/useProducts";
 import { SavedStop } from "../../api/catalog";
 import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
 import { fetchLabelPrices } from "../../api/labelPrices";
+import { uploadQuoteFile } from "../../api/quoteFiles";
 
 // Producto dentro de una tarima
 interface PalletProduct {
@@ -144,8 +145,33 @@ export default function RequestTripPage() {
         setShowStopSuggestions(prev => ({ ...prev, [index]: false }));
     };
 
+    // State for file upload status
+    const [uploadingFiles, setUploadingFiles] = useState(false);
+
     const createQuote = useMutation({
         mutationFn: async (data: QuoteFormData) => {
+            setUploadingFiles(true);
+            
+            // Upload files first if present
+            let labelingFilePath: string | undefined;
+            let bondFilePath: string | undefined;
+            
+            try {
+                // Upload label file if present
+                if (data.labeling_file && data.labeling_file.length > 0) {
+                    const labelResult = await uploadQuoteFile(data.labeling_file[0], "label");
+                    labelingFilePath = labelResult.file_path;
+                }
+                
+                // Upload bond file if present
+                if (data.bond_file && data.bond_file.length > 0) {
+                    const bondResult = await uploadQuoteFile(data.bond_file[0], "bond");
+                    bondFilePath = bondResult.file_path;
+                }
+            } finally {
+                setUploadingFiles(false);
+            }
+            
             // Transform stops to convert camelCase to snake_case
             const transformedStops = data.stops.map(s => ({
                 name: s.name,
@@ -158,7 +184,7 @@ export default function RequestTripPage() {
                 pallets: s.pallets
             }));
             
-            // Build payload without FileList fields (they need separate upload)
+            // Build payload with file paths
             const payload = {
                 origin: data.origin,
                 destination: data.destination,
@@ -169,6 +195,7 @@ export default function RequestTripPage() {
                 stops: transformedStops,
                 requires_bond: data.requires_bond,
                 bond_type: data.bond_type,
+                bond_file_path: bondFilePath,
                 requires_refrigeration: data.requires_refrigeration,
                 temperature_min: data.temperature_min,
                 temperature_max: data.temperature_max,
@@ -176,6 +203,7 @@ export default function RequestTripPage() {
                 labeling_type: data.labeling_type,
                 labeling_size: data.labeling_size,
                 labeling_quantity: data.labeling_quantity,
+                labeling_file_path: labelingFilePath,
                 requires_pickup: data.requires_pickup,
                 pickup_address: data.pickup_address,
                 pickup_address_reference: data.pickup_address_reference,
@@ -783,19 +811,37 @@ export default function RequestTripPage() {
                                                             <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">
                                                                 {t('quotes.uploadLabelFile')}
                                                             </label>
-                                                            <div className="mt-1 flex items-center gap-2">
-                                                                <label className="flex-1 flex items-center justify-center gap-2 p-3 border-2 border-dashed border-keikichi-lime-300 dark:border-keikichi-forest-500 rounded-lg cursor-pointer hover:border-keikichi-lime-500 transition-colors">
-                                                                    <Upload className="w-5 h-5 text-keikichi-lime-600" />
-                                                                    <span className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">
-                                                                        {t('quotes.selectFile')}
-                                                                    </span>
-                                                                    <input
-                                                                        type="file"
-                                                                        {...register("labeling_file")}
-                                                                        accept=".pdf,.png,.jpg,.jpeg"
-                                                                        className="sr-only"
-                                                                    />
-                                                                </label>
+                                                            <div className="mt-1">
+                                                                {watch("labeling_file")?.length ? (
+                                                                    <div className="flex items-center gap-2 p-3 bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30 border border-keikichi-lime-300 dark:border-keikichi-lime-700 rounded-lg">
+                                                                        <CheckCircle className="w-5 h-5 text-keikichi-lime-600" />
+                                                                        <span className="text-sm text-keikichi-forest-700 dark:text-keikichi-lime-200 flex-1 truncate">
+                                                                            {watch("labeling_file")?.[0]?.name}
+                                                                        </span>
+                                                                        <label className="text-xs text-keikichi-lime-600 hover:text-keikichi-lime-700 cursor-pointer">
+                                                                            {t('common.change')}
+                                                                            <input
+                                                                                type="file"
+                                                                                {...register("labeling_file")}
+                                                                                accept=".pdf,.png,.jpg,.jpeg"
+                                                                                className="sr-only"
+                                                                            />
+                                                                        </label>
+                                                                    </div>
+                                                                ) : (
+                                                                    <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-keikichi-lime-300 dark:border-keikichi-forest-500 rounded-lg cursor-pointer hover:border-keikichi-lime-500 transition-colors">
+                                                                        <Upload className="w-5 h-5 text-keikichi-lime-600" />
+                                                                        <span className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                            {t('quotes.selectFile')}
+                                                                        </span>
+                                                                        <input
+                                                                            type="file"
+                                                                            {...register("labeling_file")}
+                                                                            accept=".pdf,.png,.jpg,.jpeg"
+                                                                            className="sr-only"
+                                                                        />
+                                                                    </label>
+                                                                )}
                                                             </div>
                                                             <p className="text-xs text-keikichi-forest-400 mt-1">
                                                                 {t('quotes.labelFileFormats')}
@@ -855,19 +901,37 @@ export default function RequestTripPage() {
                                                                 <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">
                                                                     {t('quotes.uploadBondFile')}
                                                                 </label>
-                                                                <div className="mt-1 flex items-center gap-2">
-                                                                    <label className="flex-1 flex items-center justify-center gap-2 p-3 border-2 border-dashed border-keikichi-lime-300 dark:border-keikichi-forest-500 rounded-lg cursor-pointer hover:border-keikichi-lime-500 transition-colors">
-                                                                        <Upload className="w-5 h-5 text-keikichi-lime-600" />
-                                                                        <span className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">
-                                                                            {t('quotes.selectFile')}
-                                                                        </span>
-                                                                        <input
-                                                                            type="file"
-                                                                            {...register("bond_file")}
-                                                                            accept=".pdf,.png,.jpg,.jpeg"
-                                                                            className="sr-only"
-                                                                        />
-                                                                    </label>
+                                                                <div className="mt-1">
+                                                                    {watch("bond_file")?.length ? (
+                                                                        <div className="flex items-center gap-2 p-3 bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30 border border-keikichi-lime-300 dark:border-keikichi-lime-700 rounded-lg">
+                                                                            <CheckCircle className="w-5 h-5 text-keikichi-lime-600" />
+                                                                            <span className="text-sm text-keikichi-forest-700 dark:text-keikichi-lime-200 flex-1 truncate">
+                                                                                {watch("bond_file")?.[0]?.name}
+                                                                            </span>
+                                                                            <label className="text-xs text-keikichi-lime-600 hover:text-keikichi-lime-700 cursor-pointer">
+                                                                                {t('common.change')}
+                                                                                <input
+                                                                                    type="file"
+                                                                                    {...register("bond_file")}
+                                                                                    accept=".pdf,.png,.jpg,.jpeg"
+                                                                                    className="sr-only"
+                                                                                />
+                                                                            </label>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-keikichi-lime-300 dark:border-keikichi-forest-500 rounded-lg cursor-pointer hover:border-keikichi-lime-500 transition-colors">
+                                                                            <Upload className="w-5 h-5 text-keikichi-lime-600" />
+                                                                            <span className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">
+                                                                                {t('quotes.selectFile')}
+                                                                            </span>
+                                                                            <input
+                                                                                type="file"
+                                                                                {...register("bond_file")}
+                                                                                accept=".pdf,.png,.jpg,.jpeg"
+                                                                                className="sr-only"
+                                                                            />
+                                                                        </label>
+                                                                    )}
                                                                 </div>
                                                                 <p className="text-xs text-keikichi-forest-400 mt-1">
                                                                     {t('quotes.bondFileFormats')}
@@ -1070,11 +1134,15 @@ export default function RequestTripPage() {
                         ) : (
                             <button
                                 type="submit"
-                                disabled={createQuote.isPending}
+                                disabled={createQuote.isPending || uploadingFiles}
                                 className="px-8 py-2 bg-keikichi-lime-600 text-white rounded-lg hover:bg-keikichi-lime-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2 shadow-md hover:shadow-lg"
                             >
-                                <DollarSign className="w-4 h-4" />
-                                {createQuote.isPending ? t('common.processing') : t('quotes.submitRequest')}
+                                {(createQuote.isPending || uploadingFiles) ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <DollarSign className="w-4 h-4" />
+                                )}
+                                {uploadingFiles ? t('common.uploadingFiles') : createQuote.isPending ? t('common.processing') : t('quotes.submitRequest')}
                             </button>
                         )}
                     </div>

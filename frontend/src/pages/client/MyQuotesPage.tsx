@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, differenceInHours, differenceInDays } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { ArrowLeft, Plus, Check, X, MessageSquare, Clock, DollarSign, MapPin, Package, Thermometer } from "lucide-react";
+import { ArrowLeft, Plus, Check, X, MessageSquare, Clock, DollarSign, MapPin, Package, Thermometer, ChevronDown, ChevronUp, Truck, Shield, Tag, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
@@ -68,6 +68,7 @@ export default function MyQuotesPage() {
     const [respondingId, setRespondingId] = useState<string | null>(null);
     const [negotiateMessage, setNegotiateMessage] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [expandedQuotes, setExpandedQuotes] = useState<Set<string>>(new Set());
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
         action: "accept" | "reject" | null;
@@ -113,6 +114,33 @@ export default function MyQuotesPage() {
             expired: t('quotes.status.expired')
         };
         return labels[status] || status;
+    };
+
+    const toggleExpand = (quoteId: string) => {
+        setExpandedQuotes(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(quoteId)) {
+                newSet.delete(quoteId);
+            } else {
+                newSet.add(quoteId);
+            }
+            return newSet;
+        });
+    };
+
+    const getExpirationInfo = (expiresAt: string | null) => {
+        if (!expiresAt) return null;
+        const now = new Date();
+        const expires = new Date(expiresAt);
+        if (expires <= now) return { isExpired: true, text: t('quotes.expired'), urgent: true };
+        
+        const hoursLeft = differenceInHours(expires, now);
+        const daysLeft = differenceInDays(expires, now);
+        
+        if (hoursLeft < 24) {
+            return { isExpired: false, text: t('quotes.expiresInHours', { hours: hoursLeft }), urgent: true };
+        }
+        return { isExpired: false, text: t('quotes.expiresInDays', { days: daysLeft }), urgent: daysLeft <= 2 };
     };
 
     const handleAccept = (quoteId: string) => {
@@ -196,8 +224,24 @@ export default function MyQuotesPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
-                        {quotes.filter(q => statusFilter === "all" || q.status === statusFilter).map((quote) => (
+                        {quotes.filter(q => statusFilter === "all" || q.status === statusFilter).map((quote) => {
+                            const expirationInfo = getExpirationInfo(quote.expires_at);
+                            const isExpanded = expandedQuotes.has(quote.id);
+                            
+                            return (
                             <div key={quote.id} className="p-6 hover:bg-keikichi-lime-50/50 dark:hover:bg-keikichi-forest-700/50 transition-colors">
+                                {/* Expiration Warning */}
+                                {quote.status === "quoted" && expirationInfo && expirationInfo.urgent && (
+                                    <div className={`mb-4 px-3 py-2 rounded-lg flex items-center gap-2 text-sm ${
+                                        expirationInfo.isExpired 
+                                            ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+                                            : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+                                    }`}>
+                                        <AlertTriangle className="w-4 h-4" />
+                                        {expirationInfo.text}
+                                    </div>
+                                )}
+                                
                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                                     <div className="flex-1 space-y-3">
                                         <div className="flex items-center gap-3 flex-wrap">
@@ -213,6 +257,24 @@ export default function MyQuotesPage() {
                                                 <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded flex items-center gap-1">
                                                     <Thermometer className="w-3 h-3" />
                                                     {quote.temperature_min}° - {quote.temperature_max}°C
+                                                </span>
+                                            )}
+                                            {quote.requires_bond && (
+                                                <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded flex items-center gap-1">
+                                                    <Shield className="w-3 h-3" />
+                                                    Bond
+                                                </span>
+                                            )}
+                                            {quote.requires_labeling && (
+                                                <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs rounded flex items-center gap-1">
+                                                    <Tag className="w-3 h-3" />
+                                                    {t('quotes.labeling')}
+                                                </span>
+                                            )}
+                                            {quote.requires_pickup && (
+                                                <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs rounded flex items-center gap-1">
+                                                    <Truck className="w-3 h-3" />
+                                                    Pickup
                                                 </span>
                                             )}
                                         </div>
@@ -331,8 +393,117 @@ export default function MyQuotesPage() {
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Expand button */}
+                                <button
+                                    onClick={() => toggleExpand(quote.id)}
+                                    className="mt-4 w-full flex items-center justify-center gap-2 text-sm text-keikichi-forest-500 dark:text-keikichi-lime-400 hover:text-keikichi-forest-700 dark:hover:text-keikichi-lime-300 transition-colors py-2 border-t border-keikichi-lime-100 dark:border-keikichi-forest-600"
+                                >
+                                    {isExpanded ? (
+                                        <>
+                                            <ChevronUp className="w-4 h-4" />
+                                            {t('quotes.hideDetails')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChevronDown className="w-4 h-4" />
+                                            {t('quotes.showDetails')}
+                                        </>
+                                    )}
+                                </button>
+
+                                {/* Expanded Details */}
+                                {isExpanded && (
+                                    <div className="mt-4 pt-4 border-t border-keikichi-lime-100 dark:border-keikichi-forest-600 space-y-4 animate-in slide-in-from-top-2">
+                                        {/* Merchandise Info */}
+                                        {(quote.merchandise_type || quote.merchandise_weight || quote.merchandise_description) && (
+                                            <div className="bg-keikichi-forest-50 dark:bg-keikichi-forest-700/50 rounded-lg p-4">
+                                                <h4 className="font-medium text-keikichi-forest-800 dark:text-white mb-2">{t('quotes.merchandiseInfo')}</h4>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                                    {quote.merchandise_type && (
+                                                        <div>
+                                                            <span className="text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.merchandiseType')}:</span>
+                                                            <p className="font-medium dark:text-white">{quote.merchandise_type}</p>
+                                                        </div>
+                                                    )}
+                                                    {quote.merchandise_weight && (
+                                                        <div>
+                                                            <span className="text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.weight')}:</span>
+                                                            <p className="font-medium dark:text-white">{quote.merchandise_weight}</p>
+                                                        </div>
+                                                    )}
+                                                    {quote.merchandise_description && (
+                                                        <div className="col-span-full">
+                                                            <span className="text-keikichi-forest-500 dark:text-keikichi-lime-400">{t('quotes.description')}:</span>
+                                                            <p className="font-medium dark:text-white">{quote.merchandise_description}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Stops */}
+                                        {quote.stops && quote.stops.length > 0 && (
+                                            <div className="bg-keikichi-forest-50 dark:bg-keikichi-forest-700/50 rounded-lg p-4">
+                                                <h4 className="font-medium text-keikichi-forest-800 dark:text-white mb-2">{t('quotes.stops')} ({quote.stops.length})</h4>
+                                                <div className="space-y-2">
+                                                    {quote.stops.map((stop, index) => (
+                                                        <div key={index} className="flex items-start gap-3 text-sm">
+                                                            <div className="w-6 h-6 rounded-full bg-keikichi-lime-100 dark:bg-keikichi-lime-900/30 flex items-center justify-center text-keikichi-lime-700 dark:text-keikichi-lime-400 font-medium text-xs flex-shrink-0">
+                                                                {index + 1}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                {stop.name && <p className="font-medium dark:text-white">{stop.name}</p>}
+                                                                <p className="text-keikichi-forest-600 dark:text-keikichi-lime-400">{stop.address}</p>
+                                                                {stop.contact && <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-500">{stop.contact} {stop.phone && `• ${stop.phone}`}</p>}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Services */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                            {quote.requires_pickup && quote.pickup_date && (
+                                                <div className="bg-teal-50 dark:bg-teal-900/20 rounded-lg p-3 text-center">
+                                                    <Truck className="w-5 h-5 mx-auto mb-1 text-teal-600 dark:text-teal-400" />
+                                                    <p className="font-medium text-teal-800 dark:text-teal-400">{t('quotes.pickup')}</p>
+                                                    <p className="text-xs text-teal-600 dark:text-teal-500">{format(new Date(quote.pickup_date), "MMM d")}</p>
+                                                </div>
+                                            )}
+                                            {quote.requires_bond && (
+                                                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 text-center">
+                                                    <Shield className="w-5 h-5 mx-auto mb-1 text-purple-600 dark:text-purple-400" />
+                                                    <p className="font-medium text-purple-800 dark:text-purple-400">Bond</p>
+                                                </div>
+                                            )}
+                                            {quote.requires_labeling && (
+                                                <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-center">
+                                                    <Tag className="w-5 h-5 mx-auto mb-1 text-orange-600 dark:text-orange-400" />
+                                                    <p className="font-medium text-orange-800 dark:text-orange-400">{t('quotes.labeling')}</p>
+                                                </div>
+                                            )}
+                                            {quote.flexible_dates && (
+                                                <div className="bg-keikichi-lime-50 dark:bg-keikichi-lime-900/20 rounded-lg p-3 text-center">
+                                                    <Clock className="w-5 h-5 mx-auto mb-1 text-keikichi-lime-600 dark:text-keikichi-lime-400" />
+                                                    <p className="font-medium text-keikichi-lime-800 dark:text-keikichi-lime-400">{t('quotes.flexibleDates')}</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Admin response if any */}
+                                        {quote.client_response && (
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                                                <p className="text-sm text-blue-700 dark:text-blue-400 font-medium mb-1">{t('quotes.yourMessage')}:</p>
+                                                <p className="text-sm text-blue-800 dark:text-blue-300">{quote.client_response}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                        ))}
+                        );
+                        })}
                     </div>
                 )}
             </div>

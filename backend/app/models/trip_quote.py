@@ -60,6 +60,10 @@ class TripQuote(Base):
     labeling_type = Column(String(20), nullable=True)  # "keikichi" or "own"
     labeling_size = Column(String(100), nullable=True)  # ID del tamaño de etiqueta
     labeling_quantity = Column(Integer, nullable=True)
+    labeling_file_path = Column(String(500), nullable=True)  # Ruta del archivo de etiqueta
+    
+    # Bond file
+    bond_file_path = Column(String(500), nullable=True)  # Ruta del archivo de fianza
     
     # Pickup
     requires_pickup = Column(Boolean, nullable=False, default=False)

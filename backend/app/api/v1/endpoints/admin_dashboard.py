@@ -10,6 +10,7 @@ from app.models.user import User
 from app.models.reservation import Reservation, PaymentStatus, ReservationStatus
 from app.models.trip import Trip, TripStatus
 from app.models.space import Space, SpaceStatus
+from app.models.trip_quote import TripQuote, TripQuoteStatus
 
 router = APIRouter()
 
@@ -130,6 +131,32 @@ async def get_dashboard_stats(
             "created_at": res.created_at.isoformat() if res.created_at else None
         })
 
+    # 8. Quote Statistics
+    pending_quotes_stmt = select(func.count(TripQuote.id)).where(
+        TripQuote.status == TripQuoteStatus.pending
+    )
+    pending_quotes = await db.scalar(pending_quotes_stmt) or 0
+    
+    total_quotes_stmt = select(func.count(TripQuote.id))
+    total_quotes = await db.scalar(total_quotes_stmt) or 0
+    
+    # Recent quotes for dashboard
+    recent_quotes_stmt = select(TripQuote).order_by(TripQuote.created_at.desc()).limit(5)
+    recent_quotes_result = await db.execute(recent_quotes_stmt)
+    recent_quotes = recent_quotes_result.scalars().all()
+    
+    recent_quotes_data = []
+    for quote in recent_quotes:
+        recent_quotes_data.append({
+            "id": str(quote.id),
+            "client_name": quote.client_name or "N/A",
+            "client_email": quote.client_email or "N/A",
+            "origin": quote.origin,
+            "destination": quote.destination,
+            "status": quote.status.value if hasattr(quote.status, 'value') else str(quote.status),
+            "created_at": quote.created_at.isoformat() if quote.created_at else None
+        })
+
     return {
         "pending_payments": pending_payments,
         "revenue_by_currency": {
@@ -142,5 +169,8 @@ async def get_dashboard_stats(
         "active_trips": active_trips,
         "total_reservations": total_reservations,
         "upcoming_trips": upcoming_trips_data,
-        "recent_reservations": recent_data
+        "recent_reservations": recent_data,
+        "pending_quotes": pending_quotes,
+        "total_quotes": total_quotes,
+        "recent_quotes": recent_quotes_data
     }

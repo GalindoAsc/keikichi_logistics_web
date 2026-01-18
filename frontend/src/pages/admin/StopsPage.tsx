@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MapPin, Plus, Trash2, ArrowLeft, Clock, Edit2, X, Check } from "lucide-react";
+import { useState, useMemo } from "react";
+import { MapPin, Plus, Trash2, ArrowLeft, Clock, Edit2, X, Check, Search, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStops } from "../../hooks/useProducts";
 import { toast } from "sonner";
@@ -26,6 +26,22 @@ const StopsPage = () => {
     // Edit state
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState<Partial<SavedStopCreate>>({});
+    
+    // Search and filter
+    const [searchTerm, setSearchTerm] = useState("");
+    const [showAddForm, setShowAddForm] = useState(false);
+    
+    // Filtered stops
+    const filteredStops = useMemo(() => {
+        if (!searchTerm.trim()) return stops;
+        const search = searchTerm.toLowerCase();
+        return stops.filter(stop => 
+            stop.name.toLowerCase().includes(search) ||
+            stop.address?.toLowerCase().includes(search) ||
+            stop.city?.toLowerCase().includes(search) ||
+            stop.state?.toLowerCase().includes(search)
+        );
+    }, [stops, searchTerm]);
 
     const resetForm = () => {
         setName("");
@@ -54,6 +70,7 @@ const StopsPage = () => {
                 notes: notes.trim() || undefined,
             });
             resetForm();
+            setShowAddForm(false);
             toast.success(t('stops.added'));
         } catch (error) {
             toast.error(t('stops.errorAdding'));
@@ -112,21 +129,49 @@ const StopsPage = () => {
                 {t('common.backToSettings')}
             </button>
 
-            <div className="flex items-center gap-2 mb-6">
-                <MapPin className="w-6 h-6 text-keikichi-lime-600" />
-                <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">{t('stops.title')}</h1>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    <Building2 className="w-6 h-6 text-keikichi-lime-600" />
+                    <div>
+                        <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white">{t('stops.title')}</h1>
+                        <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-400">
+                            {t('stops.description')}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => setShowAddForm(!showAddForm)}
+                    className="flex items-center gap-2 bg-keikichi-lime-600 text-white px-4 py-2 rounded-lg hover:bg-keikichi-lime-700 transition-colors"
+                >
+                    <Plus className="w-4 h-4" />
+                    {t('stops.addNew')}
+                </button>
             </div>
 
-            <p className="text-sm text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-4">
-                {t('stops.description')}
-            </p>
+            {/* Barra de búsqueda */}
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-keikichi-forest-400 dark:text-keikichi-lime-500" />
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder={t('stops.searchPlaceholder')}
+                    className="w-full pl-10 pr-4 py-3 border dark:border-keikichi-forest-600 rounded-lg bg-white dark:bg-keikichi-forest-800 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500 focus:border-transparent transition-colors"
+                />
+            </div>
 
             {/* Formulario para agregar nueva parada */}
-            <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 p-6 shadow-sm space-y-4 transition-colors">
-                <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white flex items-center gap-2">
-                    <Plus className="w-5 h-5" />
-                    {t('stops.addNew')}
-                </h2>
+            {showAddForm && (
+            <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 p-6 shadow-sm space-y-4 transition-colors animate-in slide-in-from-top-2">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-keikichi-lime-600" />
+                        {t('stops.addNew')}
+                    </h2>
+                    <button onClick={() => setShowAddForm(false)} className="text-keikichi-forest-400 hover:text-keikichi-forest-600">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
@@ -215,17 +260,23 @@ const StopsPage = () => {
                     </button>
                 </div>
             </div>
+            )}
 
             {/* Lista de paradas guardadas */}
             <div className="bg-white dark:bg-keikichi-forest-800 rounded-lg border dark:border-keikichi-forest-600 shadow-sm transition-colors">
                 <div className="p-4 border-b dark:border-keikichi-forest-600">
                     <h2 className="text-lg font-semibold text-keikichi-forest-800 dark:text-white">
-                        {t('stops.savedStops')} ({stops.length})
+                        {t('stops.savedStops')} ({filteredStops.length}{searchTerm && ` / ${stops.length}`})
                     </h2>
                 </div>
                 
+                {filteredStops.length === 0 ? (
+                    <div className="p-8 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">
+                        {searchTerm ? t('stops.noResultsFound') : t('stops.noStops')}
+                    </div>
+                ) : (
                 <div className="divide-y dark:divide-keikichi-forest-600">
-                    {stops.map((stop: SavedStop) => (
+                    {filteredStops.map((stop: SavedStop) => (
                         <div key={stop.id} className="p-4 hover:bg-keikichi-lime-50 dark:hover:bg-keikichi-forest-700 transition-colors">
                             {editingId === stop.id ? (
                                 // Modo edición
@@ -331,12 +382,8 @@ const StopsPage = () => {
                             )}
                         </div>
                     ))}
-                    {stops.length === 0 && (
-                        <div className="p-8 text-center text-keikichi-forest-500 dark:text-keikichi-lime-400">
-                            {t('stops.noStops')}
-                        </div>
-                    )}
                 </div>
+                )}
             </div>
         </div>
     );

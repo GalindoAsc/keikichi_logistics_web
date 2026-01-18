@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { DollarSign, Package, Calendar, Clock, ArrowRight, TrendingUp, Truck } from "lucide-react";
+import { DollarSign, Package, Calendar, Clock, ArrowRight, TrendingUp, Truck, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../../api/client";
 import { format, parseISO } from "date-fns";
@@ -16,6 +16,16 @@ interface UpcomingTrip {
     on_hold: number;
     reserved: number;
     occupancy_percent: number;
+}
+
+interface RecentQuote {
+    id: string;
+    client_name: string;
+    client_email: string;
+    origin: string;
+    destination: string;
+    status: string;
+    created_at: string;
 }
 
 interface DashboardStats {
@@ -36,6 +46,9 @@ interface DashboardStats {
         payment_status: string;
         created_at: string;
     }>;
+    pending_quotes: number;
+    total_quotes: number;
+    recent_quotes: RecentQuote[];
 }
 
 const formatCurrencyBreakdown = (data: Record<string, number> | undefined) => {
@@ -81,6 +94,14 @@ export default function AdminDashboardPage() {
             color: "text-keikichi-yellow-600 dark:text-keikichi-yellow-400",
             bg: "bg-keikichi-yellow-50 dark:bg-keikichi-yellow-900/20",
             link: "/admin/reservations?status=pending_review"
+        },
+        {
+            title: t('dashboard.pendingQuotes'),
+            value: stats?.pending_quotes || 0,
+            icon: FileText,
+            color: "text-blue-600 dark:text-blue-400",
+            bg: "bg-blue-50 dark:bg-blue-900/20",
+            link: "/admin/quotes?status=pending"
         },
         {
             title: t('dashboard.monthlyRevenue'),
@@ -254,6 +275,46 @@ export default function AdminDashboardPage() {
                     )}
                 </div>
             </div>
+
+            {/* Recent Quotes */}
+            {stats?.recent_quotes && stats.recent_quotes.length > 0 && (
+                <div className="bg-white dark:bg-keikichi-forest-800 rounded-2xl border border-keikichi-lime-100 dark:border-keikichi-forest-600 shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-keikichi-lime-50 dark:border-keikichi-forest-600 flex justify-between items-center bg-blue-50/30 dark:bg-blue-900/10">
+                        <h2 className="text-lg font-bold font-heading text-keikichi-forest-800 dark:text-white flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            {t('dashboard.recentQuotes')}
+                        </h2>
+                        <Link to="/admin/quotes" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1 transition-colors">
+                            {t('dashboard.viewAll')} <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
+                    <div className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
+                        {stats.recent_quotes.map((quote) => (
+                            <Link to={`/admin/quotes`} key={quote.id} className="p-4 hover:bg-blue-50/50 dark:hover:bg-keikichi-forest-700/50 transition-colors flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm border border-blue-100 dark:border-blue-800">
+                                        {quote.client_name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-keikichi-forest-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{quote.client_name}</p>
+                                        <p className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-300">
+                                            {quote.origin} → {quote.destination} • {format(new Date(quote.created_at), "d MMM, HH:mm", { locale: dateLocale })}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase
+                                    ${quote.status === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                        quote.status === 'quoted' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        quote.status === 'accepted' ? 'bg-keikichi-lime-100 text-keikichi-lime-700 dark:bg-keikichi-lime-900/30 dark:text-keikichi-lime-400' :
+                                        quote.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                        'bg-keikichi-forest-100 text-keikichi-forest-600 dark:bg-keikichi-forest-700 dark:text-keikichi-lime-400'}`}>
+                                    {t(`quotes.statusValues.${quote.status}`)}
+                                </span>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
