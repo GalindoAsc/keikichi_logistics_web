@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
@@ -32,21 +32,19 @@ export default function AdminTripsPage() {
         [trips, statusFilter]
     );
 
-    const handleSelectAll = (isChecked: boolean) => {
+    const handleSelectAll = useCallback((isChecked: boolean) => {
         if (isChecked && filteredTrips) {
             setSelectedIds(filteredTrips.map(t => t.id));
         } else {
             setSelectedIds([]);
         }
-    };
+    }, [filteredTrips]);
 
-    const handleSelectTrip = (id: string) => {
-        if (selectedIds.includes(id)) {
-            setSelectedIds(prev => prev.filter(i => i !== id));
-        } else {
-            setSelectedIds(prev => [...prev, id]);
-        }
-    };
+    const handleSelectTrip = useCallback((id: string) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    }, []);
 
     const deleteMutation = useMutation({
         mutationFn: (id: string) => deleteTrip(id),

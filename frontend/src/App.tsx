@@ -6,6 +6,7 @@ import RootLayout from "./components/layout/RootLayout";
 import AuthLayout from "./components/layout/AuthLayout";
 import { Toaster } from "sonner";
 import { authStore } from "./stores/authStore";
+import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
@@ -62,6 +63,23 @@ const PageLoader = () => (
   </div>
 );
 
+// Error fallback component
+const ErrorFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-keikichi-forest-50 dark:bg-keikichi-forest-900">
+    <div className="text-center p-8">
+      <h1 className="text-2xl font-bold text-keikichi-forest-800 dark:text-white mb-4">
+        Algo salió mal
+      </h1>
+      <button
+        onClick={() => window.location.reload()}
+        className="px-4 py-2 bg-keikichi-lime-600 text-white rounded-lg hover:bg-keikichi-lime-700"
+      >
+        Recargar página
+      </button>
+    </div>
+  </div>
+);
+
 const ProtectedRoute = ({ children, allowedRoles }: { children: JSX.Element; allowedRoles?: string[] }) => {
   const { accessToken, user } = authStore();
 
@@ -78,13 +96,14 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: JSX.Element; all
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" closeButton richColors />
-      <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route element={<RootLayout />}>
-            <Route index element={<TripsPage />} />
+    <ErrorBoundary fallback={<ErrorFallback />}>
+      <QueryClientProvider client={queryClient}>
+        <Toaster position="top-right" closeButton richColors />
+        <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route element={<RootLayout />}>
+              <Route index element={<TripsPage />} />
             <Route
               path="/trips/:id"
               element={
@@ -336,9 +355,10 @@ function App() {
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
           </Route>
         </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </QueryClientProvider>
+          </Suspense>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

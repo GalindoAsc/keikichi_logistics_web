@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Upload, X, CheckCircle } from "lucide-react";
 import api from '../../api/client';
+import { compressImage } from '../../lib/imageCompression';
 
 interface FileUploadProps {
     label: string;
@@ -16,11 +17,16 @@ export const FileUpload = ({ label, docType, onUploadComplete, accept = ".pdf,.j
     const [error, setError] = useState<string | null>(null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+        let file = e.target.files?.[0];
         if (!file) return;
 
         setIsUploading(true);
         setError(null);
+
+        // Compress images before upload
+        if (file.type.startsWith('image/')) {
+            file = await compressImage(file);
+        }
 
         const formData = new FormData();
         formData.append('file', file);

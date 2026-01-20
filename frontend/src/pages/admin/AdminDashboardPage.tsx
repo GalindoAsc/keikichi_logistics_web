@@ -308,7 +308,7 @@ export default function AdminDashboardPage() {
                                         quote.status === 'accepted' ? 'bg-keikichi-lime-100 text-keikichi-lime-700 dark:bg-keikichi-lime-900/30 dark:text-keikichi-lime-400' :
                                         quote.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                                         'bg-keikichi-forest-100 text-keikichi-forest-600 dark:bg-keikichi-forest-700 dark:text-keikichi-lime-400'}`}>
-                                    {t(`quotes.statusValues.${quote.status}`)}
+                                    {t(`quotes.status.${quote.status}`)}
                                 </span>
                             </Link>
                         ))}

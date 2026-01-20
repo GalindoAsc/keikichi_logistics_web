@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -110,26 +110,17 @@ export default function AdminReservationsPage() {
     const { t, i18n } = useTranslation();
     const dateLocale = i18n.language === 'es' ? es : enUS;
 
+    const { data, isLoading, refetch } = useQuery({
+        queryKey: ["admin-reservations", page, statusFilter, paymentFilter],
+        queryFn: () => getReservations(page, 20, {
+            status: statusFilter !== "all" ? statusFilter as ReservationStatus : undefined,
+            payment_status: paymentFilter !== "all" ? paymentFilter as PaymentStatus : undefined
+        })
+    });
+
     useEffect(() => {
         setSelectedIds([]);
     }, [page, statusFilter, paymentFilter]);
-
-    const handleSelectAll = () => {
-        if (!data) return;
-        if (selectedIds.length === data.items.length) {
-            setSelectedIds([]);
-        } else {
-            setSelectedIds(data.items.map(r => r.id));
-        }
-    };
-
-    const handleSelectRow = (id: string) => {
-        if (selectedIds.includes(id)) {
-            setSelectedIds(prev => prev.filter(i => i !== id));
-        } else {
-            setSelectedIds(prev => [...prev, id]);
-        }
-    };
 
     useEffect(() => {
         const id = searchParams.get("id");
@@ -138,13 +129,18 @@ export default function AdminReservationsPage() {
         }
     }, [searchParams]);
 
-    const { data, isLoading, refetch } = useQuery({
-        queryKey: ["admin-reservations", page, statusFilter, paymentFilter],
-        queryFn: () => getReservations(page, 20, {
-            status: statusFilter !== "all" ? statusFilter as ReservationStatus : undefined,
-            payment_status: paymentFilter !== "all" ? paymentFilter as PaymentStatus : undefined
-        })
-    });
+    const handleSelectAll = useCallback(() => {
+        if (!data) return;
+        setSelectedIds(prev => 
+            prev.length === data.items.length ? [] : data.items.map(r => r.id)
+        );
+    }, [data]);
+
+    const handleSelectRow = useCallback((id: string) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    }, []);
 
     const deleteMutation = useMutation({
         mutationFn: (id: string) => deleteReservation(id),

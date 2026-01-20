@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, Check, X, MessageSquare, Clock, DollarSign, MapPin, Pa
 import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import ConfirmationModal from "../../components/shared/ConfirmationModal";
 import { QuoteCardSkeleton } from "../../components/shared/Skeleton";
 
@@ -104,7 +104,7 @@ export default function MyQuotesPage() {
         }
     });
 
-    const getStatusLabel = (status: string) => {
+    const getStatusLabel = useCallback((status: string) => {
         const labels: Record<string, string> = {
             pending: t('quotes.status.pending'),
             quoted: t('quotes.status.quoted'),
@@ -114,9 +114,9 @@ export default function MyQuotesPage() {
             expired: t('quotes.status.expired')
         };
         return labels[status] || status;
-    };
+    }, [t]);
 
-    const toggleExpand = (quoteId: string) => {
+    const toggleExpand = useCallback((quoteId: string) => {
         setExpandedQuotes(prev => {
             const newSet = new Set(prev);
             if (newSet.has(quoteId)) {
@@ -126,7 +126,7 @@ export default function MyQuotesPage() {
             }
             return newSet;
         });
-    };
+    }, []);
 
     // Memoize filtered quotes to avoid recalculating on every render
     const filteredQuotes = useMemo(() => 

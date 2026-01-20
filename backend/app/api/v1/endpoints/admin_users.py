@@ -1,9 +1,9 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.api import deps
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.user import UserResponse, UserUpdate, UserCreate
 
 router = APIRouter()
@@ -13,15 +13,23 @@ router = APIRouter()
 async def list_users(
     db: AsyncSession = Depends(deps.get_db_session),
     current_user: User = Depends(deps.get_current_user),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    role: Optional[str] = Query(None),
 ):
-    """List all users (admin only)"""
+    """List all users with pagination and optional role filter (admin only)"""
     if current_user.role not in ["superadmin", "manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
         )
     
-    result = await db.execute(select(User).order_by(User.created_at.desc()))
+    query = select(User).order_by(User.created_at.desc())
+    if role:
+        query = query.where(User.role == role)
+    query = query.offset(skip).limit(limit)
+    
+    result = await db.execute(query)
     users = result.scalars().all()
     return users
 

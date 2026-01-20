@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
@@ -17,8 +17,15 @@ router = APIRouter()
 # --- Drivers ---
 
 @router.get("/drivers", response_model=List[FleetDriverOut])
-async def list_drivers(db: AsyncSession = Depends(get_db_session), current_user=Depends(require_manager_or_superadmin)):
-    result = await db.execute(select(FleetDriver).order_by(FleetDriver.full_name))
+async def list_drivers(
+    db: AsyncSession = Depends(get_db_session),
+    current_user=Depends(require_manager_or_superadmin),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+):
+    """List drivers with pagination"""
+    query = select(FleetDriver).order_by(FleetDriver.full_name).offset(skip).limit(limit)
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 @router.post("/drivers", response_model=FleetDriverOut)
@@ -56,8 +63,15 @@ async def delete_driver(driver_id: UUID, db: AsyncSession = Depends(get_db_sessi
 # --- Vehicles ---
 
 @router.get("/vehicles", response_model=List[FleetVehicleOut])
-async def list_vehicles(db: AsyncSession = Depends(get_db_session), current_user=Depends(require_manager_or_superadmin)):
-    result = await db.execute(select(FleetVehicle).order_by(FleetVehicle.plate))
+async def list_vehicles(
+    db: AsyncSession = Depends(get_db_session),
+    current_user=Depends(require_manager_or_superadmin),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+):
+    """List vehicles with pagination"""
+    query = select(FleetVehicle).order_by(FleetVehicle.plate).offset(skip).limit(limit)
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 @router.post("/vehicles", response_model=FleetVehicleOut)

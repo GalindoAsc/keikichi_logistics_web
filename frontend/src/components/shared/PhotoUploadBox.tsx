@@ -1,5 +1,6 @@
 import { useRef, ChangeEvent } from 'react';
 import { Upload, CheckCircle, Camera, Image as ImageIcon } from 'lucide-react';
+import { compressImage } from '../../lib/imageCompression';
 
 interface Props {
     label: string;
@@ -15,16 +16,19 @@ export function PhotoUploadBox({ label, icon, file, onFileSelect, instructions, 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            onFileSelect(e.target.files[0]);
+            // Compress image before passing to parent
+            const compressed = await compressImage(e.target.files[0]);
+            onFileSelect(compressed);
         }
     };
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            onFileSelect(e.dataTransfer.files[0]);
+            const compressed = await compressImage(e.dataTransfer.files[0]);
+            onFileSelect(compressed);
         }
     };
 
