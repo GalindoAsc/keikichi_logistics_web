@@ -181,9 +181,10 @@ async def get_dashboard_stats(
         select(func.count(TripQuote.id))
     ) or 0
 
-    # Recent quotes
+    # Recent quotes - use selectinload to eagerly load client relationship
     recent_quotes_stmt = (
         select(TripQuote)
+        .options(selectinload(TripQuote.client))
         .order_by(TripQuote.created_at.desc())
         .limit(5)
     )
@@ -193,8 +194,8 @@ async def get_dashboard_stats(
     recent_quotes_data = [
         {
             "id": str(q.id),
-            "client_name": q.client_name or "N/A",
-            "client_email": q.client_email or "N/A",
+            "client_name": q.client.full_name if q.client else "N/A",
+            "client_email": q.client.email if q.client else "N/A",
             "origin": q.origin,
             "destination": q.destination,
             "status": q.status.value if hasattr(q.status, 'value') else str(q.status),
