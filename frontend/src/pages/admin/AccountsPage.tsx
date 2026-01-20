@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
+import { SmartPhoneInput, PhoneData } from "../../components/shared/SmartPhoneInput";
+import { SmartEmailInput } from "../../components/shared/SmartEmailInput";
 
 interface User {
     id: string;
@@ -214,12 +216,11 @@ const AccountsPage = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('common.email')} *</label>
-                            <input
-                                type="email"
+                            <SmartEmailInput
                                 value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
+                                onChange={(email) => setFormData({ ...formData, email })}
+                                label={`${t('common.email')} *`}
+                                required
                             />
                         </div>
                         <div>
@@ -232,12 +233,10 @@ const AccountsPage = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">{t('common.phone')}</label>
-                            <input
-                                type="text"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
+                            <SmartPhoneInput
+                                value={formData.phone || ''}
+                                onChange={(data: PhoneData) => setFormData({ ...formData, phone: data.fullNumber })}
+                                label={t('common.phone')}
                             />
                         </div>
                         <div>

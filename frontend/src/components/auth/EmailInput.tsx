@@ -1,13 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 
 const EMAIL_DOMAINS = [
+    // Personal - Más comunes
     'gmail.com',
-    'outlook.com',
     'hotmail.com',
+    'outlook.com',
     'yahoo.com',
     'icloud.com',
     'live.com',
+    'me.com',
     'protonmail.com',
+    'aol.com',
+    // Regionales - México
+    'hotmail.com.mx',
+    'outlook.com.mx',
+    'yahoo.com.mx',
+    'prodigy.net.mx',
+    // Regionales - España
+    'gmail.es',
+    'hotmail.es',
+    'yahoo.es',
 ];
 
 interface Props {

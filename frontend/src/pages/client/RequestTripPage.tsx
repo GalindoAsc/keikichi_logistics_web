@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useStops, useProducts } from "../../hooks/useProducts";
 import { SavedStop } from "../../api/catalog";
 import { SmartAddressInput } from "../../components/shared/SmartAddressInput";
+import { SmartPhoneInput, PhoneData } from "../../components/shared/SmartPhoneInput";
 import { fetchLabelPrices } from "../../api/labelPrices";
 import { uploadQuoteFile } from "../../api/quoteFiles";
 
@@ -993,14 +994,13 @@ export default function RequestTripPage() {
                                                                 className="w-full form-input mt-1" 
                                                             />
                                                         </div>
-                                                        <div>
-                                                            <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupContactPhone')}</label>
-                                                            <input 
-                                                                type="tel" 
-                                                                {...register("pickup_contact_phone")} 
-                                                                placeholder="Ej. +1 (555) 123-4567"
-                                                                className="w-full form-input mt-1" 
+                                                        <div className="mt-1">
+                                                            <SmartPhoneInput
+                                                                value={watch("pickup_contact_phone") || ''}
+                                                                onChange={(data: PhoneData) => setValue("pickup_contact_phone", data.fullNumber)}
+                                                                label={t('quotes.pickupContactPhone')}
                                                             />
+                                                            <input type="hidden" {...register("pickup_contact_phone")} />
                                                         </div>
                                                     </div>
                                                     

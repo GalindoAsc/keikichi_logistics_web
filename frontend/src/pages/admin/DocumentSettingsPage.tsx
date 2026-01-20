@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, FileText, Building2, Phone, Mail, Globe, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Save, FileText, Building2, Globe, Loader2, RefreshCw, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { fetchSystemConfigs, updateSystemConfig, SystemConfig } from "../../api/systemConfig";
+import { SmartPhoneInput, PhoneData } from "../../components/shared/SmartPhoneInput";
+import { SmartEmailInput } from "../../components/shared/SmartEmailInput";
 
 interface DocumentSettings {
     company_name: string;
@@ -260,43 +262,26 @@ const DocumentSettingsPage = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">
-                                    <Phone className="w-4 h-4 inline mr-1" />
-                                    Teléfono
-                                </label>
-                                <input
-                                    type="tel"
+                                <SmartPhoneInput
                                     value={settings.company_phone}
-                                    onChange={(e) => handleChange("company_phone", e.target.value)}
-                                    className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500 focus:border-keikichi-lime-500"
-                                    placeholder="+52 664 123 4567"
+                                    onChange={(data: PhoneData) => handleChange("company_phone", data.fullNumber)}
+                                    label="Teléfono"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">
-                                    WhatsApp (para notificaciones)
-                                </label>
-                                <input
-                                    type="tel"
+                                <SmartPhoneInput
                                     value={settings.whatsapp_number}
-                                    onChange={(e) => handleChange("whatsapp_number", e.target.value)}
-                                    className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500 focus:border-keikichi-lime-500"
-                                    placeholder="+52 664 123 4567"
+                                    onChange={(data: PhoneData) => handleChange("whatsapp_number", data.fullNumber)}
+                                    label="WhatsApp (para notificaciones)"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-keikichi-forest-700 dark:text-keikichi-lime-300 mb-1">
-                                    <Mail className="w-4 h-4 inline mr-1" />
-                                    Email de Soporte
-                                </label>
-                                <input
-                                    type="email"
+                                <SmartEmailInput
                                     value={settings.company_email}
-                                    onChange={(e) => handleChange("company_email", e.target.value)}
-                                    className="w-full border border-keikichi-lime-200 dark:border-keikichi-forest-600 rounded-lg px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500 focus:border-keikichi-lime-500"
-                                    placeholder="soporte@keikichi.com"
+                                    onChange={(email) => handleChange("company_email", email)}
+                                    label="Email de Soporte"
                                 />
                             </div>
 

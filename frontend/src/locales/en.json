@@ -609,22 +609,32 @@
         "noStops": "No saved stops. Add one to use autocomplete in quotes."
     },
     "address": {
-        "noResultsFound": "Address not found on map",
-        "useManualAddress": "Use manual address",
         "reference": "Reference",
         "referencePlaceholder": "Cross streets, landmark, building color...",
-        "useSearch": "Use search",
-        "enterManually": "Enter manually",
-        "searchPlaceholder": "Search address...",
         "street": "Street and Number",
         "streetPlaceholder": "e.g. 123 Main Street",
         "city": "City",
         "cityPlaceholder": "e.g. Los Angeles",
         "state": "State",
         "statePlaceholder": "e.g. California",
+        "province": "Province",
+        "selectState": "Select state",
         "postalCode": "Postal Code",
-        "postalCodePlaceholder": "e.g. 90001",
-        "country": "Country",
-        "countryPlaceholder": "e.g. United States"
+        "postalCodePlaceholder": "e.g. 90210",
+        "postalCodeHint": "Enter postal code to auto-fill city and state",
+        "lookingUp": "Looking up...",
+        "found": "Found",
+        "country": "Country"
+    },
+    "phone": {
+        "label": "Phone",
+        "placeholder": "Phone number",
+        "selectCountry": "Select country"
+    },
+    "email": {
+        "label": "Email",
+        "placeholder": "email@example.com",
+        "typeToComplete": "Type or select a domain",
+        "invalid": "Invalid email address"
     }
 }

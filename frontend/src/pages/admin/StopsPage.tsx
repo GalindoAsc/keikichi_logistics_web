@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { SavedStop, SavedStopCreate } from "../../api/catalog";
 import { useTranslation } from "react-i18next";
 import { SmartAddressInput, AddressData } from "../../components/shared/SmartAddressInput";
+import { SmartPhoneInput, PhoneData } from "../../components/shared/SmartPhoneInput";
 
 const StopsPage = () => {
     const navigate = useNavigate();
@@ -219,13 +220,10 @@ const StopsPage = () => {
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.phone')}</label>
-                        <input
-                            type="text"
+                        <SmartPhoneInput
                             value={defaultPhone}
-                            onChange={(e) => setDefaultPhone(e.target.value)}
-                            className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
-                            placeholder={t('stops.phonePlaceholder')}
+                            onChange={(data: PhoneData) => setDefaultPhone(data.fullNumber)}
+                            label={t('stops.phone')}
                         />
                     </div>
                 </div>

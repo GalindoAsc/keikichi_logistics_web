@@ -609,22 +609,32 @@
         "noStops": "No hay paradas guardadas. Agrega una para usar autocompletado en cotizaciones."
     },
     "address": {
-        "noResultsFound": "No se encontró la dirección en el mapa",
-        "useManualAddress": "Usar dirección manual",
         "reference": "Referencia",
         "referencePlaceholder": "Entre calles, punto de referencia, color de fachada...",
-        "useSearch": "Usar búsqueda",
-        "enterManually": "Ingresar manualmente",
-        "searchPlaceholder": "Buscar dirección...",
         "street": "Calle y Número",
         "streetPlaceholder": "Ej. Av. Reforma 123",
         "city": "Ciudad",
-        "cityPlaceholder": "Ej. Ciudad de México",
+        "cityPlaceholder": "Ej. Los Angeles",
         "state": "Estado",
-        "statePlaceholder": "Ej. CDMX",
+        "statePlaceholder": "Ej. California",
+        "province": "Provincia",
+        "selectState": "Seleccionar estado",
         "postalCode": "Código Postal",
-        "postalCodePlaceholder": "Ej. 06600",
-        "country": "País",
-        "countryPlaceholder": "Ej. México"
+        "postalCodePlaceholder": "Ej. 90210",
+        "postalCodeHint": "Ingresa el código postal para autocompletar ciudad y estado",
+        "lookingUp": "Buscando...",
+        "found": "Encontrado",
+        "country": "País"
+    },
+    "phone": {
+        "label": "Teléfono",
+        "placeholder": "Número de teléfono",
+        "selectCountry": "Seleccionar país"
+    },
+    "email": {
+        "label": "Correo Electrónico",
+        "placeholder": "correo@ejemplo.com",
+        "typeToComplete": "Escribe o selecciona un dominio",
+        "invalid": "Correo electrónico inválido"
     }
 }
