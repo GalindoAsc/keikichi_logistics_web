@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
@@ -26,7 +26,11 @@ export default function AdminTripsPage() {
         queryFn: () => fetchTrips(false)
     });
 
-    const filteredTrips = trips?.filter(trip => statusFilter === "all" || trip.status === statusFilter);
+    // Memoize filtered trips to avoid recalculation on every render
+    const filteredTrips = useMemo(() => 
+        trips?.filter(trip => statusFilter === "all" || trip.status === statusFilter),
+        [trips, statusFilter]
+    );
 
     const handleSelectAll = (isChecked: boolean) => {
         if (isChecked && filteredTrips) {

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Trip } from "../../types/trip";
 import { MoreVertical, Edit, Trash, MapPin, Calendar, Users, ArrowRight } from "lucide-react";
@@ -9,7 +10,7 @@ import { format, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 
-const TripCard = ({ trip }: { trip: Trip }) => {
+const TripCard = memo(({ trip }: { trip: Trip }) => {
   const { user } = authStore();
   const deleteTrip = useDeleteTrip();
   const canEdit = user?.role === "superadmin" || user?.role === "manager";
@@ -136,6 +137,8 @@ const TripCard = ({ trip }: { trip: Trip }) => {
       </Link>
     </div>
   );
-};
+});
+
+TripCard.displayName = 'TripCard';
 
 export default TripCard;

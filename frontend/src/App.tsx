@@ -1,44 +1,66 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 import RootLayout from "./components/layout/RootLayout";
 import AuthLayout from "./components/layout/AuthLayout";
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
-import TripsPage from "./pages/client/TripsPage";
-import TripDetailPage from "./pages/client/TripDetailPage";
-import CreateReservationPage from "./pages/client/CreateReservationPage";
-import ReservationsPage from "./pages/client/ReservationsPage";
-import ProfilePage from "./pages/client/ProfilePage";
-import VerificationPage from "./pages/client/VerificationPage";
-import CreateTripPage from "./pages/admin/CreateTripPage";
-import LabelPricesPage from "./pages/admin/LabelPricesPage";
-import SettingsPage from "./pages/admin/SettingsPage";
-import ProductsPage from "./pages/admin/ProductsPage";
-import StopsPage from "./pages/admin/StopsPage";
-import AccountsPage from "./pages/admin/AccountsPage";
-import ExchangeRatePage from "./pages/admin/ExchangeRatePage";
-import BankDetailsPage from "./pages/admin/BankDetailsPage";
-import GeneralSettingsPage from "./pages/admin/GeneralSettingsPage";
-import FleetSettingsPage from "./pages/admin/FleetSettingsPage";
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import AdminReservationsPage from "./pages/admin/AdminReservationsPage";
-import AdminTripsPage from "./pages/admin/AdminTripsPage";
-import AdminTripSpacesPage from "./pages/admin/AdminTripSpacesPage";
-import ClientFilesPage from "./pages/admin/ClientFilesPage";
-import NotificationsPage from "./pages/admin/NotificationsPage";
-import PendingVerificationsPage from "./pages/admin/PendingVerificationsPage";
-import DocumentSettingsPage from "./pages/admin/DocumentSettingsPage";
-import QRScannerPage from "./pages/admin/QRScannerPage";
-import MyFilesPage from "./pages/client/MyFilesPage";
-import RequestTripPage from "./pages/client/RequestTripPage";
-import MyQuotesPage from "./pages/client/MyQuotesPage";
-import TripQuotesPage from "./pages/admin/TripQuotesPage";
 import { Toaster } from "sonner";
 import { authStore } from "./stores/authStore";
 
-const queryClient = new QueryClient();
+// Lazy load pages for code splitting
+const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const TripsPage = lazy(() => import("./pages/client/TripsPage"));
+const TripDetailPage = lazy(() => import("./pages/client/TripDetailPage"));
+const CreateReservationPage = lazy(() => import("./pages/client/CreateReservationPage"));
+const ReservationsPage = lazy(() => import("./pages/client/ReservationsPage"));
+const ProfilePage = lazy(() => import("./pages/client/ProfilePage"));
+const VerificationPage = lazy(() => import("./pages/client/VerificationPage"));
+const MyFilesPage = lazy(() => import("./pages/client/MyFilesPage"));
+const RequestTripPage = lazy(() => import("./pages/client/RequestTripPage"));
+const MyQuotesPage = lazy(() => import("./pages/client/MyQuotesPage"));
+
+// Admin pages
+const CreateTripPage = lazy(() => import("./pages/admin/CreateTripPage"));
+const LabelPricesPage = lazy(() => import("./pages/admin/LabelPricesPage"));
+const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
+const ProductsPage = lazy(() => import("./pages/admin/ProductsPage"));
+const StopsPage = lazy(() => import("./pages/admin/StopsPage"));
+const AccountsPage = lazy(() => import("./pages/admin/AccountsPage"));
+const ExchangeRatePage = lazy(() => import("./pages/admin/ExchangeRatePage"));
+const BankDetailsPage = lazy(() => import("./pages/admin/BankDetailsPage"));
+const GeneralSettingsPage = lazy(() => import("./pages/admin/GeneralSettingsPage"));
+const FleetSettingsPage = lazy(() => import("./pages/admin/FleetSettingsPage"));
+const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage"));
+const AdminReservationsPage = lazy(() => import("./pages/admin/AdminReservationsPage"));
+const AdminTripsPage = lazy(() => import("./pages/admin/AdminTripsPage"));
+const AdminTripSpacesPage = lazy(() => import("./pages/admin/AdminTripSpacesPage"));
+const ClientFilesPage = lazy(() => import("./pages/admin/ClientFilesPage"));
+const NotificationsPage = lazy(() => import("./pages/admin/NotificationsPage"));
+const PendingVerificationsPage = lazy(() => import("./pages/admin/PendingVerificationsPage"));
+const DocumentSettingsPage = lazy(() => import("./pages/admin/DocumentSettingsPage"));
+const QRScannerPage = lazy(() => import("./pages/admin/QRScannerPage"));
+const TripQuotesPage = lazy(() => import("./pages/admin/TripQuotesPage"));
+
+// Configure QueryClient with performance optimizations
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 minutes - data considered fresh
+      gcTime: 1000 * 60 * 10,   // 10 minutes - cache retention
+      refetchOnWindowFocus: false, // Don't refetch on tab focus
+      retry: 1, // Only 1 retry on failure
+    },
+  },
+});
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex justify-center items-center min-h-[50vh]">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-keikichi-lime-600"></div>
+  </div>
+);
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: JSX.Element; allowedRoles?: string[] }) => {
   const { accessToken, user } = authStore();
@@ -59,6 +81,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Toaster position="top-right" closeButton richColors />
       <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<RootLayout />}>
             <Route index element={<TripsPage />} />
@@ -313,6 +336,7 @@ function App() {
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
           </Route>
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </QueryClientProvider>
   );

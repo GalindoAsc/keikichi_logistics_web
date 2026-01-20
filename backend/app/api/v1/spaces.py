@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import Dict, List
+from uuid import UUID
 import json
 
 from app.api.deps import get_current_user, get_db_session
@@ -10,6 +12,16 @@ from app.services.trip_service import TripService
 from app.core.security import verify_token
 
 router = APIRouter()
+
+
+async def get_space_by_id(db: AsyncSession, space_id: str) -> Space | None:
+    """Direct space lookup - O(1) instead of O(n*m)"""
+    try:
+        stmt = select(Space).where(Space.id == UUID(space_id))
+        result = await db.execute(stmt)
+        return result.scalars().first()
+    except ValueError:
+        return None
 
 
 # WebSocket Manager for Space Updates (per-trip rooms)
@@ -97,17 +109,17 @@ async def get_trip_spaces(trip_id: str, db: AsyncSession = Depends(get_db_sessio
 
 
 @router.post("/{space_id}/hold", response_model=SpaceBase)
-async def hold_space(space_id: str, db: AsyncSession = Depends(get_db_session), current_user=Depends(get_current_user)):
-    service = TripService(db)
-    trip_list = await service.list_trips()
-    space: Space | None = None
-    for trip in trip_list:
-        for s in await service.list_spaces(trip):
-            if str(s.id) == space_id:
-                space = s
-                break
+async def hold_space(
+    space_id: str,
+    db: AsyncSession = Depends(get_db_session),
+    current_user=Depends(get_current_user)
+):
+    # Direct lookup - O(1) instead of O(n*m)
+    space = await get_space_by_id(db, space_id)
     if not space:
-        raise RuntimeError("Space not found")
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    service = TripService(db)
     updated = await service.hold_space(space, str(current_user.id))
     
     # Broadcast space update
@@ -125,29 +137,28 @@ async def hold_space(space_id: str, db: AsyncSession = Depends(get_db_session), 
 
 
 @router.post("/{space_id}/block", response_model=SpaceBase)
-async def block_space(space_id: str, db: AsyncSession = Depends(get_db_session), current_user=Depends(get_current_user)):
-    service = TripService(db)
-    trip_list = await service.list_trips()
-    target: Space | None = None
-    for trip in trip_list:
-        for s in await service.list_spaces(trip):
-            if str(s.id) == space_id:
-                target = s
-                break
-    if not target:
-        raise RuntimeError("Space not found")
-    target.status = SpaceStatus.blocked
-    target.held_by = None
-    target.hold_expires_at = None
+async def block_space(
+    space_id: str,
+    db: AsyncSession = Depends(get_db_session),
+    current_user=Depends(get_current_user)
+):
+    # Direct lookup - O(1) instead of O(n*m)
+    space = await get_space_by_id(db, space_id)
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    space.status = SpaceStatus.blocked
+    space.held_by = None
+    space.hold_expires_at = None
     await db.commit()
-    await db.refresh(target)
+    await db.refresh(space)
     
     # Broadcast space update
-    await space_ws_manager.broadcast_to_trip(str(target.trip_id), {
+    await space_ws_manager.broadcast_to_trip(str(space.trip_id), {
         "event": "space_update",
         "data": {
-            "space_id": str(target.id),
-            "space_number": target.space_number,
+            "space_id": str(space.id),
+            "space_number": space.space_number,
             "status": target.status.value,
             "trip_id": str(target.trip_id)
         }

@@ -345,19 +345,30 @@ async def download_manifest(
         result = await db.execute(stmt)
         reservations = result.scalars().all()
         
+        # OPTIMIZED: Get all space numbers in ONE query instead of N queries
+        from app.models.space import Space
+        from app.models.reservation_space import ReservationSpace
+        
+        reservation_ids = [res.id for res in reservations]
+        space_map: dict = {}
+        
+        if reservation_ids:
+            all_spaces_stmt = (
+                select(ReservationSpace.reservation_id, Space.space_number)
+                .join(Space, ReservationSpace.space_id == Space.id)
+                .where(ReservationSpace.reservation_id.in_(reservation_ids))
+            )
+            all_spaces_result = await db.execute(all_spaces_stmt)
+            for res_id, space_num in all_spaces_result.all():
+                if res_id not in space_map:
+                    space_map[res_id] = []
+                space_map[res_id].append(space_num)
+        
         # Build reservations data for PDF
         reservations_data = []
         for res in reservations:
-            # Get space numbers via ReservationSpace join table
-            from app.models.space import Space
-            from app.models.reservation_space import ReservationSpace
-            spaces_stmt = (
-                select(Space.space_number)
-                .join(ReservationSpace, ReservationSpace.space_id == Space.id)
-                .where(ReservationSpace.reservation_id == res.id)
-            )
-            spaces_result = await db.execute(spaces_stmt)
-            space_numbers = [row[0] for row in spaces_result.all()]
+            # Use pre-fetched space numbers
+            space_numbers = space_map.get(res.id, [])
             
             res_data = {
                 "client_name": res.client.full_name if res.client else "Desconocido",

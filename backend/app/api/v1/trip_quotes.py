@@ -237,10 +237,12 @@ async def create_quote_request(
 @router.get("", response_model=List[TripQuoteOut])
 async def list_quotes(
     status: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Lista cotizaciones. Clientes ven las suyas, admins ven todas."""
+    """Lista cotizaciones con paginación. Clientes ven las suyas, admins ven todas."""
     query = select(TripQuote).options(selectinload(TripQuote.client))
     
     if current_user.role == UserRole.client:
@@ -249,7 +251,7 @@ async def list_quotes(
     if status:
         query = query.where(TripQuote.status == status)
     
-    query = query.order_by(TripQuote.created_at.desc())
+    query = query.order_by(TripQuote.created_at.desc()).offset(skip).limit(limit)
     
     result = await db.execute(query)
     quotes = result.scalars().all()

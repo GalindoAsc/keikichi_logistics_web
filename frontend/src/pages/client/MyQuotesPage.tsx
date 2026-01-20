@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, Check, X, MessageSquare, Clock, DollarSign, MapPin, Pa
 import { toast } from "sonner";
 import api from "../../api/client";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ConfirmationModal from "../../components/shared/ConfirmationModal";
 import { QuoteCardSkeleton } from "../../components/shared/Skeleton";
 
@@ -128,6 +128,12 @@ export default function MyQuotesPage() {
         });
     };
 
+    // Memoize filtered quotes to avoid recalculating on every render
+    const filteredQuotes = useMemo(() => 
+        quotes.filter(q => statusFilter === "all" || q.status === statusFilter),
+        [quotes, statusFilter]
+    );
+
     const getExpirationInfo = (expiresAt: string | null) => {
         if (!expiresAt) return null;
         const now = new Date();
@@ -211,7 +217,7 @@ export default function MyQuotesPage() {
                         <QuoteCardSkeleton />
                         <QuoteCardSkeleton />
                     </div>
-                ) : quotes.filter(q => statusFilter === "all" || q.status === statusFilter).length === 0 ? (
+                ) : filteredQuotes.length === 0 ? (
                     <div className="p-12 text-center">
                         <DollarSign className="w-12 h-12 mx-auto text-keikichi-lime-300 dark:text-keikichi-forest-600 mb-4" />
                         <p className="text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-4">{t('quotes.noQuotes')}</p>
@@ -224,7 +230,7 @@ export default function MyQuotesPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-keikichi-lime-50 dark:divide-keikichi-forest-600">
-                        {quotes.filter(q => statusFilter === "all" || q.status === statusFilter).map((quote) => {
+                        {filteredQuotes.map((quote) => {
                             const expirationInfo = getExpirationInfo(quote.expires_at);
                             const isExpanded = expandedQuotes.has(quote.id);
                             
