@@ -5,7 +5,7 @@ import { useStops } from "../../hooks/useProducts";
 import { toast } from "sonner";
 import { SavedStop, SavedStopCreate } from "../../api/catalog";
 import { useTranslation } from "react-i18next";
-import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
+import { SmartAddressInput, AddressData } from "../../components/shared/SmartAddressInput";
 
 const StopsPage = () => {
     const navigate = useNavigate();
@@ -14,10 +14,14 @@ const StopsPage = () => {
     
     // Form state
     const [name, setName] = useState("");
-    const [address, setAddress] = useState("");
-    const [city, setCity] = useState("");
-    const [state, setState] = useState("");
-    const [country, setCountry] = useState("USA");
+    const [addressData, setAddressData] = useState<AddressData>({
+        fullAddress: "",
+        street: "",
+        city: "",
+        state: "",
+        country: "USA",
+        postalCode: "",
+    });
     const [defaultContact, setDefaultContact] = useState("");
     const [defaultPhone, setDefaultPhone] = useState("");
     const [defaultSchedule, setDefaultSchedule] = useState("");
@@ -45,10 +49,14 @@ const StopsPage = () => {
 
     const resetForm = () => {
         setName("");
-        setAddress("");
-        setCity("");
-        setState("");
-        setCountry("USA");
+        setAddressData({
+            fullAddress: "",
+            street: "",
+            city: "",
+            state: "",
+            country: "USA",
+            postalCode: "",
+        });
         setDefaultContact("");
         setDefaultPhone("");
         setDefaultSchedule("");
@@ -60,10 +68,10 @@ const StopsPage = () => {
         try {
             await addStop({
                 name: name.trim(),
-                address: address.trim() || undefined,
-                city: city.trim() || undefined,
-                state: state.trim() || undefined,
-                country: country.trim() || undefined,
+                address: addressData.fullAddress.trim() || undefined,
+                city: addressData.city?.trim() || undefined,
+                state: addressData.state?.trim() || undefined,
+                country: addressData.country?.trim() || undefined,
                 default_contact: defaultContact.trim() || undefined,
                 default_phone: defaultPhone.trim() || undefined,
                 default_schedule: defaultSchedule.trim() || undefined,
@@ -193,38 +201,11 @@ const StopsPage = () => {
                             className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
                         />
                     </div>
-                    <div className="md:col-span-2 space-y-1">
-                        <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.address')}</label>
-                        <AddressAutocomplete
-                            value={address}
-                            onChange={setAddress}
-                            onAddressSelect={(components) => {
-                                setAddress(components.address);
-                                if (components.city && !city) setCity(components.city);
-                                if (components.state && !state) setState(components.state);
-                                if (components.country) setCountry(components.country);
-                            }}
-                            placeholder={t('stops.addressPlaceholder')}
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.city')}</label>
-                        <input
-                            type="text"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
-                            placeholder={t('stops.cityPlaceholder')}
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-sm text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('stops.state')}</label>
-                        <input
-                            type="text"
-                            value={state}
-                            onChange={(e) => setState(e.target.value)}
-                            className="w-full border dark:border-keikichi-forest-600 rounded-md px-3 py-2 bg-white dark:bg-keikichi-forest-700 text-keikichi-forest-800 dark:text-white focus:ring-2 focus:ring-keikichi-lime-500"
-                            placeholder={t('stops.statePlaceholder')}
+                    <div className="md:col-span-2">
+                        <SmartAddressInput
+                            value={addressData}
+                            onChange={setAddressData}
+                            label={t('stops.address')}
                         />
                     </div>
                     <div className="space-y-1">

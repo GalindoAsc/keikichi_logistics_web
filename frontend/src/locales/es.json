@@ -612,6 +612,19 @@
         "noResultsFound": "No se encontró la dirección en el mapa",
         "useManualAddress": "Usar dirección manual",
         "reference": "Referencia",
-        "referencePlaceholder": "Entre calles, punto de referencia, color de fachada..."
+        "referencePlaceholder": "Entre calles, punto de referencia, color de fachada...",
+        "useSearch": "Usar búsqueda",
+        "enterManually": "Ingresar manualmente",
+        "searchPlaceholder": "Buscar dirección...",
+        "street": "Calle y Número",
+        "streetPlaceholder": "Ej. Av. Reforma 123",
+        "city": "Ciudad",
+        "cityPlaceholder": "Ej. Ciudad de México",
+        "state": "Estado",
+        "statePlaceholder": "Ej. CDMX",
+        "postalCode": "Código Postal",
+        "postalCodePlaceholder": "Ej. 06600",
+        "country": "País",
+        "countryPlaceholder": "Ej. México"
     }
 }

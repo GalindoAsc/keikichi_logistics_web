@@ -8,7 +8,7 @@ import api from "../../api/client";
 import { useTranslation } from "react-i18next";
 import { useStops, useProducts } from "../../hooks/useProducts";
 import { SavedStop } from "../../api/catalog";
-import { AddressAutocomplete } from "../../components/shared/AddressAutocomplete";
+import { SmartAddressInput } from "../../components/shared/SmartAddressInput";
 import { fetchLabelPrices } from "../../api/labelPrices";
 import { uploadQuoteFile } from "../../api/quoteFiles";
 
@@ -427,14 +427,17 @@ export default function RequestTripPage() {
                                                     </div>
                                                     {/* Dirección con autocompletado */}
                                                     <div className="col-span-2">
-                                                        <label className="text-xs text-keikichi-forest-500 dark:text-keikichi-lime-400 mb-1 block">
-                                                            {t('quotes.stopAddress')} *
-                                                        </label>
-                                                        <AddressAutocomplete
-                                                            value={watch(`stops.${index}.address`) || ""}
-                                                            onChange={(value) => setValue(`stops.${index}.address`, value, { shouldValidate: true })}
-                                                            placeholder={t('quotes.stopAddressPlaceholder')}
-                                                            className="text-sm"
+                                                        <SmartAddressInput
+                                                            value={{
+                                                                fullAddress: watch(`stops.${index}.address`) || "",
+                                                                street: "",
+                                                                city: "",
+                                                                state: "",
+                                                                country: "USA",
+                                                                postalCode: "",
+                                                            }}
+                                                            onChange={(data) => setValue(`stops.${index}.address`, data.fullAddress, { shouldValidate: true })}
+                                                            label={`${t('quotes.stopAddress')} *`}
                                                         />
                                                         <input
                                                             type="hidden"
@@ -955,12 +958,17 @@ export default function RequestTripPage() {
                                             <div className="px-4 pb-4 animate-in slide-in-from-top-2">
                                                 <div className="space-y-4 pl-8 border-l-2 border-keikichi-lime-300">
                                                     <div>
-                                                        <label className="text-xs font-semibold text-keikichi-forest-600 dark:text-keikichi-lime-300">{t('quotes.pickupAddress')}</label>
-                                                        <AddressAutocomplete
-                                                            value={watch("pickup_address") || ""}
-                                                            onChange={(value) => setValue("pickup_address", value)}
-                                                            placeholder="Calle, Ciudad, Estado, CP"
-                                                            className="mt-1"
+                                                        <SmartAddressInput
+                                                            value={{
+                                                                fullAddress: watch("pickup_address") || "",
+                                                                street: "",
+                                                                city: "",
+                                                                state: "",
+                                                                country: "USA",
+                                                                postalCode: "",
+                                                            }}
+                                                            onChange={(data) => setValue("pickup_address", data.fullAddress)}
+                                                            label={t('quotes.pickupAddress')}
                                                         />
                                                         <input type="hidden" {...register("pickup_address")} />
                                                     </div>

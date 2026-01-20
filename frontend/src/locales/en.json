@@ -612,6 +612,19 @@
         "noResultsFound": "Address not found on map",
         "useManualAddress": "Use manual address",
         "reference": "Reference",
-        "referencePlaceholder": "Cross streets, landmark, building color..."
+        "referencePlaceholder": "Cross streets, landmark, building color...",
+        "useSearch": "Use search",
+        "enterManually": "Enter manually",
+        "searchPlaceholder": "Search address...",
+        "street": "Street and Number",
+        "streetPlaceholder": "e.g. 123 Main Street",
+        "city": "City",
+        "cityPlaceholder": "e.g. Los Angeles",
+        "state": "State",
+        "statePlaceholder": "e.g. California",
+        "postalCode": "Postal Code",
+        "postalCodePlaceholder": "e.g. 90001",
+        "country": "Country",
+        "countryPlaceholder": "e.g. United States"
     }
 }
