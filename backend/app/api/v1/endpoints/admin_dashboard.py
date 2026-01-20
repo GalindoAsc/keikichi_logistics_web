@@ -11,7 +11,7 @@ from app.models.user import User
 from app.models.reservation import Reservation, PaymentStatus
 from app.models.trip import Trip, TripStatus
 from app.models.space import Space, SpaceStatus
-from app.models.trip_quote import TripQuote, TripQuoteStatus
+from app.models.trip_quote import TripQuote, QuoteStatus
 
 router = APIRouter()
 
@@ -173,7 +173,7 @@ async def get_dashboard_stats(
     # 8. Quote Statistics
     pending_quotes = await db.scalar(
         select(func.count(TripQuote.id)).where(
-            TripQuote.status == TripQuoteStatus.pending
+            TripQuote.status == QuoteStatus.pending
         )
     ) or 0
 
